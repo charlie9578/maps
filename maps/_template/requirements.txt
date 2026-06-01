@@ -3,4 +3,5 @@
 #
 # geopandas>=1.0
 # folium>=0.17
+# plotly>=5.24
 # contextily>=1.6

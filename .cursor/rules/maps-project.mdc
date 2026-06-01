@@ -14,9 +14,9 @@ alwaysApply: true
 
 ## Python
 
-- Geographic / data-viz maps (matplotlib, pandas, optional geopandas/folium per map).
+- Geographic / data-viz maps (matplotlib, pandas; map-only: geopandas, folium, plotly, etc.).
 - Run scripts from repo root: `python maps/<name>/main.py`.
-- Notebooks: run Jupyter from repo root so `lib` imports work; use `lib.paths.map_dir("<name>")` for paths.
+- Notebooks: run Jupyter from repo root with kernel **Maps (.venv)**; use `lib.paths.map_dir("<name>")` for paths. Load `main.py` via `importlib` (folder names are not importable Python modules).
 - Use `Path(__file__).resolve().parent` in `main.py` for map-local paths.
 - Repo-wide deps in root `pyproject.toml`; map-only deps in `maps/<name>/requirements.txt`, installed into the **root** venv (`uv pip install -r ...` or `scripts/install_map_requirements.py`).
 - Prefer Python 3.11+; type hints; `ruff`.
@@ -28,7 +28,8 @@ alwaysApply: true
 
 ## Git
 
-- Commit small fixtures in `data/` when reasonable; document large downloads in the map README.
+- `maps/**/data/*.csv` is gitignored (downloaded on first run; document URL and filename in the map README).
+- Other small fixtures in `data/` (GeoJSON, shapefiles, etc.) may be committed when reasonable.
 - Generated files go to `output/` (gitignored).
 
 ## Extracting a map

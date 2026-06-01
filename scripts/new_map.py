@@ -51,8 +51,11 @@ def main() -> int:
             )
     print(f"Created {dest.relative_to(REPO_ROOT)}")
     print("Next: edit README.md, main.py or notebook.ipynb, add data under data/")
-    if (dest / "requirements.txt").read_text(encoding="utf-8").strip():
-        print(f"Install extras: uv pip install -r maps/{name}/requirements.txt")
+    req = dest / "requirements.txt"
+    if req.read_text(encoding="utf-8").strip():
+        print(f"Install map deps: uv pip install -r maps/{name}/requirements.txt")
+    print("Notebooks: use Jupyter kernel Maps (.venv) (see root README).")
+    print("Downloaded CSVs in data/ are gitignored — document URLs in the map README.")
     return 0
 
 

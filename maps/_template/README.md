@@ -8,7 +8,7 @@ Brief description of what this map shows and its data sources.
 python maps/MAP_NAME/main.py
 ```
 
-Or open `maps/MAP_NAME/notebook.ipynb` in Jupyter (start `jupyter lab` from the repo root).
+Or open `maps/MAP_NAME/notebook.ipynb` in Jupyter (start `jupyter lab` from the repo root; kernel **Maps (.venv)**).
 
 ## Dependencies
 
@@ -16,18 +16,20 @@ Uses the shared repo `.venv`. Map-only packages go in this folder’s `requireme
 
 ```bash
 uv pip install -r maps/MAP_NAME/requirements.txt
+# or: .venv\Scripts\python.exe -m pip install -r maps/MAP_NAME/requirements.txt
 ```
 
-Example map-only packages: `geopandas`, `folium`, `contextily`.
+Example map-only packages: `geopandas`, `folium`, `plotly`.
 
 ## Data
 
 - Place inputs in `data/`.
-- Document any files that must be downloaded separately (URL, license, expected filename).
+- **CSV files in `data/` are gitignored** — if data is downloaded, document the URL, license, and cached filename in this README; scripts should fetch on first run (see `main.py --refresh` if you add it).
+- Small non-CSV fixtures (GeoJSON, etc.) may be committed when reasonable.
 
 ## Outputs
 
-Generated files go to `output/` (gitignored by default).
+Generated files go to `output/` (gitignored). Static maps often use PNG/PDF; interactive maps often write HTML.
 
 ## Shared library
 

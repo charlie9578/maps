@@ -17,8 +17,8 @@ maps/
     ├── main.py         # Script entry point
     ├── notebook.ipynb  # Notebook entry point (optional)
     ├── requirements.txt   # Map-only packages → installed into root .venv
-    ├── data/
-    └── output/         # Generated artifacts (gitignored by default)
+    ├── data/           # inputs; *.csv gitignored (re-download via main.py)
+    └── output/         # generated artifacts (gitignored)
 scripts/
 ├── new_map.py
 └── install_map_requirements.py
@@ -68,7 +68,7 @@ python scripts/install_map_requirements.py
 python scripts/new_map.py my-map-name
 ```
 
-Then edit `maps/my-map-name/README.md`, `main.py`, and/or `notebook.ipynb`.
+Then edit `maps/my-map-name/README.md`, `main.py`, and/or `notebook.ipynb`. If the map has `requirements.txt`, install it before running the notebook (kernel **Maps (.venv)**).
 
 ## Run a map
 
