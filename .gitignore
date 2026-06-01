@@ -27,6 +27,10 @@ htmlcov/
 maps/**/output/*
 !maps/**/output/.gitkeep
 
+# Downloaded map data (document sources in map README; keep .gitkeep)
+maps/**/data/*.csv
+maps/**/data/**/*.csv
+
 # OS / editor
 .DS_Store
 Thumbs.db

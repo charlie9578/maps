@@ -1,0 +1,3 @@
+# Map-only packages (installed into the repo root .venv, not a separate env)
+# uv pip install -r maps/interactive-owid-map/requirements.txt
+plotly>=5.24
