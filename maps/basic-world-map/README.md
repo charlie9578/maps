@@ -8,12 +8,13 @@ bundled with Cartopy.
 
 ```bash
 uv pip install -r maps/basic-world-map/requirements.txt
+# or: .venv\Scripts\python.exe -m pip install -r maps/basic-world-map/requirements.txt
 python maps/basic-world-map/main.py
 ```
 
 Output: `maps/basic-world-map/output/world_map.png`
 
-Or open `maps/basic-world-map/notebook.ipynb` in Jupyter (start `jupyter lab` from the repo root).
+Or open `maps/basic-world-map/notebook.ipynb` in Jupyter (repo root as cwd; kernel **Maps (.venv)**).
 
 ## Dependencies
 
@@ -21,12 +22,11 @@ Uses the shared repo `.venv`. This map adds **cartopy** (see `requirements.txt`)
 
 ## Data
 
-No local data files — coastlines and borders come from Cartopy’s Natural Earth cache
-(downloaded on first run).
+No local `data/` files — coastlines and borders come from Cartopy’s Natural Earth cache (downloaded on first use).
 
 ## Outputs
 
-Generated files go to `output/` (gitignored by default).
+`output/world_map.png` (gitignored).
 
 ## Standalone repo
 
