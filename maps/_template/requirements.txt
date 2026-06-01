@@ -1,0 +1,6 @@
+# Map-only packages (installed into the repo root .venv, not a separate env)
+# uv pip install -r maps/MAP_NAME/requirements.txt
+#
+# geopandas>=1.0
+# folium>=0.17
+# contextily>=1.6

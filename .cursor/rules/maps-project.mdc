@@ -1,0 +1,36 @@
+---
+description: Conventions for map folders and shared Python setup
+alwaysApply: true
+---
+
+# Maps repository
+
+## Layout
+
+- Each map is a **self-contained folder** under `maps/<name>/` (not `maps/_template/`).
+- Standard files: `README.md`, `main.py`, `notebook.ipynb`, `data/`, `output/`, optional `requirements.txt`.
+- **One shared virtual environment** at the repo root. Do not add per-map `.venv/` folders.
+- **Do not import from sibling map folders.** Shared code goes in top-level `lib/` (`from lib.paths import map_dir`).
+
+## Python
+
+- Geographic / data-viz maps (matplotlib, pandas, optional geopandas/folium per map).
+- Run scripts from repo root: `python maps/<name>/main.py`.
+- Notebooks: run Jupyter from repo root so `lib` imports work; use `lib.paths.map_dir("<name>")` for paths.
+- Use `Path(__file__).resolve().parent` in `main.py` for map-local paths.
+- Repo-wide deps in root `pyproject.toml`; map-only deps in `maps/<name>/requirements.txt`, installed into the **root** venv (`uv pip install -r ...` or `scripts/install_map_requirements.py`).
+- Prefer Python 3.11+; type hints; `ruff`.
+
+## New maps
+
+- Scaffold: `python scripts/new_map.py <kebab-case-name>`.
+- Names: lowercase, hyphens, start with a letter (e.g. `uk-rail-network`).
+
+## Git
+
+- Commit small fixtures in `data/` when reasonable; document large downloads in the map README.
+- Generated files go to `output/` (gitignored).
+
+## Extracting a map
+
+- Map folder + documented deps + any used `lib/` modules should be enough for a standalone repo.
