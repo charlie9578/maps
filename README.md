@@ -4,6 +4,8 @@ Geographic and data-visualization map projects sharing one Python virtual enviro
 
 Each map lives under `maps/<name>/` with its own README, scripts, notebook, data, and outputs. A map folder should contain everything needed to run that map; you can copy a single map folder into a new repository and follow its README to bootstrap a standalone project.
 
+**Map index:** see **[MAPS.md](MAPS.md)** for a short catalog of maps in this repo.
+
 Shared Python code lives in **`lib/`** (installable as `from lib...`). Maps must not import from sibling map folders.
 
 ## Repository layout

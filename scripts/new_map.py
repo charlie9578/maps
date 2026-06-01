@@ -56,6 +56,7 @@ def main() -> int:
         print(f"Install map deps: uv pip install -r maps/{name}/requirements.txt")
     print("Notebooks: use Jupyter kernel Maps (.venv) (see root README).")
     print("Downloaded CSVs in data/ are gitignored — document URLs in the map README.")
+    print(f"Add a row for this map in MAPS.md.")
     return 0
 
 

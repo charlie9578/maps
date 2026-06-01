@@ -1,0 +1,30 @@
+# Map catalog
+
+Short index of maps in this repo. Each folder under `maps/<name>/` is self-contained; see that map’s `README.md` for full run instructions.
+
+| Map | Type | Summary |
+|-----|------|---------|
+| [basic-world-map](maps/basic-world-map/) | Static PNG | Political world map (land, ocean, coastlines, borders) via Cartopy / Natural Earth. |
+| [interactive-owid-map](maps/interactive-owid-map/) | Interactive HTML | Choropleth of territorial CO₂ **per capita** from [Our World in Data](https://ourworldindata.org/explorers/co2); year slider, hover tooltips, forward-filled gaps marked **(est.)**. |
+
+**Scaffold only (not a map):** [`maps/_template/`](maps/_template/) — starting point for `python scripts/new_map.py <name>`.
+
+## Quick run
+
+From the repo root, after setting up the shared `.venv` (see [README.md](README.md)):
+
+```bash
+python maps/basic-world-map/main.py
+uv pip install -r maps/interactive-owid-map/requirements.txt   # or pip equivalent
+python maps/interactive-owid-map/main.py
+```
+
+Outputs: `maps/<name>/output/` (gitignored).
+
+## Adding a map
+
+```bash
+python scripts/new_map.py my-map-name
+```
+
+Then add a row to the table above and document it in `maps/my-map-name/README.md`.

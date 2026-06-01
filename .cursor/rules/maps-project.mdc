@@ -25,6 +25,7 @@ alwaysApply: true
 
 - Scaffold: `python scripts/new_map.py <kebab-case-name>`.
 - Names: lowercase, hyphens, start with a letter (e.g. `uk-rail-network`).
+- Add new maps to root **`MAPS.md`** (short catalog) and the map’s `README.md`.
 
 ## Git
 
