@@ -1,0 +1,9 @@
+# Map-only packages (installed into the repo root .venv)
+# uv pip install -r maps/tfl-live-map/requirements.txt
+
+dash
+dash-bootstrap-components
+plotly
+requests
+pandas
+python-dotenv

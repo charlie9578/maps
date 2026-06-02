@@ -1,0 +1,38 @@
+/* Dash auto-loads files under assets/ */
+
+body {
+  background: #f6f8fb;
+}
+
+.app-shell {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.app-title {
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+.card-tight .card-body {
+  padding: 12px;
+}
+
+.kpi .kpi-value {
+  font-size: 22px;
+  font-weight: 750;
+}
+
+.kpi .kpi-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.sticky-sidebar {
+  position: sticky;
+  top: 12px;
+}
