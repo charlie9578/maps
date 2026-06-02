@@ -92,9 +92,21 @@ Put reusable functions here when more than one map needs them:
 
 ```python
 from lib.paths import map_dir, repo_root
+from lib.env import load_repo_env  # before reading API keys from os.environ
 ```
 
 Keep `lib/` small and stable; map-specific logic stays in the map folder.
+
+## API keys (`.env`)
+
+Maps that call external APIs should read secrets from a **repo-root** `.env` file (gitignored):
+
+```bash
+cp .env.example .env
+# edit .env with your keys
+```
+
+Document required variable names in each map’s README and add placeholders to `.env.example` when adding a new provider. See `.cursor/rules/maps-project.mdc` for conventions.
 
 ## Adding dependencies
 

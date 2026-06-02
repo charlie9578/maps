@@ -62,7 +62,7 @@ Edit `.env` (one line is enough):
 TFL_APP_KEY=paste-your-primary-key-here
 ```
 
-`.env` is gitignored. The map loads it via `python-dotenv`.
+`.env` is gitignored. Keys are loaded via `lib.env.load_repo_env()` (repo-wide helper).
 
 Alternatively (PowerShell, current session only):
 
@@ -90,6 +90,8 @@ Uses the shared repo `.venv`. This template expects:
 
 - `dash`, `dash-bootstrap-components`, `plotly`
 - `openpyxl` if you read `.xlsx` files with pandas
+
+`python-dotenv` is provided via root `lib/` when using `load_repo_env()`; add to `requirements.txt` only if extracting this map standalone.
 
 ## Data
 

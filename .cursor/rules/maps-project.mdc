@@ -76,6 +76,24 @@ alwaysApply: true
 
 
 
+## API keys and `.env` (maps that call external APIs)
+
+
+
+- **Secrets live at the repo root**, not in map folders: copy `.env.example` → `.env` (gitignored).
+
+- **Never commit** `.env` or real keys. Document required variable names in the map’s `README.md` and add placeholders to `.env.example` when introducing a new provider.
+
+- **Load env in code** via `from lib.env import load_repo_env` (call once before reading keys) or `from lib.env import env`. Do not duplicate ad-hoc `load_dotenv` paths in each map.
+
+- **Naming**: use provider-prefixed vars (e.g. `TFL_APP_KEY`, `OS_API_KEY`). Optional tuning vars (ports, refresh intervals) may also go in `.env`.
+
+- **Map README**: include portal link, how to obtain a key, rate-limit notes if relevant, and `cp .env.example .env` instructions.
+
+- Maps without APIs do not need `.env` entries or `python-dotenv` in their `requirements.txt` (root `lib` already depends on `python-dotenv`).
+
+
+
 ## Source citation (required)
 
 - **Every map must cite its data source(s)**:

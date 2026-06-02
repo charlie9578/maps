@@ -27,6 +27,10 @@ Example map-only packages: `geopandas`, `folium`, `plotly`.
 - **CSV files in `data/` are gitignored** — if data is downloaded, document the URL, license, and cached filename in this README; scripts should fetch on first run (see `main.py --refresh` if you add it).
 - Small non-CSV fixtures (GeoJSON, etc.) may be committed when reasonable.
 
+## API keys (if this map calls an external API)
+
+Use repo-root `.env` (see `.env.example` and `lib.env.load_repo_env()`). Document keys in this README.
+
 ## Outputs
 
 Generated files go to `output/` (gitignored). Static maps often use PNG/PDF; interactive maps often write HTML.

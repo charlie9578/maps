@@ -35,6 +35,15 @@ Uses the shared repo `.venv`. This template expects:
 - **CSV files in `data/` are gitignored** — document URL, license, and filename in this README if downloaded.
 - For Excel: add `openpyxl` to `requirements.txt` and document the sheet name in `data_processing.py`.
 
+## API keys (if this map calls an external API)
+
+1. Copy repo-root `.env.example` to `.env` (same folder as the top-level `README.md`).
+2. Add your key(s) there — **never commit `.env`**.
+3. In code: `from lib.env import load_repo_env` then read `os.getenv("YOUR_VAR")` after `load_repo_env()`.
+4. Document variable names, portal link, and rate limits in this README.
+
+Maps that only use local/static data can ignore this section.
+
 ## Code layout
 
 Keep Python modules under **~500 lines** each. Suggested split:

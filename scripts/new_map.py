@@ -75,6 +75,7 @@ def main() -> int:
 
     print("Downloaded CSVs in data/ are gitignored — document URLs in the map README.")
     print("Add a row for this map in MAPS.md.")
+    print("External API? Add keys to repo-root .env (see .env.example).")
     return 0
 
 

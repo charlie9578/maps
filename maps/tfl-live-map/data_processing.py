@@ -12,7 +12,8 @@ from typing import Any
 
 import pandas as pd
 import requests
-from dotenv import load_dotenv
+
+from lib.env import load_repo_env
 
 TFL_BASE_URL = "https://api.tfl.gov.uk"
 MAP_DATA_DIR = Path(__file__).resolve().parent / "data"
@@ -48,21 +49,13 @@ class TflAuth:
     app_key: str | None
 
 
-def _load_env_file() -> None:
-    """Load repo-root `.env` if present (gitignored). Idempotent."""
-    repo_root = Path(__file__).resolve().parents[2]
-    env_path = repo_root / ".env"
-    if env_path.is_file():
-        load_dotenv(env_path, override=False)
-
-
 def get_tfl_auth() -> TflAuth:
     """Read TfL credentials from environment variables (optional but recommended).
 
     As of 2026, TfL's portal only requires ``app_key`` (subscription primary key).
     See https://api-portal.tfl.gov.uk/ — ``app_id`` is legacy and may be omitted.
     """
-    _load_env_file()
+    load_repo_env()
     # Primary / secondary subscription keys from the API portal Profile → Subscriptions.
     app_key = os.getenv("TFL_APP_KEY") or os.getenv("TFL_PRIMARY_KEY") or None
     # Legacy; only sent if explicitly set (TfL no longer requires app_id).
