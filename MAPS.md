@@ -6,6 +6,7 @@ Short index of maps in this repo. Each folder under `maps/<name>/` is self-conta
 |-----|------|---------|
 | [basic-world-map](maps/basic-world-map/) | Static PNG | Political world map (land, ocean, coastlines, borders) via Cartopy / Natural Earth. |
 | [interactive-owid-map](maps/interactive-owid-map/) | Interactive HTML | Choropleth of territorial CO₂ **per capita** from [Our World in Data](https://ourworldindata.org/explorers/co2); year slider, hover tooltips, forward-filled gaps marked **(est.)**. |
+| [osm-solar-map](maps/osm-solar-map/) | Interactive HTML | Malta solar **plants** from [OpenStreetMap](https://www.openstreetmap.org/) via Overpass (`plant:source=solar`); clustered Folium map. |
 
 **Scaffold only (not a map):** [`maps/_template/`](maps/_template/) — starting point for `python scripts/new_map.py <name>`.
 
@@ -17,6 +18,8 @@ From the repo root, after setting up the shared `.venv` (see [README.md](README.
 python maps/basic-world-map/main.py
 uv pip install -r maps/interactive-owid-map/requirements.txt   # or pip equivalent
 python maps/interactive-owid-map/main.py
+uv pip install -r maps/osm-solar-map/requirements.txt
+python maps/osm-solar-map/main.py
 ```
 
 Outputs: `maps/<name>/output/` (gitignored).

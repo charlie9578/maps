@@ -1,0 +1,142 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.4720283,
+          35.8604947
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 305102217,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.5272536,
+          35.8087215
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 961675225,
+        "operator": "Hili Energy",
+        "capacity_mw": 2.4,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.4500817,
+          35.8354043
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 1042729673,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.4569799,
+          35.8409313
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 1042729674,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.4569715,
+          35.8599465
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 1042729685,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.4742633,
+          35.8621991
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 1208981883,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.4711987,
+          35.8596598
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 1421980569,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.4785859,
+          35.8524569
+        ]
+      },
+      "properties": {
+        "osm_type": "way",
+        "osm_id": 1484586520,
+        "power": "plant"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.3941219,
+          35.9112805
+        ]
+      },
+      "properties": {
+        "osm_type": "relation",
+        "osm_id": 15034302,
+        "power": "plant"
+      }
+    }
+  ]
+}
