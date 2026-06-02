@@ -9,6 +9,7 @@ Short index of maps in this repo. Each folder under `maps/<name>/` is self-conta
 | [gem-wind-map](maps/gem-wind-map/) | Interactive dashboard | GEM Global Wind Power Tracker (Feb 2026): bubble map (**size=capacity**, **color=status**) + filters + largest projects + capacity breakdowns. |
 | [osm-solar-map](maps/osm-solar-map/) | Interactive HTML | Malta solar **plants** from [OpenStreetMap](https://www.openstreetmap.org/) via Overpass (`plant:source=solar`); clustered Folium map. |
 | [tfl-live-map](maps/tfl-live-map/) | Interactive dashboard | Live (station-based) locations of London Underground trains from the TfL Unified API arrivals feed. |
+| [world-cup-teams-map](maps/world-cup-teams-map/) | Interactive HTML | 2026 World Cup teams at their capitals; click a capital to trace curved "flight paths" to club stadiums where its players play. Curated dataset (Plotly + click JS). |
 
 **Scaffold only (not maps):** [`maps/_template/`](maps/_template/) (default) · [`maps/_template_dash/`](maps/_template_dash/) (Dash dashboard) — `python scripts/new_map.py <name>` or `--type dash`.
 
