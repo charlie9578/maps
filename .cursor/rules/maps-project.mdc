@@ -20,6 +20,7 @@ alwaysApply: true
 - Use `Path(__file__).resolve().parent` in `main.py` for map-local paths.
 - Repo-wide deps in root `pyproject.toml`; map-only deps in `maps/<name>/requirements.txt`, installed into the **root** venv (`uv pip install -r ...` or `scripts/install_map_requirements.py`).
 - Prefer Python 3.11+; type hints; `ruff`.
+- If you embed web map tiles (Folium / Leaflet), avoid the default `OpenStreetMap` tiles in shared HTML outputs; prefer a provider intended for embedded usage (e.g. `CartoDB Positron`) and keep attribution intact.
 
 ## New maps
 
