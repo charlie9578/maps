@@ -6,6 +6,7 @@ Short index of maps in this repo. Each folder under `maps/<name>/` is self-conta
 |-----|------|---------|
 | [basic-world-map](maps/basic-world-map/) | Static PNG | Political world map (land, ocean, coastlines, borders) via Cartopy / Natural Earth. |
 | [interactive-owid-map](maps/interactive-owid-map/) | Interactive HTML | Choropleth of territorial CO₂ **per capita** from [Our World in Data](https://ourworldindata.org/explorers/co2); year slider, hover tooltips, forward-filled gaps marked **(est.)**. |
+| [gem-wind-map](maps/gem-wind-map/) | Interactive dashboard | GEM Global Wind Power Tracker (Feb 2026): bubble map (**size=capacity**, **color=status**) + filters + largest projects + capacity breakdowns. |
 | [osm-solar-map](maps/osm-solar-map/) | Interactive HTML | Malta solar **plants** from [OpenStreetMap](https://www.openstreetmap.org/) via Overpass (`plant:source=solar`); clustered Folium map. |
 
 **Scaffold only (not a map):** [`maps/_template/`](maps/_template/) — starting point for `python scripts/new_map.py <name>`.
