@@ -13,6 +13,7 @@ from wind_viz import (
     make_country_bar,
     make_installation_pie,
     make_map,
+    make_owner_bar,
     make_status_bar,
     make_top_projects_bar,
 )
@@ -54,6 +55,16 @@ def _toggle_single_selection(current: list[str] | None, selected: str | None) ->
     if len(cur) == 1 and cur[0] == selected:
         return []
     return [selected]
+
+
+def _toggle_single_value(current: str | None, selected: str | None) -> str | None:
+    cur = (current or "").strip()
+    sel = (selected or "").strip()
+    if not sel:
+        return cur or None
+    if cur and cur == sel:
+        return None
+    return sel
 
 
 def _kpi_card(value_id: str, label: str):
@@ -103,6 +114,22 @@ def make_app(df: pd.DataFrame) -> Dash:
                                 html.Div(
                                     "February 2026 snapshot  ·  marker size = capacity  ·  color = status",
                                     className="muted",
+                                ),
+                                html.Div(
+                                    [
+                                        "Data source: ",
+                                        html.A(
+                                            "Global Energy Monitor — Renewables and other power",
+                                            href="https://globalenergymonitor.org/renewables-and-other-power",
+                                            target="_blank",
+                                            rel="noreferrer",
+                                            className="text-decoration-none",
+                                            style={"color": "#a5f3fc"},
+                                        ),
+                                        " (accessed 2026-06-02)",
+                                    ],
+                                    className="muted",
+                                    style={"fontSize": "12px", "marginTop": "6px"},
                                 ),
                             ],
                             md=8,
@@ -270,6 +297,14 @@ def make_app(df: pd.DataFrame) -> Dash:
                                                                 ),
                                                                 md=6,
                                                             ),
+                                                            dbc.Col(
+                                                                dcc.Loading(
+                                                                    type="circle",
+                                                                    color="#34d399",
+                                                                    children=dcc.Graph(id="owner-bar"),
+                                                                ),
+                                                                md=12,
+                                                            ),
                                                         ],
                                                     ),
                                                 ],
@@ -363,6 +398,7 @@ def make_app(df: pd.DataFrame) -> Dash:
             ),
             dcc.Store(id="df-store", data=df.to_dict("records")),
             dcc.Store(id="filtered-store"),
+            dcc.Store(id="owner-selected"),
         ],
     )
 
@@ -404,6 +440,18 @@ def make_app(df: pd.DataFrame) -> Dash:
         return _toggle_single_selection(current_values, selected)
 
     @app.callback(
+        Output("owner-selected", "data"),
+        Input("owner-bar", "clickData"),
+        State("owner-selected", "data"),
+        prevent_initial_call=True,
+    )
+    def _crossfilter_owner(click_data, current_owner):
+        selected = _extract_xy(click_data, "y")
+        if selected is None:
+            raise PreventUpdate
+        return _toggle_single_value(current_owner, selected)
+
+    @app.callback(
         Output("map", "figure"),
         Output("summary-text", "children"),
         Output("kpi-capacity", "children"),
@@ -413,10 +461,12 @@ def make_app(df: pd.DataFrame) -> Dash:
         Output("status-bar", "figure"),
         Output("country-bar", "figure"),
         Output("top-projects-bar", "figure"),
+        Output("owner-bar", "figure"),
         Output("assets-table", "data"),
         Output("assets-table", "columns"),
         Output("filtered-store", "data"),
         Input("df-store", "data"),
+        Input("owner-selected", "data"),
         Input("country", "value"),
         Input("status", "value"),
         Input("installation-type", "value"),
@@ -427,6 +477,7 @@ def make_app(df: pd.DataFrame) -> Dash:
     )
     def _update(
         records,
+        owner_selected,
         country_values,
         status_values,
         installation_values,
@@ -448,6 +499,11 @@ def make_app(df: pd.DataFrame) -> Dash:
             search_text=search_text,
         )
 
+        if isinstance(owner_selected, str) and owner_selected.strip():
+            needle = owner_selected.strip()
+            owners = dff[COL.owner].astype("string")
+            dff = dff[owners.str.contains(needle, case=False, na=False)]
+
         map_fig = make_map(dff)
 
         total_capacity = float(dff[COL.capacity_mw].sum()) if len(dff) else 0.0
@@ -462,6 +518,8 @@ def make_app(df: pd.DataFrame) -> Dash:
             f"Total capacity (MW): {total_capacity:,.1f}\n"
             f"Countries: {countries_n} | Statuses: {status_n} | Installation types: {installations_n}"
         )
+        if isinstance(owner_selected, str) and owner_selected.strip():
+            summary += f"\nOwner (from chart): {owner_selected.strip()}"
 
         kpi_capacity_ui = [
             html.Span(kpi_capacity, className="kpi-number"),
@@ -483,6 +541,7 @@ def make_app(df: pd.DataFrame) -> Dash:
         status_fig = make_status_bar(dff)
         country_fig = make_country_bar(dff)
         top_fig = make_top_projects_bar(dff)
+        owner_fig = make_owner_bar(dff)
 
         assets = assets_table_df(dff)
         assets_data = assets.to_dict("records")
@@ -503,6 +562,7 @@ def make_app(df: pd.DataFrame) -> Dash:
             status_fig,
             country_fig,
             top_fig,
+            owner_fig,
             assets_data,
             assets_cols,
             assets_data,

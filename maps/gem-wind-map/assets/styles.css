@@ -291,6 +291,32 @@ hr {
   color: var(--text);
 }
 
+/* RangeSlider optional min/max numeric inputs */
+.dash-input-container input,
+.dash-range-slider-input input,
+input.dash-range-slider-input,
+.dash-range-slider-input.dash-range-slider-min-input input,
+.dash-range-slider-input.dash-range-slider-max-input input {
+  background-color: rgba(248, 250, 252, 0.96) !important;
+  color: #0b1120 !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  border-radius: 10px !important;
+  padding: 8px 10px !important;
+  box-shadow: none !important;
+}
+
+.dash-input-container input:focus,
+.dash-range-slider-input input:focus {
+  border-color: rgba(34, 211, 238, 0.65) !important;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18) !important;
+  outline: none !important;
+}
+
+.dash-input-container input::placeholder,
+.dash-range-slider-input input::placeholder {
+  color: #334155 !important;
+}
+
 .rc-slider-rail {
   background-color: rgba(148, 163, 184, 0.22) !important;
 }

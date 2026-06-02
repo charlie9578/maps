@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -201,6 +202,136 @@ def make_top_projects_bar(dff: pd.DataFrame) -> go.Figure:
     fig.update_traces(marker_line_width=0)
     fig = _apply_theme(fig)
     fig.update_layout(yaxis_title=None, coloraxis_showscale=False)
+    return fig
+
+
+_OWNER_PCT_RE = re.compile(r"^(?P<name>.*?)(?:\s*\[(?P<pct>\d+(?:\.\d+)?)%\]\s*)?$")
+
+
+def _split_owners(owner: object) -> list[str]:
+    if owner is None:
+        return []
+    s = str(owner).strip()
+    if not s or s == "<NA>" or s.casefold() == "nan":
+        return []
+    # GEM strings are typically ';' separated, but we handle commas too.
+    parts = re.split(r"\s*;\s*|\s*,\s*", s)
+    return [p.strip() for p in parts if p and p.strip()]
+
+
+def _parse_owner_shares(owner: object) -> list[tuple[str, float]]:
+    """
+    Parse owner strings like:
+      - 'Company A [40%]; Company B [60%]'
+      - 'Company A [100%]'
+      - 'Company A; Company B'  (no shares -> equal split)
+
+    Returns list of (owner_name, percent_of_capacity).
+    """
+    parts = _split_owners(owner)
+    if not parts:
+        return []
+
+    parsed: list[tuple[str, float | None]] = []
+    for p in parts:
+        m = _OWNER_PCT_RE.match(p)
+        if not m:
+            parsed.append((p.strip(), None))
+            continue
+        name = (m.group("name") or "").strip()
+        if not name:
+            continue
+        pct_raw = m.group("pct")
+        pct = float(pct_raw) if pct_raw is not None else None
+        parsed.append((name, pct))
+
+    if not parsed:
+        return []
+
+    with_pct = [(n, p) for n, p in parsed if p is not None]
+    without_pct = [n for n, p in parsed if p is None]
+
+    if not with_pct:
+        # No explicit shares: split equally.
+        per = 100.0 / len(parsed)
+        return [(n, per) for n, _ in parsed]
+
+    used = sum(p for _, p in with_pct)  # type: ignore[arg-type]
+    used = float(used)
+    if without_pct:
+        remaining = max(0.0, 100.0 - used)
+        per = remaining / len(without_pct) if len(without_pct) else 0.0
+        out = [(n, float(p)) for n, p in with_pct] + [(n, per) for n in without_pct]
+    else:
+        out = [(n, float(p)) for n, p in with_pct]
+
+    total = sum(p for _, p in out)
+    if total <= 0:
+        return []
+    # If shares sum to > 100 (or < 100 when no unspecified left), normalize to 100.
+    if abs(total - 100.0) > 1e-6:
+        out = [(n, p * (100.0 / total)) for n, p in out]
+    return out
+
+
+def breakdown_capacity_by_owner(dff: pd.DataFrame, n: int = 25) -> pd.DataFrame:
+    rows: list[dict[str, object]] = []
+    if len(dff) == 0:
+        return pd.DataFrame({"Owner": [], "Capacity (MW)": []})
+
+    for _, r in dff[[COL.capacity_mw, COL.owner]].iterrows():
+        cap = float(r[COL.capacity_mw]) if pd.notna(r[COL.capacity_mw]) else 0.0
+        if cap <= 0:
+            continue
+        owners = _parse_owner_shares(r[COL.owner])
+        if not owners:
+            continue
+        for name, pct in owners:
+            name_cf = name.casefold().strip()
+            if not name_cf or name_cf in {"nan", "<na>", "none"}:
+                continue
+            # Don't allow the bucket label to appear as a real owner
+            if name_cf == "other":
+                continue
+            rows.append({"Owner": name, "Capacity (MW)": cap * (pct / 100.0)})
+
+    if not rows:
+        return pd.DataFrame({"Owner": [], "Capacity (MW)": []})
+
+    out = (
+        pd.DataFrame(rows)
+        .groupby("Owner", dropna=False)["Capacity (MW)"]
+        .sum()
+        .reset_index()
+        .sort_values("Capacity (MW)", ascending=False)
+    )
+    return out.head(n).copy()
+
+
+def make_owner_bar(dff: pd.DataFrame) -> go.Figure:
+    owners = breakdown_capacity_by_owner(dff, n=25)
+    n = int(len(owners))
+    height = max(520, 26 * n + 140) if n else 520
+    fig = px.bar(
+        owners.sort_values("Capacity (MW)", ascending=True),
+        x="Capacity (MW)",
+        y="Owner",
+        orientation="h",
+        title="Capacity by owner (share-adjusted, top 25)",
+        color="Capacity (MW)",
+        color_continuous_scale=CAPACITY_SCALE,
+        height=height,
+    )
+    fig.update_traces(marker_line_width=0)
+    fig = _apply_theme(fig)
+    fig.update_layout(yaxis_title=None, coloraxis_showscale=False)
+    # Force every owner label to show (Plotly auto-skips ticks otherwise).
+    fig.update_yaxes(
+        automargin=True,
+        tickmode="linear",
+        dtick=1,
+        tickfont=dict(size=12),
+    )
     return fig
 
 
