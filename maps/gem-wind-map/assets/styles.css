@@ -1,0 +1,413 @@
+/* Dash auto-loads files under assets/ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --bg-0: #0b1120;
+  --bg-1: #0f172a;
+  --surface: rgba(17, 24, 39, 0.72);
+  --surface-2: rgba(30, 41, 59, 0.55);
+  --border: rgba(148, 163, 184, 0.14);
+  --border-strong: rgba(148, 163, 184, 0.24);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #34d399;
+  --accent-2: #22d3ee;
+  --shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.85);
+}
+
+html,
+body {
+  background: var(--bg-0);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(1100px 600px at 12% -8%, rgba(34, 211, 238, 0.12), transparent 60%),
+    radial-gradient(1000px 620px at 100% 0%, rgba(52, 211, 153, 0.1), transparent 55%),
+    linear-gradient(180deg, #0b1120 0%, #0a0f1c 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.app-shell {
+  max-width: 1640px;
+  margin: 0 auto;
+}
+
+/* ---- Hero header ---------------------------------------------------------- */
+.app-hero {
+  position: relative;
+  border-radius: 20px;
+  padding: 22px 26px;
+  background:
+    linear-gradient(110deg, rgba(34, 211, 238, 0.14), rgba(52, 211, 153, 0.05) 45%, rgba(15, 23, 42, 0) 75%),
+    var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.app-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.app-eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18);
+}
+
+.app-title {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  background: linear-gradient(95deg, #f8fafc 0%, #a5f3fc 55%, #6ee7b7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 4px 0 2px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.tip-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+}
+
+/* ---- Cards ---------------------------------------------------------------- */
+.card,
+.dash-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.card-tight .card-body {
+  padding: 16px;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+hr {
+  border-color: var(--border);
+  opacity: 1;
+}
+
+.form-label {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.sticky-sidebar {
+  position: sticky;
+  top: 14px;
+}
+
+/* ---- KPI stat cards ------------------------------------------------------- */
+.kpi-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 16px 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
+}
+
+.kpi .kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.kpi-number {
+  background: linear-gradient(95deg, #e2e8f0, #5eead4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.kpi-unit {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kpi .kpi-label {
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* ---- Inputs --------------------------------------------------------------- */
+.form-control {
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+}
+
+.form-control::placeholder {
+  color: #64748b;
+}
+
+.form-control:focus {
+  border-color: rgba(52, 211, 153, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15) !important;
+}
+
+/* ---- dcc.Dropdown (react-select) ----------------------------------------- */
+.Select-control,
+.Select.is-focused:not(.is-open) > .Select-control {
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+.Select.is-focused > .Select-control {
+  border-color: rgba(52, 211, 153, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15) !important;
+}
+
+.Select-placeholder,
+.Select-value-label,
+.Select--single > .Select-control .Select-value .Select-value-label,
+.Select-input > input {
+  color: var(--text) !important;
+}
+
+.Select-placeholder {
+  color: #64748b !important;
+}
+
+.Select-menu-outer {
+  background-color: #0f172a !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+
+.Select-option {
+  background-color: #0f172a !important;
+  color: var(--text) !important;
+}
+
+.Select-option.is-focused {
+  background-color: rgba(34, 211, 238, 0.16) !important;
+}
+
+.Select-option.is-selected {
+  background-color: rgba(52, 211, 153, 0.18) !important;
+}
+
+.Select--multi .Select-value {
+  background-color: rgba(34, 211, 238, 0.14) !important;
+  border: 1px solid rgba(34, 211, 238, 0.4) !important;
+  color: #a5f3fc !important;
+  border-radius: 8px !important;
+}
+
+.Select--multi .Select-value-icon {
+  border-right: 1px solid rgba(34, 211, 238, 0.4) !important;
+}
+
+.Select--multi .Select-value-icon:hover {
+  background-color: rgba(248, 113, 113, 0.25) !important;
+  color: #fecaca !important;
+}
+
+.Select-arrow {
+  border-color: var(--muted) transparent transparent !important;
+}
+
+.Select-clear {
+  color: var(--muted) !important;
+}
+
+/* ---- Checklist ------------------------------------------------------------ */
+#flags label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+#flags input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+/* ---- RangeSlider ---------------------------------------------------------- */
+.rc-slider-rail {
+  background-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+.rc-slider-track {
+  background: linear-gradient(90deg, var(--accent-2), var(--accent)) !important;
+}
+
+.rc-slider-handle {
+  background-color: #0b1120 !important;
+  border: 2px solid var(--accent) !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18) !important;
+}
+
+.rc-slider-handle:hover,
+.rc-slider-handle-dragging {
+  border-color: var(--accent-2) !important;
+  box-shadow: 0 0 0 5px rgba(34, 211, 238, 0.22) !important;
+}
+
+.rc-slider-tooltip-inner {
+  background-color: #0f172a !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.rc-slider-tooltip-arrow {
+  border-bottom-color: #0f172a !important;
+}
+
+/* ---- Tabs ----------------------------------------------------------------- */
+.dash-tabs .tab {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  color: var(--muted) !important;
+  font-weight: 600 !important;
+  padding: 12px 18px !important;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.dash-tabs .tab:hover {
+  color: var(--text) !important;
+}
+
+.dash-tabs .tab--selected {
+  background: transparent !important;
+  color: var(--text) !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+
+.dash-tabs .tab-container {
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* ---- Buttons -------------------------------------------------------------- */
+.btn-primary {
+  background: linear-gradient(95deg, var(--accent-2), var(--accent)) !important;
+  border: none !important;
+  color: #06281f !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 20px -10px rgba(34, 211, 238, 0.7) !important;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.07);
+}
+
+/* ---- DataTable ------------------------------------------------------------ */
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.dash-table-container input.dash-filter--case {
+  color: var(--text) !important;
+}
+
+.dash-table-container .dash-filter input {
+  color: var(--text) !important;
+}
+
+.dash-table-container .previous-next-container .page-number,
+.dash-table-container .previous-next-container button {
+  color: var(--text) !important;
+}
+
+/* ---- Plotly chrome -------------------------------------------------------- */
+.js-plotly-plot .modebar {
+  background: transparent !important;
+}
+
+.js-plotly-plot .modebar-btn path {
+  fill: var(--muted) !important;
+}
+
+.js-plotly-plot .modebar-btn.active path,
+.js-plotly-plot .modebar-btn:hover path {
+  fill: var(--accent) !important;
+}
+
+/* ---- Scrollbars ----------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}

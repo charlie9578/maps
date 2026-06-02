@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import plotly.express as px
+import dash_bootstrap_components as dbc
 from dash import Dash, Input, Output, State, dcc, html
 from dash.dash_table import DataTable
 from dash.exceptions import PreventUpdate
@@ -10,12 +10,14 @@ import pandas as pd
 from wind_data import COL, filter_df, load_data, sorted_unique
 from wind_viz import (
     assets_table_df,
-    breakdown_installation_types,
-    breakdown_status,
-    breakdown_top_countries,
+    make_country_bar,
+    make_installation_pie,
     make_map,
-    top_projects_table,
+    make_status_bar,
+    make_top_projects_bar,
 )
+
+GOOGLE_FONTS = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 
 MAP_DIR = Path(__file__).resolve().parent
 DATA_PATH = MAP_DIR / "data" / "Global-Wind-Power-Tracker-February-2026.xlsx"
@@ -54,6 +56,16 @@ def _toggle_single_selection(current: list[str] | None, selected: str | None) ->
     return [selected]
 
 
+def _kpi_card(value_id: str, label: str):
+    return html.Div(
+        className="kpi-card kpi",
+        children=[
+            html.Div(id=value_id, className="kpi-value"),
+            html.Div(label, className="kpi-label"),
+        ],
+    )
+
+
 def make_app(df: pd.DataFrame) -> Dash:
     countries = sorted_unique(df, COL.country)
     statuses = sorted_unique(df, COL.status)
@@ -68,171 +80,282 @@ def make_app(df: pd.DataFrame) -> Dash:
     sy_max = float(sy.max()) if len(sy) else 2035.0
     sy_default = [sy_min, sy_max]
 
-    app = Dash(__name__)
+    app = Dash(
+        __name__,
+        external_stylesheets=[dbc.themes.DARKLY, GOOGLE_FONTS],
+        title="GEM wind farms (Feb 2026)",
+    )
     app.title = "GEM wind farms (Feb 2026)"
 
-    app.layout = html.Div(
-        style={"fontFamily": "system-ui, -apple-system, Segoe UI, Roboto, Arial", "padding": "12px"},
+    app.layout = dbc.Container(
+        fluid=True,
+        className="app-shell py-3",
         children=[
-            html.H2("Global Wind Power Tracker — dashboard (Feb 2026)"),
             html.Div(
-                "Tip: click a slice/bar in the breakdown charts to cross-filter (click again to clear).",
-                style={"color": "#4b5563", "marginBottom": "8px"},
+                className="app-hero mb-3",
+                children=dbc.Row(
+                    className="align-items-center g-3",
+                    children=[
+                        dbc.Col(
+                            [
+                                html.Span("Global Wind Power Tracker", className="app-eyebrow"),
+                                html.Div("Wind farms of the world", className="app-title h2 mb-0"),
+                                html.Div(
+                                    "February 2026 snapshot  ·  marker size = capacity  ·  color = status",
+                                    className="muted",
+                                ),
+                            ],
+                            md=8,
+                        ),
+                        dbc.Col(
+                            html.Div(
+                                "Tip: click a slice or bar to cross-filter (click again to clear).",
+                                className="tip-pill",
+                            ),
+                            md=4,
+                            className="d-flex justify-content-md-end",
+                        ),
+                    ],
+                ),
             ),
-            html.Div(
-                style={"display": "grid", "gridTemplateColumns": "360px 1fr", "gap": "12px", "alignItems": "start"},
+            dbc.Row(
+                className="g-3",
                 children=[
-                    html.Div(
-                        style={
-                            "border": "1px solid #e5e7eb",
-                            "borderRadius": "10px",
-                            "padding": "12px",
-                            "background": "#fafafa",
-                        },
+                    dbc.Col(
+                        md=4,
+                        lg=3,
                         children=[
-                            html.Div("Filters", style={"fontWeight": 700, "marginBottom": "8px"}),
-                            html.Label("Search (project / phase / operator / owner)"),
-                            dcc.Input(id="search-text", type="text", value="", style={"width": "100%"}),
-                            html.Div(style={"height": "10px"}),
-                            html.Label("Country/Area"),
-                            dcc.Dropdown(
-                                id="country",
-                                options=[{"label": c, "value": c} for c in countries],
-                                value=[],
-                                multi=True,
-                                placeholder="All countries",
-                            ),
-                            html.Div(style={"height": "10px"}),
-                            html.Label("Status"),
-                            dcc.Dropdown(
-                                id="status",
-                                options=[{"label": s, "value": s} for s in statuses],
-                                value=[],
-                                multi=True,
-                                placeholder="All statuses",
-                            ),
-                            html.Div(style={"height": "10px"}),
-                            html.Label("Installation Type"),
-                            dcc.Dropdown(
-                                id="installation-type",
-                                options=[{"label": t, "value": t} for t in installation_types],
-                                value=[],
-                                multi=True,
-                                placeholder="All installation types",
-                            ),
-                            html.Div(style={"height": "10px"}),
-                            html.Label("Capacity range (MW)"),
-                            dcc.RangeSlider(
-                                id="capacity-range",
-                                min=cap_min,
-                                max=cap_max,
-                                value=cap_default,
-                                tooltip={"placement": "bottom", "always_visible": False},
-                                allowCross=False,
-                            ),
-                            html.Div(style={"height": "10px"}),
-                            html.Label("Start year range (blank start year is kept)"),
-                            dcc.RangeSlider(
-                                id="start-year-range",
-                                min=sy_min,
-                                max=sy_max,
-                                value=sy_default,
-                                step=1,
-                                tooltip={"placement": "bottom", "always_visible": False},
-                                allowCross=False,
-                            ),
-                            html.Div(style={"height": "10px"}),
-                            dcc.Checklist(
-                                id="flags",
-                                options=[
-                                    {"label": "Only entries with Hydrogen", "value": "hydrogen"},
-                                    {"label": "Only entries with Associated storage", "value": "storage"},
+                            dbc.Card(
+                                className="card-tight shadow-sm sticky-sidebar",
+                                children=[
+                                    dbc.CardBody(
+                                        [
+                                            html.Div("Filters", className="section-label mb-3"),
+                                            dbc.Label("Search (project / phase / operator / owner)", className="mb-1"),
+                                            dbc.Input(id="search-text", type="text", value="", placeholder="e.g. Vestas"),
+                                            html.Div(className="my-2"),
+                                            dbc.Label("Country/Area", className="mb-1"),
+                                            dcc.Dropdown(
+                                                id="country",
+                                                options=[{"label": c, "value": c} for c in countries],
+                                                value=[],
+                                                multi=True,
+                                                placeholder="All countries",
+                                            ),
+                                            html.Div(className="my-2"),
+                                            dbc.Label("Status", className="mb-1"),
+                                            dcc.Dropdown(
+                                                id="status",
+                                                options=[{"label": s, "value": s} for s in statuses],
+                                                value=[],
+                                                multi=True,
+                                                placeholder="All statuses",
+                                            ),
+                                            html.Div(className="my-2"),
+                                            dbc.Label("Installation Type", className="mb-1"),
+                                            dcc.Dropdown(
+                                                id="installation-type",
+                                                options=[{"label": t, "value": t} for t in installation_types],
+                                                value=[],
+                                                multi=True,
+                                                placeholder="All installation types",
+                                            ),
+                                            html.Div(className="my-2"),
+                                            dbc.Label("Capacity range (MW)", className="mb-1"),
+                                            dcc.RangeSlider(
+                                                id="capacity-range",
+                                                min=cap_min,
+                                                max=cap_max,
+                                                value=cap_default,
+                                                tooltip={"placement": "bottom", "always_visible": False},
+                                                allowCross=False,
+                                            ),
+                                            html.Div(className="my-2"),
+                                            dbc.Label("Start year range (blank start year is kept)", className="mb-1"),
+                                            dcc.RangeSlider(
+                                                id="start-year-range",
+                                                min=sy_min,
+                                                max=sy_max,
+                                                value=sy_default,
+                                                step=1,
+                                                tooltip={"placement": "bottom", "always_visible": False},
+                                                allowCross=False,
+                                            ),
+                                            html.Div(className="my-2"),
+                                            dcc.Checklist(
+                                                id="flags",
+                                                options=[
+                                                    {"label": "Only entries with Hydrogen", "value": "hydrogen"},
+                                                    {"label": "Only entries with Associated storage", "value": "storage"},
+                                                ],
+                                                value=[],
+                                            ),
+                                            html.Hr(className="my-3"),
+                                            html.Div(
+                                                id="summary-text",
+                                                className="muted",
+                                                style={"whiteSpace": "pre-wrap"},
+                                            ),
+                                        ]
+                                    )
                                 ],
-                                value=[],
-                            ),
-                            html.Hr(),
-                            html.Div(id="summary-text", style={"whiteSpace": "pre-wrap", "fontSize": "13px"}),
+                            )
                         ],
                     ),
-                    html.Div(
+                    dbc.Col(
+                        md=8,
+                        lg=9,
                         children=[
-                            dcc.Graph(id="map", config={"displayModeBar": True}),
-                            dcc.Tabs(
-                                value="breakdowns",
+                            dbc.Row(
+                                className="g-3 mb-3",
                                 children=[
-                                    dcc.Tab(
-                                        label="Breakdowns",
-                                        value="breakdowns",
-                                        children=[
-                                            html.Div(
-                                                style={
-                                                    "display": "grid",
-                                                    "gridTemplateColumns": "1fr 1fr",
-                                                    "gap": "12px",
-                                                    "paddingTop": "10px",
-                                                },
-                                                children=[
-                                                    dcc.Graph(id="installation-pie"),
-                                                    dcc.Graph(id="status-bar"),
-                                                    dcc.Graph(id="country-bar"),
-                                                    dcc.Graph(id="top-projects-bar"),
-                                                ],
-                                            )
-                                        ],
-                                    ),
-                                    dcc.Tab(
-                                        label="Wind farm list",
-                                        value="list",
-                                        children=[
-                                            html.Div(style={"height": "10px"}),
-                                            html.Div(
-                                                style={
-                                                    "display": "flex",
-                                                    "gap": "10px",
-                                                    "alignItems": "center",
-                                                    "justifyContent": "space-between",
-                                                    "flexWrap": "wrap",
-                                                },
-                                                children=[
-                                                    html.Div(
-                                                        "Table shows the currently filtered rows. Use the button to download as CSV.",
-                                                        style={"color": "#4b5563"},
-                                                    ),
-                                                    html.Button(
-                                                        "Download filtered CSV",
-                                                        id="download-csv-btn",
-                                                        style={
-                                                            "border": "1px solid #d1d5db",
-                                                            "background": "white",
-                                                            "padding": "8px 10px",
-                                                            "borderRadius": "8px",
-                                                            "cursor": "pointer",
-                                                        },
-                                                    ),
-                                                ],
-                                            ),
-                                            dcc.Download(id="download-csv"),
-                                            html.Div(style={"height": "10px"}),
-                                            DataTable(
-                                                id="assets-table",
-                                                page_size=20,
-                                                sort_action="native",
-                                                filter_action="native",
-                                                style_table={"overflowX": "auto"},
-                                                style_cell={
-                                                    "fontFamily": "inherit",
-                                                    "fontSize": 12,
-                                                    "padding": "6px",
-                                                    "whiteSpace": "normal",
-                                                    "height": "auto",
-                                                    "maxWidth": "420px",
-                                                },
-                                                style_header={"fontWeight": "bold"},
-                                                markdown_options={"link_target": "_blank"},
-                                            ),
-                                        ],
-                                    ),
+                                    dbc.Col(_kpi_card("kpi-capacity", "Total capacity (MW)"), md=4),
+                                    dbc.Col(_kpi_card("kpi-rows", "Filtered rows"), md=4),
+                                    dbc.Col(_kpi_card("kpi-countries", "Countries"), md=4),
                                 ],
+                            ),
+                            dbc.Card(
+                                className="mb-3",
+                                children=dbc.CardBody(
+                                    dcc.Loading(
+                                        type="circle",
+                                        color="#34d399",
+                                        children=dcc.Graph(id="map", config={"displayModeBar": True}),
+                                    )
+                                ),
+                            ),
+                            dbc.Card(
+                                children=dbc.CardBody(
+                                    dcc.Tabs(
+                                        value="breakdowns",
+                                        className="dash-tabs",
+                                        children=[
+                                            dcc.Tab(
+                                                label="Breakdowns",
+                                                value="breakdowns",
+                                                children=[
+                                                    html.Div(className="pt-2"),
+                                                    dbc.Row(
+                                                        className="g-3",
+                                                        children=[
+                                                            dbc.Col(
+                                                                dcc.Loading(
+                                                                    type="circle",
+                                                                    color="#34d399",
+                                                                    children=dcc.Graph(id="installation-pie"),
+                                                                ),
+                                                                md=6,
+                                                            ),
+                                                            dbc.Col(
+                                                                dcc.Loading(
+                                                                    type="circle",
+                                                                    color="#34d399",
+                                                                    children=dcc.Graph(id="status-bar"),
+                                                                ),
+                                                                md=6,
+                                                            ),
+                                                            dbc.Col(
+                                                                dcc.Loading(
+                                                                    type="circle",
+                                                                    color="#34d399",
+                                                                    children=dcc.Graph(id="country-bar"),
+                                                                ),
+                                                                md=6,
+                                                            ),
+                                                            dbc.Col(
+                                                                dcc.Loading(
+                                                                    type="circle",
+                                                                    color="#34d399",
+                                                                    children=dcc.Graph(id="top-projects-bar"),
+                                                                ),
+                                                                md=6,
+                                                            ),
+                                                        ],
+                                                    ),
+                                                ],
+                                            ),
+                                            dcc.Tab(
+                                                label="Wind farm list",
+                                                value="list",
+                                                children=[
+                                                    html.Div(className="pt-2"),
+                                                    dbc.Row(
+                                                        className="align-items-center g-2 mb-2",
+                                                        children=[
+                                                            dbc.Col(
+                                                                html.Div(
+                                                                    "Table shows the currently filtered rows (including the Status groupings).",
+                                                                    className="muted",
+                                                                ),
+                                                                md=8,
+                                                            ),
+                                                            dbc.Col(
+                                                                dbc.Button(
+                                                                    "Download filtered CSV",
+                                                                    id="download-csv-btn",
+                                                                    color="primary",
+                                                                    className="w-100 w-md-auto",
+                                                                ),
+                                                                md=4,
+                                                            ),
+                                                        ],
+                                                    ),
+                                                    dcc.Download(id="download-csv"),
+                                                    dcc.Loading(
+                                                        type="circle",
+                                                        color="#34d399",
+                                                        children=DataTable(
+                                                            id="assets-table",
+                                                            page_size=20,
+                                                            sort_action="native",
+                                                            filter_action="native",
+                                                            style_as_list_view=True,
+                                                            style_table={"overflowX": "auto"},
+                                                            style_cell={
+                                                                "fontFamily": "inherit",
+                                                                "fontSize": 12,
+                                                                "padding": "10px 12px",
+                                                                "whiteSpace": "normal",
+                                                                "height": "auto",
+                                                                "maxWidth": "420px",
+                                                                "backgroundColor": "transparent",
+                                                                "color": "#e2e8f0",
+                                                                "border": "none",
+                                                                "borderBottom": "1px solid rgba(148, 163, 184, 0.12)",
+                                                            },
+                                                            style_header={
+                                                                "fontWeight": "700",
+                                                                "textTransform": "uppercase",
+                                                                "fontSize": 11,
+                                                                "letterSpacing": "0.06em",
+                                                                "backgroundColor": "rgba(15, 23, 42, 0.6)",
+                                                                "color": "#94a3b8",
+                                                                "border": "none",
+                                                                "borderBottom": "1px solid rgba(148, 163, 184, 0.24)",
+                                                            },
+                                                            style_data_conditional=[
+                                                                {
+                                                                    "if": {"row_index": "odd"},
+                                                                    "backgroundColor": "rgba(148, 163, 184, 0.05)",
+                                                                },
+                                                                {
+                                                                    "if": {"state": "active"},
+                                                                    "backgroundColor": "rgba(52, 211, 153, 0.12)",
+                                                                    "border": "1px solid rgba(52, 211, 153, 0.4)",
+                                                                },
+                                                            ],
+                                                            style_filter={
+                                                                "backgroundColor": "rgba(15, 23, 42, 0.6)",
+                                                                "color": "#e2e8f0",
+                                                            },
+                                                            markdown_options={"link_target": "_blank"},
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                        ],
+                                    )
+                                ),
                             ),
                         ],
                     ),
@@ -283,6 +406,9 @@ def make_app(df: pd.DataFrame) -> Dash:
     @app.callback(
         Output("map", "figure"),
         Output("summary-text", "children"),
+        Output("kpi-capacity", "children"),
+        Output("kpi-rows", "children"),
+        Output("kpi-countries", "children"),
         Output("installation-pie", "figure"),
         Output("status-bar", "figure"),
         Output("country-bar", "figure"),
@@ -328,33 +454,35 @@ def make_app(df: pd.DataFrame) -> Dash:
         status_n = int(dff[COL.status].nunique()) if len(dff) else 0
         countries_n = int(dff[COL.country].nunique()) if len(dff) else 0
         installations_n = int(dff[COL.installation_type].nunique()) if len(dff) else 0
+        kpi_capacity = f"{total_capacity:,.0f}"
+        kpi_rows = f"{len(dff):,}"
+        kpi_countries = f"{countries_n:,}"
         summary = (
             f"Filtered rows: {len(dff):,}\n"
             f"Total capacity (MW): {total_capacity:,.1f}\n"
             f"Countries: {countries_n} | Statuses: {status_n} | Installation types: {installations_n}"
         )
 
-        inst = breakdown_installation_types(dff)
-        inst_fig = px.pie(inst, names=COL.installation_type, values="Capacity (MW)", title="Capacity by installation type")
-        inst_fig.update_layout(margin=dict(l=0, r=0, t=40, b=0))
+        kpi_capacity_ui = [
+            html.Span(kpi_capacity, className="kpi-number"),
+            html.Br(),
+            html.Span("MW", className="kpi-unit"),
+        ]
+        kpi_rows_ui = [
+            html.Span(kpi_rows, className="kpi-number"),
+            html.Br(),
+            html.Span("rows", className="kpi-unit"),
+        ]
+        kpi_countries_ui = [
+            html.Span(kpi_countries, className="kpi-number"),
+            html.Br(),
+            html.Span("countries", className="kpi-unit"),
+        ]
 
-        stat = breakdown_status(dff)
-        status_fig = px.bar(stat, x=COL.status, y="Capacity (MW)", title="Capacity by status")
-        status_fig.update_layout(margin=dict(l=0, r=0, t=40, b=0), xaxis_title=None)
-
-        ctry = breakdown_top_countries(dff, n=15)
-        country_fig = px.bar(ctry, x=COL.country, y="Capacity (MW)", title="Capacity by country (top 15 + Other)")
-        country_fig.update_layout(margin=dict(l=0, r=0, t=40, b=0), xaxis_title=None)
-
-        top_projects = top_projects_table(dff, n=20)
-        top_fig = px.bar(
-            top_projects.sort_values("Total capacity (MW)", ascending=True),
-            x="Total capacity (MW)",
-            y=COL.project,
-            orientation="h",
-            title="Largest wind farms (top 20 projects, summed across phases)",
-        )
-        top_fig.update_layout(margin=dict(l=0, r=0, t=40, b=0), yaxis_title=None)
+        inst_fig = make_installation_pie(dff)
+        status_fig = make_status_bar(dff)
+        country_fig = make_country_bar(dff)
+        top_fig = make_top_projects_bar(dff)
 
         assets = assets_table_df(dff)
         assets_data = assets.to_dict("records")
@@ -368,6 +496,9 @@ def make_app(df: pd.DataFrame) -> Dash:
         return (
             map_fig,
             summary,
+            kpi_capacity_ui,
+            kpi_rows_ui,
+            kpi_countries_ui,
             inst_fig,
             status_fig,
             country_fig,
