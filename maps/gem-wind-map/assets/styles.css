@@ -287,6 +287,10 @@ hr {
 }
 
 /* ---- RangeSlider ---------------------------------------------------------- */
+.dash-slider-container {
+  color: var(--text);
+}
+
 .rc-slider-rail {
   background-color: rgba(148, 163, 184, 0.22) !important;
 }
@@ -309,15 +313,39 @@ hr {
 }
 
 .rc-slider-tooltip-inner {
-  background-color: #0f172a !important;
-  border: 1px solid var(--border-strong) !important;
-  color: var(--text) !important;
+  /* Use a light tooltip with dark text for maximum readability */
+  background-color: rgba(248, 250, 252, 0.96) !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  color: #0b1120 !important;
   border-radius: 6px !important;
   box-shadow: none !important;
 }
 
 .rc-slider-tooltip-arrow {
-  border-bottom-color: #0f172a !important;
+  border-bottom-color: rgba(248, 250, 252, 0.96) !important;
+}
+
+/* Some Dash / rc-slider builds wrap the value in extra nodes */
+.dash-slider-container .rc-slider-tooltip,
+.dash-slider-container .rc-slider-tooltip-inner,
+.dash-slider-container .rc-slider-tooltip-inner * {
+  color: #0b1120 !important;
+}
+
+/* Slider marks & dots */
+.dash-slider-container .rc-slider-mark-text,
+.dash-slider-container .rc-slider-mark-text-active {
+  color: var(--muted) !important;
+  background: transparent !important;
+}
+
+.dash-slider-container .rc-slider-dot {
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  background: rgba(15, 23, 42, 0.6) !important;
+}
+
+.dash-slider-container .rc-slider-dot-active {
+  border-color: rgba(52, 211, 153, 0.45) !important;
 }
 
 /* ---- Tabs ----------------------------------------------------------------- */
