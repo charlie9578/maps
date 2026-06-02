@@ -1,0 +1,7 @@
+# Map-only packages (installed into the repo root .venv)
+# uv pip install -r maps/MAP_NAME/requirements.txt
+
+dash
+dash-bootstrap-components
+plotly
+openpyxl

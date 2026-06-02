@@ -31,6 +31,8 @@ Example map-only packages: `geopandas`, `folium`, `plotly`.
 
 Generated files go to `output/` (gitignored). Static maps often use PNG/PDF; interactive maps often write HTML.
 
+For an **interactive Dash dashboard**, scaffold with `python scripts/new_map.py MAP_NAME --type dash` instead of this template.
+
 ## Shared library
 
 If you use repo-wide helpers:

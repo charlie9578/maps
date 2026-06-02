@@ -13,7 +13,8 @@ Shared Python code lives in **`lib/`** (installable as `from lib...`). Maps must
 ```
 lib/                    # Shared helpers (import: from lib.paths import map_dir)
 maps/
-├── _template/          # Scaffold for new maps (not a published map)
+├── _template/          # Scaffold for script/static maps (not published)
+├── _template_dash/     # Scaffold for Dash dashboards (not published)
 └── <map-name>/
     ├── README.md
     ├── main.py         # Script entry point
@@ -68,9 +69,12 @@ python scripts/install_map_requirements.py
 
 ```bash
 python scripts/new_map.py my-map-name
+python scripts/new_map.py my-dashboard --type dash   # interactive Dash app
 ```
 
-Then edit `maps/my-map-name/README.md`, `main.py`, and/or `notebook.ipynb`. If the map has `requirements.txt`, install it before running the notebook (kernel **Maps (.venv)**).
+Then edit `maps/my-map-name/README.md`, `main.py`, and/or `notebook.ipynb`. If the map has `requirements.txt`, install it before running (kernel **Maps (.venv)** for notebooks).
+
+**Dash maps:** run `python maps/<name>/main.py` from the terminal (Ctrl+C to stop). Keep Python files under ~500 lines; split into `data_processing.py`, `viz.py`, and `main.py` as needed.
 
 ## Run a map
 

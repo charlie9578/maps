@@ -1,39 +1,72 @@
----
-description: Conventions for map folders and shared Python setup
-alwaysApply: true
----
-
-# Maps repository
-
-## Layout
-
-- Each map is a **self-contained folder** under `maps/<name>/` (not `maps/_template/`).
-- Standard files: `README.md`, `main.py`, `notebook.ipynb`, `data/`, `output/`, optional `requirements.txt`.
-- **One shared virtual environment** at the repo root. Do not add per-map `.venv/` folders.
-- **Do not import from sibling map folders.** Shared code goes in top-level `lib/` (`from lib.paths import map_dir`).
-
-## Python
-
-- Geographic / data-viz maps (matplotlib, pandas; map-only: geopandas, folium, plotly, etc.).
-- Run scripts from repo root: `python maps/<name>/main.py`.
-- Notebooks: run Jupyter from repo root with kernel **Maps (.venv)**; use `lib.paths.map_dir("<name>")` for paths. Load `main.py` via `importlib` (folder names are not importable Python modules).
-- Use `Path(__file__).resolve().parent` in `main.py` for map-local paths.
-- Repo-wide deps in root `pyproject.toml`; map-only deps in `maps/<name>/requirements.txt`, installed into the **root** venv (`uv pip install -r ...` or `scripts/install_map_requirements.py`).
-- Prefer Python 3.11+; type hints; `ruff`.
-- If you embed web map tiles (Folium / Leaflet), avoid the default `OpenStreetMap` tiles in shared HTML outputs; prefer a provider intended for embedded usage (e.g. `CartoDB Positron`) and keep attribution intact.
-
-## New maps
-
-- Scaffold: `python scripts/new_map.py <kebab-case-name>`.
-- Names: lowercase, hyphens, start with a letter (e.g. `uk-rail-network`).
-- Add new maps to root **`MAPS.md`** (short catalog) and the map’s `README.md`.
-
-## Git
-
-- `maps/**/data/*.csv` is gitignored (downloaded on first run; document URL and filename in the map README).
-- Other small fixtures in `data/` (GeoJSON, shapefiles, etc.) may be committed when reasonable.
-- Generated files go to `output/` (gitignored).
-
-## Extracting a map
-
-- Map folder + documented deps + any used `lib/` modules should be enough for a standalone repo.
+---
+description: Conventions for map folders and shared Python setup
+alwaysApply: true
+---
+
+# Maps repository
+
+## Layout
+
+- Each map is a **self-contained folder** under `maps/<name>/` (not `maps/_template/` or `maps/_template_dash/`).
+- Standard files: `README.md`, `main.py`, `notebook.ipynb`, `data/`, `output/`, optional `requirements.txt`.
+- **One shared virtual environment** at the repo root. Do not add per-map `.venv/` folders.
+- **Do not import from sibling map folders.** Shared code goes in top-level `lib/` (`from lib.paths import map_dir`).
+
+## Python
+
+- Geographic / data-viz maps (matplotlib, pandas; map-only: geopandas, folium, plotly, etc.).
+- Run scripts from repo root: `python maps/<name>/main.py`.
+- Notebooks: run Jupyter from repo root with kernel **Maps (.venv)**; use `lib.paths.map_dir("<name>")` for paths. Load `main.py` via `importlib` (folder names are not importable Python modules).
+- Use `Path(__file__).resolve().parent` in `main.py` for map-local paths.
+- Repo-wide deps in root `pyproject.toml`; map-only deps in `maps/<name>/requirements.txt`, installed into the **root** venv (`uv pip install -r ...` or `scripts/install_map_requirements.py`).
+- Prefer Python 3.11+; type hints; `ruff`.
+- If you embed web map tiles (Folium / Leaflet), avoid the default `OpenStreetMap` tiles in shared HTML outputs; prefer a provider intended for embedded usage (e.g. `CartoDB Positron`) and keep attribution intact.
+
+## File size and module split
+
+- Keep each Python file **under ~500 lines**. Split before it grows unwieldy.
+- **Dash dashboards** (typical split):
+  - `main.py` — layout, callbacks, `main()`
+  - `data_processing.py` — load, clean, filter, category grouping
+  - `viz.py` — Plotly figure builders
+  - `assets/styles.css` — optional custom CSS (Dash auto-loads `assets/`)
+- **Static / script maps**: extract helpers into `data_processing.py` or similar when `main.py` gets large.
+
+## Data formats
+
+- **Excel (`.xlsx`)**: add `openpyxl` to the map’s `requirements.txt`; document sheet name(s) in README and load code.
+- **CSV in `data/`**: gitignored when downloaded — document URL, license, and filename in the map README.
+
+## Category / status grouping
+
+- Prefer keeping the **raw** column from the source and adding a **grouped** column (e.g. `Status (grouped)`) via a small `normalize_*()` function in `data_processing.py`, so legends and filters stay stable while preserving originals for export.
+
+## Dash dashboards
+
+- Scaffold: `python scripts/new_map.py <name> --type dash` (from `maps/_template_dash/`).
+- Run from terminal: `python maps/<name>/main.py` — server runs until Ctrl+C; default `http://127.0.0.1:8050`.
+- UI conventions: filter sidebar, `dcc.Loading` on charts/tables, KPI summary for row/capacity/counts where useful; `dash-bootstrap-components` + `assets/styles.css` for polish.
+- Cross-filtering: wire chart `clickData` to filter controls (click again to clear).
+- Notebooks: exploration only; do not rely on running `main()` in-kernel (blocks Jupyter).
+
+## Notebooks
+
+- `.ipynb` files are **JSON** — create/edit via Jupyter or the scaffold script, not as plain text with `#` markdown.
+
+## New maps
+
+- Default scaffold: `python scripts/new_map.py <kebab-case-name>`.
+- Dashboard scaffold: `python scripts/new_map.py <kebab-case-name> --type dash`.
+- Names: lowercase, hyphens, start with a letter (e.g. `uk-rail-network`).
+- Add new maps to root **`MAPS.md`** (short catalog) and the map’s `README.md`.
+
+## Git
+
+- `maps/**/data/*.csv` is gitignored (downloaded on first run; document URL and filename in the map README).
+- Other small fixtures in `data/` (GeoJSON, shapefiles, etc.) may be committed when reasonable.
+- Generated files go to `output/` (gitignored).
+
+## Extracting a map
+
+- Map folder + documented deps + any used `lib/` modules should be enough for a standalone repo.
+
