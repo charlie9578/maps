@@ -1,0 +1,5 @@
+# Map-only packages (installed into the repo root .venv)
+# uv pip install -r maps/academic-citations-map/requirements.txt
+networkx>=3.2
+plotly>=5.24
+requests>=2.32
