@@ -2,14 +2,14 @@
 
 Trace layout (important: the hover/click JavaScript in main.py relies on it):
 
-    [0 .. N-1]      one "arcs" line trace per team   (hidden by default)
-    [N .. 2N-1]     one "destinations" marker trace per team (hidden)
-    [2N]            capitals marker trace (visible flags)
-    [2N+1]          invisible enlarged targets at capitals (click / hover)
-    [2N+2 ..]       confederation legend dummy traces
+    [0 .. N-1]      one "arcs" line trace per team (hidden by default)
+    [N]             shared stadium markers (aggregated hover; filtered in JS)
+    [N+1]           capitals marker trace (visible flags)
+    [N+2]           invisible enlarged targets at capitals (click / hover)
+    [N+3 ..]        confederation legend dummy traces
 
-Clicking a capital, its flight paths, club dots, or the enlarged target toggles
-that team (see main.py).
+Clicking a capital, its flight paths, or the enlarged target toggles that team
+(see main.py). Stadium hovers list nations with an active (visible) path to that ground.
 """
 
 from __future__ import annotations
@@ -34,32 +34,15 @@ LAND = "#13294b"
 COASTLINE = "#2b4a7a"
 COUNTRY_LINE = "#1f3a63"
 
+STADIUM_MARKER_SIZE = 8
+STADIUM_MARKER_COLOR = "#94a3b8"
+
 
 def confed_color(confederation: str) -> str:
     for key, color in CONFED_COLORS.items():
         if confederation.startswith(key):
             return color
     return DEFAULT_COLOR
-
-
-def _split_antimeridian(
-    lats: list[float], lons: list[float]
-) -> tuple[list[float | None], list[float | None]]:
-    """Insert a None break where an arc wraps across the ±180° meridian.
-
-    Great-circle longitudes returned by atan2 jump from ~+179 to ~-179 when the
-    shortest path crosses the antimeridian; without a break Plotly would draw a
-    long horizontal streak straight across the map.
-    """
-    out_lat: list[float | None] = []
-    out_lon: list[float | None] = []
-    for i, (la, lo) in enumerate(zip(lats, lons, strict=True)):
-        if i and abs(lo - lons[i - 1]) > 180:
-            out_lat.append(None)
-            out_lon.append(None)
-        out_lat.append(la)
-        out_lon.append(lo)
-    return out_lat, out_lon
 
 
 def _players_label(players: list[tuple[str, str]]) -> str:
@@ -78,7 +61,6 @@ def _arc_trace_data(
     lons: list[float | None] = []
     customdata: list[list[str] | None] = []
     for route in team.routes:
-        plats, plons = _split_antimeridian(route.arc_lats, route.arc_lons)
         row = [
             _players_label(route.players),
             _clubs_label(route.clubs),
@@ -88,7 +70,7 @@ def _arc_trace_data(
             team.capital,
             team.nation,
         ]
-        for la, lo in zip(plats, plons, strict=True):
+        for la, lo in zip(route.arc_lats, route.arc_lons, strict=True):
             lats.append(la)
             lons.append(lo)
             customdata.append(row)
@@ -98,29 +80,60 @@ def _arc_trace_data(
     return lats, lons, customdata
 
 
-def _destinations(team: Team) -> list[dict]:
-    """One marker per destination route (all players at that stadium)."""
-    return [
-        {
-            "lat": route.dest_lat,
-            "lon": route.dest_lon,
-            "club": _clubs_label(route.clubs),
-            "stadium": route.stadium,
-            "city": route.club_city,
-            "country": route.club_country,
-            "distance_km": route.distance_km,
-            "players": _players_label(route.players),
-        }
-        for route in team.routes
-    ]
+def _stadium_key(lat: float, lon: float) -> tuple[float, float]:
+    return round(lat, 4), round(lon, 4)
 
 
-def build_figure(tournament: str, teams: list[Team]) -> go.Figure:
-    """Assemble the scattergeo figure with per-team arc + destination traces."""
+def aggregate_stadium_sites(teams: list[Team]) -> list[dict]:
+    """One entry per stadium location; squads hold per-nation data for JS hover filtering."""
+    grouped: dict[tuple[float, float], dict] = {}
+    for team_index, team in enumerate(teams):
+        for route in team.routes:
+            key = _stadium_key(route.dest_lat, route.dest_lon)
+            entry = grouped.get(key)
+            if entry is None:
+                entry = {
+                    "lat": route.dest_lat,
+                    "lon": route.dest_lon,
+                    "stadium": route.stadium,
+                    "location": f"{route.club_city}, {route.club_country}",
+                    "squads": [],
+                    "team_indices": set(),
+                }
+                grouped[key] = entry
+            entry["team_indices"].add(team_index)
+            entry["squads"].append(
+                {
+                    "team": team_index,
+                    "nation": team.nation,
+                    "capital": team.capital,
+                    "distance_km": route.distance_km,
+                    "club": _clubs_label(route.clubs),
+                    "players": _players_label(route.players),
+                }
+            )
+
+    sites: list[dict] = []
+    for entry in grouped.values():
+        sites.append(
+            {
+                "lat": entry["lat"],
+                "lon": entry["lon"],
+                "teams": sorted(entry["team_indices"]),
+                "stadium": entry["stadium"],
+                "location": entry["location"],
+                "squads": entry["squads"],
+            }
+        )
+    sites.sort(key=lambda s: (s["lat"], s["lon"]))
+    return sites
+
+
+def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[dict]]:
+    """Assemble the scattergeo figure; return stadium site metadata for main.py."""
     fig = go.Figure()
-    n = len(teams)
+    stadium_sites = aggregate_stadium_sites(teams)
 
-    # 1) Arc traces (one per team), hidden until the capital is clicked.
     arc_hover = (
         "<b>%{customdata[1]}</b> — %{customdata[2]}<br>"
         "%{customdata[3]}<br>"
@@ -128,6 +141,8 @@ def build_figure(tournament: str, teams: list[Team]) -> go.Figure:
         "~%{customdata[4]} km from %{customdata[5]} (%{customdata[6]})"
         "<extra></extra>"
     )
+
+    # 1) Arc traces (one per team), hidden until the capital is clicked.
     for team in teams:
         color = confed_color(team.confederation)
         lats, lons, customdata = _arc_trace_data(team)
@@ -140,7 +155,7 @@ def build_figure(tournament: str, teams: list[Team]) -> go.Figure:
                 opacity=0.65,
                 customdata=customdata,
                 hovertemplate=arc_hover,
-                hoverinfo="skip",  # enabled via JS when the team is selected (clicked)
+                hoverinfo="skip",  # enabled via JS when the team is selected
                 hoverlabel=dict(bgcolor="#1e293b", font=dict(color="#e2e8f0")),
                 visible=False,
                 showlegend=False,
@@ -148,44 +163,33 @@ def build_figure(tournament: str, teams: list[Team]) -> go.Figure:
             )
         )
 
-    # 2) Destination (club stadium) markers, one trace per team, hidden.
-    for team in teams:
-        color = confed_color(team.confederation)
-        dests = _destinations(team)
-        fig.add_trace(
-            go.Scattergeo(
-                lat=[d["lat"] for d in dests],
-                lon=[d["lon"] for d in dests],
-                mode="markers",
-                marker=dict(
-                    size=7,
-                    color=color,
-                    line=dict(width=1, color="white"),
-                    symbol="circle",
-                ),
-                customdata=[
-                    [
-                        d["club"],
-                        d["stadium"],
-                        f"{d['city']}, {d['country']}",
-                        "<br>".join(d["players"]),
-                        f"{d['distance_km']:,.0f}",
-                        team.nation,
-                    ]
-                    for d in dests
-                ],
-                hovertemplate=(
-                    "<b>%{customdata[0]}</b> — %{customdata[1]}<br>"
-                    "%{customdata[2]}<br>"
-                    "<b>%{customdata[5]}</b>:<br>%{customdata[3]}<br>"
-                    "~%{customdata[4]} km from capital<extra></extra>"
-                ),
-                hoverinfo="skip",  # enabled via JS when the team is selected (clicked)
-                visible=False,
-                showlegend=False,
-                name=f"{team.nation} clubs",
-            )
+    # 2) Stadium markers (hover text rebuilt in JS for active nations only).
+    fig.add_trace(
+        go.Scattergeo(
+            lat=[s["lat"] for s in stadium_sites],
+            lon=[s["lon"] for s in stadium_sites],
+            mode="markers",
+            marker=dict(
+                size=STADIUM_MARKER_SIZE,
+                color=STADIUM_MARKER_COLOR,
+                line=dict(width=1, color="white"),
+                symbol="circle",
+            ),
+            customdata=[["", "", "", ""] for _ in stadium_sites],
+            hovertemplate=(
+                "<b>%{customdata[0]}</b><br>"
+                "%{customdata[1]}<br>"
+                "%{customdata[2]}<br><br>"
+                "%{customdata[3]}"
+                "<extra></extra>"
+            ),
+            hoverinfo="skip",
+            hoverlabel=dict(bgcolor="#1e293b", font=dict(color="#e2e8f0")),
+            visible=False,
+            showlegend=False,
+            name="stadiums",
         )
+    )
 
     cap_customdata = [
         [t.nation, t.capital, t.confederation, t.n_players, t.n_destinations]
@@ -235,7 +239,6 @@ def build_figure(tournament: str, teams: list[Team]) -> go.Figure:
         )
     )
 
-    # Confederation legend (dummy traces so colours are explained).
     for confed, color in CONFED_COLORS.items():
         fig.add_trace(
             go.Scattergeo(
@@ -267,8 +270,8 @@ def build_figure(tournament: str, teams: list[Team]) -> go.Figure:
         title=dict(
             text=(
                 f"{tournament} — where the players play<br>"
-                "<sup>Click a capital for flight paths · hover paths or clubs for "
-                "player &amp; stadium · colour = confederation</sup>"
+                "<sup>Click a capital for flight paths · Show/Hide all (top right) · "
+                "hover paths or clubs for player &amp; stadium · colour = confederation</sup>"
             ),
             x=0.5,
             xanchor="center",
@@ -289,4 +292,4 @@ def build_figure(tournament: str, teams: list[Team]) -> go.Figure:
         ),
         margin=dict(l=0, r=0, t=70, b=30),
     )
-    return fig
+    return fig, stadium_sites

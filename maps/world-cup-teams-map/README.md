@@ -13,13 +13,14 @@ Messi at Inter Miami; and so on.
 - **Markers** = national-team capitals, coloured by **confederation** (UEFA,
   CONMEBOL, CONCACAF, CAF, AFC, OFC).
 - **Arcs + endpoint dots** = one route per stadium (all players at that club
-  share a line; shown only after you click that nation). Paths are **styled
-  **great-circle flight paths** to each stadium, with a **short radial fan** at
-  the capital (unique departure angle per route) so nearby lines do not stack;
-  the rest of each arc follows the realistic great-circle route. **Hover** a path or club dot for every
+  share a line; shown only after you click that nation). Paths are **great-circle
+  arcs** from capital to stadium. If the shortest path would
+  wrap off the map (e.g. Korea → USA across the Pacific), the longer great-circle
+  leg is drawn instead so lines stay on screen. **Hover** a path or club dot for every
   player at that destination. **Click the capital again** (or any of its paths or
   club dots) to hide; a larger invisible target around each capital helps clicks
-  land near the city. You can open several nations at once to compare.
+  land near the city. Use **Show all** / **Hide all** (top-right buttons) to toggle
+  every squad at once. You can open several nations at once to compare.
 
 ## Run (from repo root)
 

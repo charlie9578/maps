@@ -305,7 +305,7 @@
       ]
     },
     {
-      "nation": "Paraguay", "flag": "\ud83c\uddf5\ud83c\udffe", "confederation": "CONMEBOL",
+      "nation": "Paraguay", "flag": "\ud83c\uddf5\ud83c\uddfe", "confederation": "CONMEBOL",
       "capital": "Asuncion", "lat": -25.2637, "lon": -57.5759,
       "players": [
         {"name": "Miguel Almiron", "pos": "MF", "club": "Atlanta United"},
