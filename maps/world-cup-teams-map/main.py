@@ -51,7 +51,15 @@ function refresh() {
         active.sort(function (a, b) {
             return a.nation.localeCompare(b.nation);
         });
-        var clubs = active.map(function (sq) { return sq.club; }).join(" / ");
+        var clubsSeen = {};
+        var clubs = [];
+        active.forEach(function (sq) {
+            if (!clubsSeen[sq.club]) {
+                clubsSeen[sq.club] = true;
+                clubs.push(sq.club);
+            }
+        });
+        clubs = clubs.join(" / ");
         var squadsHtml = active.map(function (sq) {
             var km = Math.round(sq.distance_km).toLocaleString();
             return "<b>" + sq.nation + "</b> (~" + km + " km from " + sq.capital + "):<br>" + sq.players;
@@ -103,7 +111,7 @@ function hideAll() {
 (function addToolbar() {
     var bar = document.createElement("div");
     bar.style.cssText =
-        "position:fixed;top:12px;right:12px;z-index:10000;display:flex;gap:8px;" +
+        "position:fixed;top:12px;left:12px;z-index:10000;display:flex;gap:8px;" +
         "font:14px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;";
     function makeBtn(label, onClick) {
         var btn = document.createElement("button");
@@ -169,7 +177,7 @@ def main() -> None:
     print(f"Wrote {path}")
     print(f"{tournament}: {len(teams)} teams, {total_players} players plotted.")
     print(
-        "Open the HTML: click a capital or use Show all / Hide all (top right); "
+        "Open the HTML: click a capital or use Show all / Hide all (top left); "
         "hover paths or club dots for details."
     )
 

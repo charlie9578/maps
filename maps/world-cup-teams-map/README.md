@@ -19,7 +19,7 @@ Messi at Inter Miami; and so on.
   leg is drawn instead so lines stay on screen. **Hover** a path or club dot for every
   player at that destination. **Click the capital again** (or any of its paths or
   club dots) to hide; a larger invisible target around each capital helps clicks
-  land near the city. Use **Show all** / **Hide all** (top-right buttons) to toggle
+  land near the city. Use **Show all** / **Hide all** (top-left buttons) to toggle
   every squad at once. You can open several nations at once to compare.
 
 ## Run (from repo root)

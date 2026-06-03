@@ -270,7 +270,7 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
         title=dict(
             text=(
                 f"{tournament} — where the players play<br>"
-                "<sup>Click a capital for flight paths · Show/Hide all (top right) · "
+                "<sup>Click a capital for flight paths · Show/Hide all (top left) · "
                 "hover paths or clubs for player &amp; stadium · colour = confederation</sup>"
             ),
             x=0.5,
