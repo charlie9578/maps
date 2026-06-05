@@ -2,21 +2,24 @@
 
 Trace layout (important: the hover/click JavaScript in main.py relies on it):
 
-    [0 .. N-1]      one "arcs" line trace per team (hidden by default)
-    [N]             shared stadium markers (aggregated hover; filtered in JS)
-    [N+1]           capitals marker trace (visible flags)
-    [N+2]           invisible enlarged targets at capitals (click / hover)
-    [N+3 ..]        confederation legend dummy traces
+    [0 .. R-1]        one great-circle arc per capital↔club link (shared by
+                      club and capital clicks; hidden until either end is selected)
+    [R]               club markers (always visible)
+    [R+1]             invisible enlarged click targets on clubs
+    [R+2]             capitals marker trace (visible flags)
+    [R+3]             invisible enlarged targets at capitals (click / hover)
+    [R+4 ..]          confederation legend dummy traces
 
-Clicking a capital, its flight paths, or the enlarged target toggles that team
-(see main.py). Stadium hovers list nations with an active (visible) path to that ground.
+Flight paths are not clickable — only club and capital markers toggle arcs.
 """
 
 from __future__ import annotations
 
+from datetime import date
+
 import plotly.graph_objects as go
 
-from data_processing import Team
+from data_processing import DestinationRoute, Team
 
 # Confederation -> colour (matched by prefix so "CAF (playoff)" etc. still map).
 CONFED_COLORS: dict[str, str] = {
@@ -45,39 +48,93 @@ def confed_color(confederation: str) -> str:
     return DEFAULT_COLOR
 
 
-def _players_label(players: list[tuple[str, str]]) -> str:
-    return "<br>".join(f"{name} ({pos})" if pos else name for name, pos in players)
+def _format_dob(iso: str | None) -> str | None:
+    if not iso:
+        return None
+    try:
+        d = date.fromisoformat(iso)
+    except ValueError:
+        return iso
+    return f"b. {d.day} {d.strftime('%b %Y')}"
+
+
+def _players_label(
+    players: list[tuple[int | None, str, str, str | None, int | None, int | None, int | None]],
+) -> str:
+    lines: list[str] = []
+    for no, name, pos, dob, age, caps, goals in players:
+        bits: list[str] = []
+        if no is not None:
+            bits.append(f"#{no}")
+        bits.append(name)
+        if pos:
+            bits.append(pos)
+        dob_label = _format_dob(dob)
+        if dob_label:
+            bits.append(dob_label)
+        if age is not None:
+            bits.append(f"age {age}")
+        if caps is not None:
+            bits.append(f"{caps} caps")
+        if goals is not None:
+            bits.append(f"{goals} goals")
+        lines.append(" · ".join(bits))
+    return "<br>".join(lines)
 
 
 def _clubs_label(clubs: list[str]) -> str:
     return " / ".join(clubs)
 
 
-def _arc_trace_data(
+def _route_arc_trace_data(
     team: Team,
-) -> tuple[list[float | None], list[float | None], list[list[str] | None]]:
-    """Lat/lon polyline plus per-point customdata for arc hover tooltips."""
-    lats: list[float | None] = []
-    lons: list[float | None] = []
-    customdata: list[list[str] | None] = []
-    for route in team.routes:
-        row = [
-            _players_label(route.players),
-            _clubs_label(route.clubs),
-            route.stadium,
-            f"{route.club_city}, {route.club_country}",
-            f"{route.distance_km:,.0f}",
-            team.capital,
-            team.nation,
-        ]
-        for la, lo in zip(route.arc_lats, route.arc_lons, strict=True):
-            lats.append(la)
-            lons.append(lo)
-            customdata.append(row)
-        lats.append(None)
-        lons.append(None)
-        customdata.append(None)
-    return lats, lons, customdata
+    route: DestinationRoute,
+) -> tuple[list[float | None], list[float | None], list[list[str]]]:
+    """One capital → club arc with per-point hover rows."""
+    row = [
+        _players_label(route.players),
+        _clubs_label(route.clubs),
+        route.stadium,
+        f"{route.club_city}, {route.club_country}",
+        f"{route.distance_km:,.0f}",
+        team.capital,
+        team.nation,
+    ]
+    customdata = [row for _ in route.arc_lats]
+    return list(route.arc_lats), list(route.arc_lons), customdata
+
+
+def build_route_meta(teams: list[Team], stadium_sites: list[dict]) -> list[dict]:
+    """Map each arc trace index to its team and stadium indices (for JS toggling)."""
+    site_index = {
+        _stadium_key(site["lat"], site["lon"]): idx for idx, site in enumerate(stadium_sites)
+    }
+    meta: list[dict] = []
+    for team_idx, team in enumerate(teams):
+        for route in team.routes:
+            stadium_idx = site_index[_stadium_key(route.dest_lat, route.dest_lon)]
+            meta.append({"team": team_idx, "stadium": stadium_idx})
+    return meta
+
+
+def _stadium_hover_row(site: dict) -> list[str]:
+    """Static hover payload for a club marker (all nations at that ground)."""
+    squads = sorted(site["squads"], key=lambda sq: sq["nation"])
+    clubs_seen: list[str] = []
+    for sq in squads:
+        for club in sq["club"].split(" / "):
+            if club not in clubs_seen:
+                clubs_seen.append(club)
+    nations_html = "<br><br>".join(
+        f"<b>{sq['nation']}</b> (~{sq['distance_km']:,.0f} km to {sq['capital']}):<br>{sq['players']}"
+        for sq in squads
+    )
+    return [
+        " / ".join(clubs_seen),
+        site["stadium"],
+        site["location"],
+        nations_html,
+    ]
 
 
 def _stadium_key(lat: float, lon: float) -> tuple[float, float]:
@@ -129,41 +186,40 @@ def aggregate_stadium_sites(teams: list[Team]) -> list[dict]:
     return sites
 
 
-def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[dict]]:
-    """Assemble the scattergeo figure; return stadium site metadata for main.py."""
+def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[dict], list[dict]]:
+    """Assemble the scattergeo figure; return stadium sites and route meta for main.py."""
     fig = go.Figure()
     stadium_sites = aggregate_stadium_sites(teams)
+    route_meta = build_route_meta(teams, stadium_sites)
 
-    arc_hover = (
-        "<b>%{customdata[1]}</b> — %{customdata[2]}<br>"
-        "%{customdata[3]}<br>"
-        "%{customdata[0]}<br>"
-        "~%{customdata[4]} km from %{customdata[5]} (%{customdata[6]})"
-        "<extra></extra>"
+    stadium_hover = (
+        "<b>%{customdata[0]}</b><br>"
+        "%{customdata[1]}<br>"
+        "%{customdata[2]}<br><br>"
+        "%{customdata[3]}"
+        "<extra>click for flight paths</extra>"
     )
 
-    # 1) Arc traces (one per team), hidden until the capital is clicked.
+    # 1) One arc per capital↔club link (shown when either endpoint is selected).
     for team in teams:
         color = confed_color(team.confederation)
-        lats, lons, customdata = _arc_trace_data(team)
-        fig.add_trace(
-            go.Scattergeo(
-                lat=lats,
-                lon=lons,
-                mode="lines",
-                line=dict(width=2, color=color),
-                opacity=0.65,
-                customdata=customdata,
-                hovertemplate=arc_hover,
-                hoverinfo="skip",  # enabled via JS when the team is selected
-                hoverlabel=dict(bgcolor="#1e293b", font=dict(color="#e2e8f0")),
-                visible=False,
-                showlegend=False,
-                name=f"{team.nation} routes",
+        for route in team.routes:
+            lats, lons, _customdata = _route_arc_trace_data(team, route)
+            fig.add_trace(
+                go.Scattergeo(
+                    lat=lats,
+                    lon=lons,
+                    mode="lines",
+                    line=dict(width=2, color=color),
+                    opacity=0.65,
+                    hoverinfo="skip",
+                    visible=False,
+                    showlegend=False,
+                    name=f"{team.nation} → {_clubs_label(route.clubs)}",
+                )
             )
-        )
 
-    # 2) Stadium markers (hover text rebuilt in JS for active nations only).
+    # 2) Club markers (always visible).
     fig.add_trace(
         go.Scattergeo(
             lat=[s["lat"] for s in stadium_sites],
@@ -175,19 +231,25 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
                 line=dict(width=1, color="white"),
                 symbol="circle",
             ),
-            customdata=[["", "", "", ""] for _ in stadium_sites],
-            hovertemplate=(
-                "<b>%{customdata[0]}</b><br>"
-                "%{customdata[1]}<br>"
-                "%{customdata[2]}<br><br>"
-                "%{customdata[3]}"
-                "<extra></extra>"
-            ),
-            hoverinfo="skip",
+            customdata=[_stadium_hover_row(s) for s in stadium_sites],
+            hovertemplate=stadium_hover,
             hoverlabel=dict(bgcolor="#1e293b", font=dict(color="#e2e8f0")),
-            visible=False,
             showlegend=False,
-            name="stadiums",
+            name="clubs",
+        )
+    )
+
+    # 3) Invisible enlarged targets so clicks near a club still register.
+    fig.add_trace(
+        go.Scattergeo(
+            lat=[s["lat"] for s in stadium_sites],
+            lon=[s["lon"] for s in stadium_sites],
+            mode="markers",
+            marker=dict(size=22, color="rgba(0,0,0,0)", line=dict(width=0)),
+            customdata=[_stadium_hover_row(s) for s in stadium_sites],
+            hovertemplate=stadium_hover,
+            showlegend=False,
+            name="club-targets",
         )
     )
 
@@ -200,10 +262,10 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
         "Capital: %{customdata[1]}<br>"
         "%{customdata[2]}<br>"
         "%{customdata[3]} players at %{customdata[4]} clubs"
-        "<extra>click to show or hide flight paths</extra>"
+        "<extra>click to show paths to clubs</extra>"
     )
 
-    # 3) Capitals (visible markers + flag labels).
+    # 4) Capitals (visible markers + flag labels).
     fig.add_trace(
         go.Scattergeo(
             lat=[t.lat for t in teams],
@@ -224,7 +286,7 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
         )
     )
 
-    # 4) Invisible enlarged targets so clicks near the capital still register.
+    # 5) Invisible enlarged targets at capitals (click / hover).
     fig.add_trace(
         go.Scattergeo(
             lat=[t.lat for t in teams],
@@ -270,8 +332,8 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
         title=dict(
             text=(
                 f"{tournament} — where the players play<br>"
-                "<sup>Click a capital for flight paths · Show/Hide all (top left) · "
-                "hover paths or clubs for player &amp; stadium · colour = confederation</sup>"
+                "<sup>Click a club or capital for flight paths · hover clubs for all players · "
+                "Show/Hide all (top left) · capitals coloured by confederation</sup>"
             ),
             x=0.5,
             xanchor="center",
@@ -292,4 +354,4 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
         ),
         margin=dict(l=0, r=0, t=70, b=30),
     )
-    return fig, stadium_sites
+    return fig, stadium_sites, route_meta

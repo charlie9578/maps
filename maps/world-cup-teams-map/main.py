@@ -2,8 +2,9 @@
 
     python maps/world-cup-teams-map/main.py
 
-Plots each qualified nation at its capital city. Click a capital to reveal
-curved great-circle "flight paths" to the clubs where that squad's players play.
+Plots each qualified nation at its capital city and every club stadium with
+squad players. Click a club or capital to reveal great-circle flight paths.
+Each path is drawn once and shared by both click modes.
 
 Data is curated/committed JSON (see README and data/*.json for sourcing).
 """
@@ -24,87 +25,81 @@ OUTPUT_HTML = OUTPUT_DIR / "world_cup_teams_map.html"
 # Injected after the Plotly chart loads. Trace indices must match viz.py layout.
 CLICK_SCRIPT = """
 var gd = document.getElementById('{plot_id}');
+var R = __R__;
+var S = __S__;
 var N = __N__;
-var stadiumIdx = N;            // shared stadium markers
-var capIdx = N + 1;            // visible capital markers
-var capHitIdx = N + 2;         // invisible enlarged capital click targets
-var STADIUMS = __STADIUMS__;
-var selected = {};
+var ROUTE_META = __ROUTE_META__;
+var clubIdx = R;
+var clubHitIdx = R + 1;
+var capIdx = R + 2;
+var capHitIdx = R + 3;
+var selectedClubs = {};
+var selectedTeams = {};
 
 function refresh() {
-    var arcIdx = [], arcVis = [], arcHover = [];
-    for (var i = 0; i < N; i++) {
-        var on = selected[i] === true;
-        arcIdx.push(i);
-        arcVis.push(on);
-        arcHover.push(on ? "text" : "skip");
-    }
-    Plotly.restyle(gd, {visible: arcVis, hoverinfo: arcHover}, arcIdx);
-
-    var lat = [], lon = [], cd = [];
-    for (var s = 0; s < STADIUMS.length; s++) {
-        var site = STADIUMS[s];
-        var active = site.squads.filter(function (sq) { return selected[sq.team]; });
-        if (active.length === 0) {
-            continue;
+    if (R > 0) {
+        var arcIdx = [], arcVis = [];
+        for (var r = 0; r < R; r++) {
+            var meta = ROUTE_META[r];
+            var on = selectedClubs[meta.stadium] === true || selectedTeams[meta.team] === true;
+            arcIdx.push(r);
+            arcVis.push(on);
         }
-        active.sort(function (a, b) {
-            return a.nation.localeCompare(b.nation);
-        });
-        var clubsSeen = {};
-        var clubs = [];
-        active.forEach(function (sq) {
-            if (!clubsSeen[sq.club]) {
-                clubsSeen[sq.club] = true;
-                clubs.push(sq.club);
-            }
-        });
-        clubs = clubs.join(" / ");
-        var squadsHtml = active.map(function (sq) {
-            var km = Math.round(sq.distance_km).toLocaleString();
-            return "<b>" + sq.nation + "</b> (~" + km + " km from " + sq.capital + "):<br>" + sq.players;
-        }).join("<br><br>");
-        lat.push(site.lat);
-        lon.push(site.lon);
-        cd.push([clubs, site.stadium, site.location, squadsHtml]);
+        Plotly.restyle(gd, {visible: arcVis}, arcIdx);
     }
-    Plotly.restyle(gd, {
-        lat: [lat],
-        lon: [lon],
-        customdata: [cd],
-        visible: lat.length > 0,
-        hoverinfo: lat.length > 0 ? ["text"] : ["skip"]
-    }, [stadiumIdx]);
+
+    if (S > 0) {
+        var clubSizes = [], clubColors = [];
+        for (var c = 0; c < S; c++) {
+            clubSizes.push(selectedClubs[c] ? 11 : 8);
+            clubColors.push(selectedClubs[c] ? "#e2e8f0" : "#94a3b8");
+        }
+        Plotly.restyle(gd, {
+            "marker.size": [clubSizes],
+            "marker.color": [clubColors]
+        }, [clubIdx]);
+    }
+
+    if (N > 0) {
+        var capSizes = [];
+        for (var k = 0; k < N; k++) {
+            capSizes.push(selectedTeams[k] ? 12 : 9);
+        }
+        Plotly.restyle(gd, {"marker.size": [capSizes]}, [capIdx]);
+    }
 }
 
-function teamFromClick(curveNumber, pointNumber) {
-    if (curveNumber === capIdx || curveNumber === capHitIdx) {
-        return pointNumber;
+function toggleClub(i) {
+    if (selectedClubs[i]) {
+        delete selectedClubs[i];
+    } else {
+        selectedClubs[i] = true;
     }
-    if (curveNumber < N) {
-        return curveNumber;
-    }
-    return null;
+    refresh();
 }
 
 function toggleTeam(i) {
-    if (selected[i]) {
-        delete selected[i];
+    if (selectedTeams[i]) {
+        delete selectedTeams[i];
     } else {
-        selected[i] = true;
+        selectedTeams[i] = true;
     }
     refresh();
 }
 
 function showAll() {
-    for (var i = 0; i < N; i++) {
-        selected[i] = true;
+    for (var i = 0; i < S; i++) {
+        selectedClubs[i] = true;
+    }
+    for (var t = 0; t < N; t++) {
+        selectedTeams[t] = true;
     }
     refresh();
 }
 
 function hideAll() {
-    selected = {};
+    selectedClubs = {};
+    selectedTeams = {};
     refresh();
 }
 
@@ -132,9 +127,11 @@ function hideAll() {
 
 gd.on('plotly_click', function (ev) {
     var p = ev.points[0];
-    var i = teamFromClick(p.curveNumber, p.pointNumber);
-    if (i !== null) {
-        toggleTeam(i);
+    var curve = p.curveNumber;
+    if (curve === clubIdx || curve === clubHitIdx) {
+        toggleClub(p.pointNumber);
+    } else if (curve === capHitIdx) {
+        toggleTeam(p.pointNumber);
     }
 });
 """
@@ -142,12 +139,13 @@ gd.on('plotly_click', function (ev) {
 
 def write_map(output_path: Path) -> Path:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    tournament, teams = build_teams(strict=True)
-    fig, stadium_sites = build_figure(tournament, teams)
+    tournament, teams = build_teams(strict=False)
+    fig, stadium_sites, route_meta = build_figure(tournament, teams)
     post_script = (
-        CLICK_SCRIPT.replace("__N__", str(len(teams))).replace(
-            "__STADIUMS__", json.dumps(stadium_sites)
-        )
+        CLICK_SCRIPT.replace("__R__", str(len(route_meta)))
+        .replace("__S__", str(len(stadium_sites)))
+        .replace("__N__", str(len(teams)))
+        .replace("__ROUTE_META__", json.dumps(route_meta))
     )
     fig.write_html(
         output_path,
@@ -170,15 +168,15 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    tournament, teams = build_teams(strict=True)
+    tournament, teams = build_teams(strict=False)
     path = write_map(args.output)
 
     total_players = sum(t.n_players for t in teams)
     print(f"Wrote {path}")
     print(f"{tournament}: {len(teams)} teams, {total_players} players plotted.")
     print(
-        "Open the HTML: click a capital or use Show all / Hide all (top left); "
-        "hover paths or club dots for details."
+        "Open the HTML: click a club or capital for flight paths (not the lines); "
+        "use Show all / Hide all (top left)."
     )
 
 

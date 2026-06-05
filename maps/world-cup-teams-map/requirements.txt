@@ -1,3 +1,6 @@
 # Map-only packages (installed into the repo root .venv, not a separate env)
 # uv pip install -r maps/world-cup-teams-map/requirements.txt
 plotly>=5.24
+lxml>=5.0
+beautifulsoup4>=4.12
+requests>=2.31

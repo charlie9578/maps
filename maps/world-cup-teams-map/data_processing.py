@@ -4,7 +4,7 @@ The map plots each qualified nation at its capital city; clicking a capital
 reveals great-circle "flight paths" from the capital to each club stadium.
 
 Data lives in two committed JSON files (see README for sourcing + caveats):
-  - data/squads.json : nations -> capital + key players (player -> club name)
+  - data/squads.json : nations -> capital + official squad (no, name, pos, dob, age, caps, goals, club)
   - data/clubs.json  : club name -> home stadium + lat/lon
 
 Run from repo root: python maps/world-cup-teams-map/main.py
@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -37,7 +38,8 @@ class DestinationRoute:
     club_city: str
     club_country: str
     distance_km: float
-    players: list[tuple[str, str]]  # (name, position)
+    players: list[tuple[int | None, str, str, str | None, int | None, int | None, int | None]]
+    # (shirt no., name, position, dob ISO, age, caps, goals)
     arc_lats: list[float | None]
     arc_lons: list[float | None]
 
@@ -252,7 +254,17 @@ def build_teams(*, strict: bool = True) -> tuple[str, list[Team]]:
                 grouped[key] = entry
             if player["club"] not in entry["clubs"]:
                 entry["clubs"].append(player["club"])
-            entry["players"].append((player["name"], player.get("pos", "")))
+            entry["players"].append(
+                (
+                    player.get("no"),
+                    player["name"],
+                    player.get("pos", ""),
+                    player.get("dob"),
+                    player.get("age"),
+                    player.get("caps"),
+                    player.get("goals"),
+                )
+            )
 
         if not grouped:
             teams.append(team)
@@ -292,8 +304,9 @@ if __name__ == "__main__":
     _missing = find_missing_clubs(_squads, _clubs)
     print(f"Teams: {len(_squads['teams'])}  Clubs in catalog: {len(_clubs)}")
     if _missing:
-        print(f"\n{len(_missing)} missing club reference(s):")
+        print(f"\n{len(_missing)} missing club reference(s):", flush=True)
         for nat, pl, club in _missing:
-            print(f"  - {nat}: {pl} -> {club}")
+            line = f"  - {nat}: {pl} -> {club}\n"
+            sys.stdout.buffer.write(line.encode("utf-8", errors="replace"))
     else:
         print("All player clubs resolve against clubs.json.")

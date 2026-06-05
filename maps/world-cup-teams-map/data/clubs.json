@@ -1,185 +1,2070 @@
 {
-  "_comment": "Club -> home stadium + coordinates. Coordinates are city/stadium-level (good to a few hundred metres), which is more than enough at world-map scale. Compiled from public sources (club/stadium Wikipedia + Wikidata coordinate locations). See README for sourcing notes.",
+  "_comment": "Club -> home stadium + coordinates. Coordinates are city/stadium-level (good to a few hundred metres), which is more than enough at world-map scale. Compiled from Wikipedia. See README for sourcing notes.",
   "clubs": {
-    "Manchester City": {"stadium": "Etihad Stadium", "city": "Manchester", "country": "England", "lat": 53.4831, "lon": -2.2004},
-    "Manchester United": {"stadium": "Old Trafford", "city": "Manchester", "country": "England", "lat": 53.4631, "lon": -2.2913},
-    "Liverpool": {"stadium": "Anfield", "city": "Liverpool", "country": "England", "lat": 53.4308, "lon": -2.9608},
-    "Arsenal": {"stadium": "Emirates Stadium", "city": "London", "country": "England", "lat": 51.5549, "lon": -0.1084},
-    "Chelsea": {"stadium": "Stamford Bridge", "city": "London", "country": "England", "lat": 51.4817, "lon": -0.1910},
-    "Tottenham Hotspur": {"stadium": "Tottenham Hotspur Stadium", "city": "London", "country": "England", "lat": 51.6043, "lon": -0.0664},
-    "Newcastle United": {"stadium": "St James' Park", "city": "Newcastle", "country": "England", "lat": 54.9756, "lon": -1.6217},
-    "Aston Villa": {"stadium": "Villa Park", "city": "Birmingham", "country": "England", "lat": 52.5092, "lon": -1.8848},
-    "West Ham United": {"stadium": "London Stadium", "city": "London", "country": "England", "lat": 51.5386, "lon": -0.0166},
-    "Brighton & Hove Albion": {"stadium": "Amex Stadium", "city": "Brighton", "country": "England", "lat": 50.8616, "lon": -0.0837},
-    "Everton": {"stadium": "Hill Dickinson Stadium", "city": "Liverpool", "country": "England", "lat": 53.4108, "lon": -3.0010},
-    "Nottingham Forest": {"stadium": "City Ground", "city": "Nottingham", "country": "England", "lat": 52.9400, "lon": -1.1327},
-    "Crystal Palace": {"stadium": "Selhurst Park", "city": "London", "country": "England", "lat": 51.3983, "lon": -0.0855},
-    "Brentford": {"stadium": "Gtech Community Stadium", "city": "London", "country": "England", "lat": 51.4907, "lon": -0.2887},
-    "Fulham": {"stadium": "Craven Cottage", "city": "London", "country": "England", "lat": 51.4749, "lon": -0.2217},
-    "Wolverhampton Wanderers": {"stadium": "Molineux", "city": "Wolverhampton", "country": "England", "lat": 52.5903, "lon": -2.1303},
-    "AFC Bournemouth": {"stadium": "Vitality Stadium", "city": "Bournemouth", "country": "England", "lat": 50.7352, "lon": -1.8385},
-    "Leeds United": {"stadium": "Elland Road", "city": "Leeds", "country": "England", "lat": 53.7778, "lon": -1.5722},
-
-    "Real Madrid": {"stadium": "Santiago Bernabeu", "city": "Madrid", "country": "Spain", "lat": 40.4531, "lon": -3.6883},
-    "Barcelona": {"stadium": "Spotify Camp Nou", "city": "Barcelona", "country": "Spain", "lat": 41.3809, "lon": 2.1228},
-    "Atletico Madrid": {"stadium": "Riyadh Air Metropolitano", "city": "Madrid", "country": "Spain", "lat": 40.4362, "lon": -3.5995},
-    "Athletic Bilbao": {"stadium": "San Mames", "city": "Bilbao", "country": "Spain", "lat": 43.2641, "lon": -2.9496},
-    "Real Sociedad": {"stadium": "Reale Arena", "city": "San Sebastian", "country": "Spain", "lat": 43.3013, "lon": -1.9735},
-    "Sevilla": {"stadium": "Ramon Sanchez-Pizjuan", "city": "Seville", "country": "Spain", "lat": 37.3841, "lon": -5.9705},
-    "Real Betis": {"stadium": "Benito Villamarin", "city": "Seville", "country": "Spain", "lat": 37.3565, "lon": -5.9817},
-    "Villarreal": {"stadium": "Estadio de la Ceramica", "city": "Villarreal", "country": "Spain", "lat": 39.9441, "lon": -0.1035},
-    "Valencia": {"stadium": "Mestalla", "city": "Valencia", "country": "Spain", "lat": 39.4748, "lon": -0.3582},
-    "Girona": {"stadium": "Montilivi", "city": "Girona", "country": "Spain", "lat": 41.9613, "lon": 2.8285},
-
-    "Bayern Munich": {"stadium": "Allianz Arena", "city": "Munich", "country": "Germany", "lat": 48.2188, "lon": 11.6247},
-    "Borussia Dortmund": {"stadium": "Signal Iduna Park", "city": "Dortmund", "country": "Germany", "lat": 51.4926, "lon": 7.4519},
-    "RB Leipzig": {"stadium": "Red Bull Arena", "city": "Leipzig", "country": "Germany", "lat": 51.3459, "lon": 12.3483},
-    "Bayer Leverkusen": {"stadium": "BayArena", "city": "Leverkusen", "country": "Germany", "lat": 51.0383, "lon": 7.0024},
-    "Eintracht Frankfurt": {"stadium": "Deutsche Bank Park", "city": "Frankfurt", "country": "Germany", "lat": 50.0686, "lon": 8.6455},
-    "VfB Stuttgart": {"stadium": "MHPArena", "city": "Stuttgart", "country": "Germany", "lat": 48.7923, "lon": 9.2320},
-    "Borussia Monchengladbach": {"stadium": "Borussia-Park", "city": "Monchengladbach", "country": "Germany", "lat": 51.1745, "lon": 6.3854},
-    "VfL Wolfsburg": {"stadium": "Volkswagen Arena", "city": "Wolfsburg", "country": "Germany", "lat": 52.4319, "lon": 10.8038},
-
-    "Inter Milan": {"stadium": "San Siro", "city": "Milan", "country": "Italy", "lat": 45.4781, "lon": 9.1240},
-    "AC Milan": {"stadium": "San Siro", "city": "Milan", "country": "Italy", "lat": 45.4781, "lon": 9.1240},
-    "Juventus": {"stadium": "Allianz Stadium", "city": "Turin", "country": "Italy", "lat": 45.1096, "lon": 7.6413},
-    "Napoli": {"stadium": "Stadio Diego Armando Maradona", "city": "Naples", "country": "Italy", "lat": 40.8279, "lon": 14.1931},
-    "Roma": {"stadium": "Stadio Olimpico", "city": "Rome", "country": "Italy", "lat": 41.9339, "lon": 12.4547},
-    "Lazio": {"stadium": "Stadio Olimpico", "city": "Rome", "country": "Italy", "lat": 41.9339, "lon": 12.4547},
-    "Atalanta": {"stadium": "Gewiss Stadium", "city": "Bergamo", "country": "Italy", "lat": 45.7090, "lon": 9.6809},
-    "Fiorentina": {"stadium": "Stadio Artemio Franchi", "city": "Florence", "country": "Italy", "lat": 43.7809, "lon": 11.2823},
-    "Bologna": {"stadium": "Stadio Renato Dall'Ara", "city": "Bologna", "country": "Italy", "lat": 44.4923, "lon": 11.3097},
-    "Torino": {"stadium": "Stadio Olimpico Grande Torino", "city": "Turin", "country": "Italy", "lat": 45.0418, "lon": 7.6500},
-
-    "Paris Saint-Germain": {"stadium": "Parc des Princes", "city": "Paris", "country": "France", "lat": 48.8414, "lon": 2.2530},
-    "Marseille": {"stadium": "Stade Velodrome", "city": "Marseille", "country": "France", "lat": 43.2699, "lon": 5.3958},
-    "Monaco": {"stadium": "Stade Louis II", "city": "Monaco", "country": "Monaco", "lat": 43.7273, "lon": 7.4156},
-    "Lyon": {"stadium": "Groupama Stadium", "city": "Lyon", "country": "France", "lat": 45.7653, "lon": 4.9821},
-    "Lille": {"stadium": "Stade Pierre-Mauroy", "city": "Lille", "country": "France", "lat": 50.6119, "lon": 3.1304},
-    "Nice": {"stadium": "Allianz Riviera", "city": "Nice", "country": "France", "lat": 43.7050, "lon": 7.1925},
-    "Rennes": {"stadium": "Roazhon Park", "city": "Rennes", "country": "France", "lat": 48.1075, "lon": -1.7128},
-
-    "Benfica": {"stadium": "Estadio da Luz", "city": "Lisbon", "country": "Portugal", "lat": 38.7526, "lon": -9.1847},
-    "Porto": {"stadium": "Estadio do Dragao", "city": "Porto", "country": "Portugal", "lat": 41.1617, "lon": -8.5836},
-    "Sporting CP": {"stadium": "Estadio Jose Alvalade", "city": "Lisbon", "country": "Portugal", "lat": 38.7613, "lon": -9.1610},
-    "Braga": {"stadium": "Estadio Municipal de Braga", "city": "Braga", "country": "Portugal", "lat": 41.5628, "lon": -8.4300},
-
-    "Ajax": {"stadium": "Johan Cruyff Arena", "city": "Amsterdam", "country": "Netherlands", "lat": 52.3144, "lon": 4.9419},
-    "PSV": {"stadium": "Philips Stadion", "city": "Eindhoven", "country": "Netherlands", "lat": 51.4417, "lon": 5.4674},
-    "Feyenoord": {"stadium": "De Kuip", "city": "Rotterdam", "country": "Netherlands", "lat": 51.8939, "lon": 4.5231},
-
-    "Celtic": {"stadium": "Celtic Park", "city": "Glasgow", "country": "Scotland", "lat": 55.8497, "lon": -4.2055},
-    "Rangers": {"stadium": "Ibrox Stadium", "city": "Glasgow", "country": "Scotland", "lat": 55.8531, "lon": -4.3094},
-
-    "Galatasaray": {"stadium": "RAMS Park", "city": "Istanbul", "country": "Turkey", "lat": 41.1036, "lon": 28.9908},
-    "Fenerbahce": {"stadium": "Sukru Saracoglu Stadium", "city": "Istanbul", "country": "Turkey", "lat": 40.9879, "lon": 29.0369},
-    "Besiktas": {"stadium": "Tupras Stadium", "city": "Istanbul", "country": "Turkey", "lat": 41.0392, "lon": 28.9947},
-    "Trabzonspor": {"stadium": "Senol Gunes Stadium", "city": "Trabzon", "country": "Turkey", "lat": 41.0136, "lon": 39.6753},
-
-    "Dynamo Kyiv": {"stadium": "Valeriy Lobanovskyi Stadium", "city": "Kyiv", "country": "Ukraine", "lat": 50.4444, "lon": 30.5333},
-    "Shakhtar Donetsk": {"stadium": "Arena Lviv (host)", "city": "Lviv", "country": "Ukraine", "lat": 49.7770, "lon": 24.0277},
-    "Red Star Belgrade": {"stadium": "Rajko Mitic Stadium", "city": "Belgrade", "country": "Serbia", "lat": 44.7833, "lon": 20.4650},
-    "Dinamo Zagreb": {"stadium": "Stadion Maksimir", "city": "Zagreb", "country": "Croatia", "lat": 45.8190, "lon": 16.0181},
-    "Club Brugge": {"stadium": "Jan Breydel Stadium", "city": "Bruges", "country": "Belgium", "lat": 51.1932, "lon": 3.1808},
-    "Anderlecht": {"stadium": "Lotto Park", "city": "Brussels", "country": "Belgium", "lat": 50.8340, "lon": 4.2986},
-    "Royal Antwerp": {"stadium": "Bosuilstadion", "city": "Antwerp", "country": "Belgium", "lat": 51.2306, "lon": 4.4719},
-    "Red Bull Salzburg": {"stadium": "Red Bull Arena", "city": "Salzburg", "country": "Austria", "lat": 47.8167, "lon": 13.0083},
-    "Copenhagen": {"stadium": "Parken", "city": "Copenhagen", "country": "Denmark", "lat": 55.7027, "lon": 12.5726},
-    "Olympiacos": {"stadium": "Karaiskakis Stadium", "city": "Piraeus", "country": "Greece", "lat": 37.9450, "lon": 23.6650},
-    "Slavia Prague": {"stadium": "Fortuna Arena", "city": "Prague", "country": "Czechia", "lat": 50.0680, "lon": 14.4717},
-    "Sparta Prague": {"stadium": "epet Arena", "city": "Prague", "country": "Czechia", "lat": 50.0997, "lon": 14.4161},
-    "Young Boys": {"stadium": "Wankdorf", "city": "Bern", "country": "Switzerland", "lat": 46.9631, "lon": 7.4656},
-    "Basel": {"stadium": "St. Jakob-Park", "city": "Basel", "country": "Switzerland", "lat": 47.5414, "lon": 7.6206},
-
-    "Al Nassr": {"stadium": "Al-Awwal Park", "city": "Riyadh", "country": "Saudi Arabia", "lat": 24.7244, "lon": 46.6447},
-    "Al Hilal": {"stadium": "Kingdom Arena", "city": "Riyadh", "country": "Saudi Arabia", "lat": 24.7700, "lon": 46.6400},
-    "Al Ittihad": {"stadium": "King Abdullah Sports City", "city": "Jeddah", "country": "Saudi Arabia", "lat": 21.7556, "lon": 39.1561},
-    "Al Ahli Saudi": {"stadium": "King Abdullah Sports City", "city": "Jeddah", "country": "Saudi Arabia", "lat": 21.7556, "lon": 39.1561},
-    "Al Ettifaq": {"stadium": "Prince Mohamed bin Fahd Stadium", "city": "Dammam", "country": "Saudi Arabia", "lat": 26.4207, "lon": 50.1175},
-
-    "Inter Miami": {"stadium": "Chase Stadium", "city": "Fort Lauderdale", "country": "United States", "lat": 26.1934, "lon": -80.1614},
-    "LA Galaxy": {"stadium": "Dignity Health Sports Park", "city": "Carson", "country": "United States", "lat": 33.8644, "lon": -118.2611},
-    "Los Angeles FC": {"stadium": "BMO Stadium", "city": "Los Angeles", "country": "United States", "lat": 34.0128, "lon": -118.2851},
-    "Atlanta United": {"stadium": "Mercedes-Benz Stadium", "city": "Atlanta", "country": "United States", "lat": 33.7553, "lon": -84.4006},
-    "Seattle Sounders": {"stadium": "Lumen Field", "city": "Seattle", "country": "United States", "lat": 47.5952, "lon": -122.3316},
-    "Toronto FC": {"stadium": "BMO Field", "city": "Toronto", "country": "Canada", "lat": 43.6332, "lon": -79.4185},
-    "CF Montreal": {"stadium": "Stade Saputo", "city": "Montreal", "country": "Canada", "lat": 45.5630, "lon": -73.5520},
-    "Vancouver Whitecaps": {"stadium": "BC Place", "city": "Vancouver", "country": "Canada", "lat": 49.2768, "lon": -123.1119},
-
-    "Club America": {"stadium": "Estadio Azteca", "city": "Mexico City", "country": "Mexico", "lat": 19.3029, "lon": -99.1505},
-    "Guadalajara": {"stadium": "Estadio Akron", "city": "Guadalajara", "country": "Mexico", "lat": 20.6819, "lon": -103.4628},
-    "Monterrey": {"stadium": "Estadio BBVA", "city": "Monterrey", "country": "Mexico", "lat": 25.6694, "lon": -100.2447},
-    "Tigres UANL": {"stadium": "Estadio Universitario", "city": "Monterrey", "country": "Mexico", "lat": 25.7222, "lon": -100.3107},
-    "Cruz Azul": {"stadium": "Estadio Ciudad de los Deportes", "city": "Mexico City", "country": "Mexico", "lat": 19.3886, "lon": -99.1869},
-
-    "Boca Juniors": {"stadium": "La Bombonera", "city": "Buenos Aires", "country": "Argentina", "lat": -34.6356, "lon": -58.3647},
-    "River Plate": {"stadium": "Estadio Monumental", "city": "Buenos Aires", "country": "Argentina", "lat": -34.5453, "lon": -58.4498},
-    "Flamengo": {"stadium": "Maracana", "city": "Rio de Janeiro", "country": "Brazil", "lat": -22.9121, "lon": -43.2302},
-    "Palmeiras": {"stadium": "Allianz Parque", "city": "Sao Paulo", "country": "Brazil", "lat": -23.5274, "lon": -46.6781},
-    "Corinthians": {"stadium": "Neo Quimica Arena", "city": "Sao Paulo", "country": "Brazil", "lat": -23.5453, "lon": -46.4742},
-    "Sao Paulo": {"stadium": "Estadio do Morumbi", "city": "Sao Paulo", "country": "Brazil", "lat": -23.6006, "lon": -46.7197},
-    "Fluminense": {"stadium": "Maracana", "city": "Rio de Janeiro", "country": "Brazil", "lat": -22.9121, "lon": -43.2302},
-    "Botafogo": {"stadium": "Estadio Nilton Santos", "city": "Rio de Janeiro", "country": "Brazil", "lat": -22.8932, "lon": -43.2922},
-    "Penarol": {"stadium": "Estadio Campeon del Siglo", "city": "Montevideo", "country": "Uruguay", "lat": -34.8118, "lon": -56.0258},
-    "Nacional": {"stadium": "Gran Parque Central", "city": "Montevideo", "country": "Uruguay", "lat": -34.8861, "lon": -56.1622},
-    "Atletico Nacional": {"stadium": "Estadio Atanasio Girardot", "city": "Medellin", "country": "Colombia", "lat": 6.2569, "lon": -75.5903},
-    "Barcelona SC": {"stadium": "Estadio Monumental", "city": "Guayaquil", "country": "Ecuador", "lat": -2.1011, "lon": -79.9181},
-    "LDU Quito": {"stadium": "Estadio Rodrigo Paz Delgado", "city": "Quito", "country": "Ecuador", "lat": -0.1331, "lon": -78.4569},
-    "Olimpia": {"stadium": "Estadio Manuel Ferreira", "city": "Asuncion", "country": "Paraguay", "lat": -25.2828, "lon": -57.6306},
-    "Cerro Porteno": {"stadium": "Estadio General Pablo Rojas", "city": "Asuncion", "country": "Paraguay", "lat": -25.3197, "lon": -57.6125},
-
-    "Al Sadd": {"stadium": "Jassim bin Hamad Stadium", "city": "Doha", "country": "Qatar", "lat": 25.2667, "lon": 51.4500},
-    "Al Duhail": {"stadium": "Abdullah bin Khalifa Stadium", "city": "Doha", "country": "Qatar", "lat": 25.3000, "lon": 51.4900},
-    "Urawa Red Diamonds": {"stadium": "Saitama Stadium 2002", "city": "Saitama", "country": "Japan", "lat": 35.9036, "lon": 139.7172},
-    "Yokohama F. Marinos": {"stadium": "Nissan Stadium", "city": "Yokohama", "country": "Japan", "lat": 35.5100, "lon": 139.6063},
-    "Kawasaki Frontale": {"stadium": "Todoroki Stadium", "city": "Kawasaki", "country": "Japan", "lat": 35.5806, "lon": 139.6594},
-    "Ulsan HD": {"stadium": "Munsu Football Stadium", "city": "Ulsan", "country": "South Korea", "lat": 35.5347, "lon": 129.2628},
-    "Jeonbuk Hyundai Motors": {"stadium": "Jeonju World Cup Stadium", "city": "Jeonju", "country": "South Korea", "lat": 35.8689, "lon": 127.0639},
-    "FC Seoul": {"stadium": "Seoul World Cup Stadium", "city": "Seoul", "country": "South Korea", "lat": 37.5683, "lon": 126.8972},
-    "Persepolis": {"stadium": "Azadi Stadium", "city": "Tehran", "country": "Iran", "lat": 35.7244, "lon": 51.2756},
-    "Esteghlal": {"stadium": "Azadi Stadium", "city": "Tehran", "country": "Iran", "lat": 35.7244, "lon": 51.2756},
-    "Al Ain": {"stadium": "Hazza bin Zayed Stadium", "city": "Al Ain", "country": "United Arab Emirates", "lat": 24.2592, "lon": 55.7361},
-    "Pakhtakor": {"stadium": "Pakhtakor Central Stadium", "city": "Tashkent", "country": "Uzbekistan", "lat": 41.3144, "lon": 69.2406},
-
-    "Al Ahly": {"stadium": "Cairo International Stadium", "city": "Cairo", "country": "Egypt", "lat": 30.0686, "lon": 31.3119},
-    "Zamalek": {"stadium": "Cairo International Stadium", "city": "Cairo", "country": "Egypt", "lat": 30.0686, "lon": 31.3119},
-    "Esperance de Tunis": {"stadium": "Stade Hammadi Agrebi", "city": "Tunis", "country": "Tunisia", "lat": 36.8453, "lon": 10.2719},
-    "Mamelodi Sundowns": {"stadium": "Loftus Versfeld", "city": "Pretoria", "country": "South Africa", "lat": -25.7536, "lon": 28.2228},
-    "Kaizer Chiefs": {"stadium": "FNB Stadium", "city": "Johannesburg", "country": "South Africa", "lat": -26.2347, "lon": 27.9822},
-    "Wydad AC": {"stadium": "Stade Mohammed V", "city": "Casablanca", "country": "Morocco", "lat": 33.5519, "lon": -7.6497},
-    "Raja CA": {"stadium": "Stade Mohammed V", "city": "Casablanca", "country": "Morocco", "lat": 33.5519, "lon": -7.6497},
-    "TP Mazembe": {"stadium": "Stade TP Mazembe", "city": "Lubumbashi", "country": "DR Congo", "lat": -11.6647, "lon": 27.4794},
-    "Simba SC": {"stadium": "Benjamin Mkapa Stadium", "city": "Dar es Salaam", "country": "Tanzania", "lat": -6.8639, "lon": 39.2750},
-
-    "Burnley": {"stadium": "Turf Moor", "city": "Burnley", "country": "England", "lat": 53.7890, "lon": -2.2304},
-    "Sunderland": {"stadium": "Stadium of Light", "city": "Sunderland", "country": "England", "lat": 54.9145, "lon": -1.3882},
-    "Leicester City": {"stadium": "King Power Stadium", "city": "Leicester", "country": "England", "lat": 52.6204, "lon": -1.1422},
-    "Middlesbrough": {"stadium": "Riverside Stadium", "city": "Middlesbrough", "country": "England", "lat": 54.5781, "lon": -1.2169},
-    "Sheffield United": {"stadium": "Bramall Lane", "city": "Sheffield", "country": "England", "lat": 53.3703, "lon": -1.4709},
-    "Plymouth Argyle": {"stadium": "Home Park", "city": "Plymouth", "country": "England", "lat": 50.3881, "lon": -4.1508},
-    "Hibernian": {"stadium": "Easter Road", "city": "Edinburgh", "country": "Scotland", "lat": 55.9617, "lon": -3.1656},
-    "Mallorca": {"stadium": "Son Moix", "city": "Palma", "country": "Spain", "lat": 39.5897, "lon": 2.6300},
-    "Hoffenheim": {"stadium": "PreZero Arena", "city": "Sinsheim", "country": "Germany", "lat": 49.2386, "lon": 8.8875},
-    "St. Pauli": {"stadium": "Millerntor-Stadion", "city": "Hamburg", "country": "Germany", "lat": 53.5547, "lon": 9.9678},
-    "Hamburger SV": {"stadium": "Volksparkstadion", "city": "Hamburg", "country": "Germany", "lat": 53.5872, "lon": 9.8983},
-    "Nantes": {"stadium": "Stade de la Beaujoire", "city": "Nantes", "country": "France", "lat": 47.2558, "lon": -1.5247},
-    "Lens": {"stadium": "Stade Bollaert-Delelis", "city": "Lens", "country": "France", "lat": 50.4328, "lon": 2.8147},
-    "Montpellier": {"stadium": "Stade de la Mosson", "city": "Montpellier", "country": "France", "lat": 43.6222, "lon": 3.8119},
-    "Utrecht": {"stadium": "Stadion Galgenwaard", "city": "Utrecht", "country": "Netherlands", "lat": 52.0810, "lon": 5.1486},
-    "Empoli": {"stadium": "Stadio Carlo Castellani", "city": "Empoli", "country": "Italy", "lat": 43.7261, "lon": 10.9550},
-    "Como": {"stadium": "Stadio Giuseppe Sinigaglia", "city": "Como", "country": "Italy", "lat": 45.8167, "lon": 9.0731},
-    "Westerlo": {"stadium": "Het Kuipje", "city": "Westerlo", "country": "Belgium", "lat": 51.0903, "lon": 4.9606},
-    "Hatayspor": {"stadium": "Mersin Stadium (host)", "city": "Mersin", "country": "Turkey", "lat": 36.8121, "lon": 34.6415},
-    "Spartak Moscow": {"stadium": "Lukoil Arena", "city": "Moscow", "country": "Russia", "lat": 55.8181, "lon": 37.4406},
-    "Pumas UNAM": {"stadium": "Estadio Olimpico Universitario", "city": "Mexico City", "country": "Mexico", "lat": 19.3320, "lon": -99.1944},
-    "Leon": {"stadium": "Estadio Leon", "city": "Leon", "country": "Mexico", "lat": 21.1219, "lon": -101.6792},
-    "Saprissa": {"stadium": "Estadio Ricardo Saprissa", "city": "San Jose", "country": "Costa Rica", "lat": 9.9650, "lon": -84.0772},
-    "Independiente del Valle": {"stadium": "Estadio Banco Guayaquil", "city": "Sangolqui", "country": "Ecuador", "lat": -0.3167, "lon": -78.4500},
-    "Al Jazira": {"stadium": "Mohammed bin Zayed Stadium", "city": "Abu Dhabi", "country": "United Arab Emirates", "lat": 24.4225, "lon": 54.4533},
-    "Shabab Al Ahli": {"stadium": "Rashid Stadium", "city": "Dubai", "country": "United Arab Emirates", "lat": 25.2300, "lon": 55.3300},
-    "Neom SC": {"stadium": "Prince Sultan bin Fahd Stadium (host)", "city": "Riyadh", "country": "Saudi Arabia", "lat": 24.7136, "lon": 46.6753},
-    "Al Arabi": {"stadium": "Grand Hamad Stadium", "city": "Doha", "country": "Qatar", "lat": 25.2800, "lon": 51.5000},
-    "Al Wakrah": {"stadium": "Al Janoub Stadium", "city": "Al Wakrah", "country": "Qatar", "lat": 25.1670, "lon": 51.5470},
-    "Al Wehdat": {"stadium": "Amman International Stadium", "city": "Amman", "country": "Jordan", "lat": 31.9928, "lon": 35.9242}
+    "AC Milan": {
+      "stadium": "San Siro",
+      "city": "Milan",
+      "country": "Italy",
+      "lat": 45.4781,
+      "lon": 9.124
+    },
+    "AEK Larnaca": {
+      "stadium": "AEK Arena",
+      "city": "Larnaca",
+      "country": "Cyprus",
+      "lat": 34.9167,
+      "lon": 33.6333
+    },
+    "AEL": {
+      "stadium": "Angel Stadium",
+      "city": "Unknown",
+      "country": "Unknown",
+      "lat": 33.8003,
+      "lon": -117.8828
+    },
+    "AEL Limassol": {
+      "stadium": "Alphamega Stadium",
+      "city": "Limassol",
+      "country": "Cyprus",
+      "lat": 34.7,
+      "lon": 33.05
+    },
+    "AFC Bournemouth": {
+      "stadium": "Vitality Stadium",
+      "city": "Bournemouth",
+      "country": "England",
+      "lat": 50.7352,
+      "lon": -1.8385
+    },
+    "AGF": {
+      "stadium": "Ceres Park",
+      "city": "Aarhus",
+      "country": "Denmark",
+      "lat": 56.1167,
+      "lon": 10.2
+    },
+    "APOEL": {
+      "stadium": "GSP Stadium",
+      "city": "Nicosia",
+      "country": "Cyprus",
+      "lat": 35.1147,
+      "lon": 33.3628
+    },
+    "Ajax": {
+      "stadium": "Johan Cruyff Arena",
+      "city": "Amsterdam",
+      "country": "Netherlands",
+      "lat": 52.3144,
+      "lon": 4.9419
+    },
+    "Al Ahli Saudi": {
+      "stadium": "King Abdullah Sports City",
+      "city": "Jeddah",
+      "country": "Saudi Arabia",
+      "lat": 21.7556,
+      "lon": 39.1561
+    },
+    "Al Ahly": {
+      "stadium": "Cairo International Stadium",
+      "city": "Cairo",
+      "country": "Egypt",
+      "lat": 30.0686,
+      "lon": 31.3119
+    },
+    "Al Ain": {
+      "stadium": "Hazza bin Zayed Stadium",
+      "city": "Al Ain",
+      "country": "United Arab Emirates",
+      "lat": 24.2592,
+      "lon": 55.7361
+    },
+    "Al Arabi": {
+      "stadium": "Grand Hamad Stadium",
+      "city": "Doha",
+      "country": "Qatar",
+      "lat": 25.28,
+      "lon": 51.5
+    },
+    "Al Bataeh": {
+      "stadium": "Al Bataeh Stadium",
+      "city": "Al Bataeh",
+      "country": "UAE",
+      "lat": 25.2833,
+      "lon": 55.7333
+    },
+    "Al Duhail": {
+      "stadium": "Abdullah bin Khalifa Stadium",
+      "city": "Doha",
+      "country": "Qatar",
+      "lat": 25.3,
+      "lon": 51.49
+    },
+    "Al Ettifaq": {
+      "stadium": "Prince Mohamed bin Fahd Stadium",
+      "city": "Dammam",
+      "country": "Saudi Arabia",
+      "lat": 26.4207,
+      "lon": 50.1175
+    },
+    "Al Hilal": {
+      "stadium": "Kingdom Arena",
+      "city": "Riyadh",
+      "country": "Saudi Arabia",
+      "lat": 24.77,
+      "lon": 46.64
+    },
+    "Al Ittihad": {
+      "stadium": "King Abdullah Sports City",
+      "city": "Jeddah",
+      "country": "Saudi Arabia",
+      "lat": 21.7556,
+      "lon": 39.1561
+    },
+    "Al Jazira": {
+      "stadium": "Mohammed bin Zayed Stadium",
+      "city": "Abu Dhabi",
+      "country": "United Arab Emirates",
+      "lat": 24.4225,
+      "lon": 54.4533
+    },
+    "Al Nassr": {
+      "stadium": "Al-Awwal Park",
+      "city": "Riyadh",
+      "country": "Saudi Arabia",
+      "lat": 24.7244,
+      "lon": 46.6447
+    },
+    "Al Qadsiah": {
+      "stadium": "Prince Saud bin Jalawi Stadium",
+      "city": "Khobar",
+      "country": "Saudi Arabia",
+      "lat": 26.2172,
+      "lon": 50.1972
+    },
+    "Al Sadd": {
+      "stadium": "Jassim bin Hamad Stadium",
+      "city": "Doha",
+      "country": "Qatar",
+      "lat": 25.2667,
+      "lon": 51.45
+    },
+    "Al Wakrah": {
+      "stadium": "Al Janoub Stadium",
+      "city": "Al Wakrah",
+      "country": "Qatar",
+      "lat": 25.167,
+      "lon": 51.547
+    },
+    "Al Wehdat": {
+      "stadium": "Amman International Stadium",
+      "city": "Amman",
+      "country": "Jordan",
+      "lat": 31.9928,
+      "lon": 35.9242
+    },
+    "Al-Faisaly": {
+      "stadium": "Amman International Stadium",
+      "city": "Amman",
+      "country": "Jordan",
+      "lat": 31.9928,
+      "lon": 35.9242
+    },
+    "Al-Gharafa": {
+      "stadium": "Thani bin Jassim Stadium",
+      "city": "Doha",
+      "country": "Qatar",
+      "lat": 25.3361,
+      "lon": 51.4572
+    },
+    "Al-Hussein": {
+      "stadium": "Amman International Stadium",
+      "city": "Amman",
+      "country": "Jordan",
+      "lat": 31.9928,
+      "lon": 35.9242
+    },
+    "Al-Karma": {
+      "stadium": "Al-Najaf Stadium",
+      "city": "Najaf",
+      "country": "Iraq",
+      "lat": 32.0,
+      "lon": 44.3333
+    },
+    "Al-Najma": {
+      "stadium": "Prince Abdullah bin Jalawi Stadium",
+      "city": "Al-Ahsa",
+      "country": "Saudi Arabia",
+      "lat": 25.3833,
+      "lon": 49.5833
+    },
+    "Al-Rayyan": {
+      "stadium": "Ahmad bin Ali Stadium",
+      "city": "Al Rayyan",
+      "country": "Qatar",
+      "lat": 25.33,
+      "lon": 51.34
+    },
+    "Al-Shorta": {
+      "stadium": "Al-Shaab Stadium",
+      "city": "Baghdad",
+      "country": "Iraq",
+      "lat": 33.34,
+      "lon": 44.4
+    },
+    "Al-Talaba": {
+      "stadium": "Al-Shaab Stadium",
+      "city": "Baghdad",
+      "country": "Iraq",
+      "lat": 33.34,
+      "lon": 44.4
+    },
+    "Al-Zawraa": {
+      "stadium": "Al-Shaab Stadium",
+      "city": "Baghdad",
+      "country": "Iraq",
+      "lat": 33.34,
+      "lon": 44.4
+    },
+    "Anderlecht": {
+      "stadium": "Lotto Park",
+      "city": "Brussels",
+      "country": "Belgium",
+      "lat": 50.834,
+      "lon": 4.2986
+    },
+    "Angers": {
+      "stadium": "Stade Raymond Kopa",
+      "city": "Angers",
+      "country": "France",
+      "lat": 47.4608,
+      "lon": -0.5306
+    },
+    "Arsenal": {
+      "stadium": "Emirates Stadium",
+      "city": "London",
+      "country": "England",
+      "lat": 51.5549,
+      "lon": -0.1084
+    },
+    "Aston Villa": {
+      "stadium": "Villa Park",
+      "city": "Birmingham",
+      "country": "England",
+      "lat": 52.5092,
+      "lon": -1.8848
+    },
+    "Atalanta": {
+      "stadium": "Gewiss Stadium",
+      "city": "Bergamo",
+      "country": "Italy",
+      "lat": 45.709,
+      "lon": 9.6809
+    },
+    "Athletic Bilbao": {
+      "stadium": "San Mames",
+      "city": "Bilbao",
+      "country": "Spain",
+      "lat": 43.2641,
+      "lon": -2.9496
+    },
+    "Atlanta United": {
+      "stadium": "Mercedes-Benz Stadium",
+      "city": "Atlanta",
+      "country": "United States",
+      "lat": 33.7553,
+      "lon": -84.4006
+    },
+    "Atletico Madrid": {
+      "stadium": "Riyadh Air Metropolitano",
+      "city": "Madrid",
+      "country": "Spain",
+      "lat": 40.4362,
+      "lon": -3.5995
+    },
+    "Atletico Mineiro": {
+      "stadium": "Arena MRV",
+      "city": "Belo Horizonte",
+      "country": "Brazil",
+      "lat": -19.8658,
+      "lon": -43.9711
+    },
+    "Atletico Nacional": {
+      "stadium": "Estadio Atanasio Girardot",
+      "city": "Medellin",
+      "country": "Colombia",
+      "lat": 6.2569,
+      "lon": -75.5903
+    },
+    "Auckland FC": {
+      "stadium": "Go Media Stadium",
+      "city": "Auckland",
+      "country": "New Zealand",
+      "lat": -36.917,
+      "lon": 174.809
+    },
+    "Austria Wien": {
+      "stadium": "Generali Arena",
+      "city": "Vienna",
+      "country": "Austria",
+      "lat": 48.1986,
+      "lon": 16.265
+    },
+    "Auxerre": {
+      "stadium": "Stade de l'Abbe-Deschamps",
+      "city": "Auxerre",
+      "country": "France",
+      "lat": 47.8136,
+      "lon": 3.5886
+    },
+    "Barcelona": {
+      "stadium": "Spotify Camp Nou",
+      "city": "Barcelona",
+      "country": "Spain",
+      "lat": 41.3809,
+      "lon": 2.1228
+    },
+    "Barcelona SC": {
+      "stadium": "Estadio Monumental",
+      "city": "Guayaquil",
+      "country": "Ecuador",
+      "lat": -2.1011,
+      "lon": -79.9181
+    },
+    "Basel": {
+      "stadium": "St. Jakob-Park",
+      "city": "Basel",
+      "country": "Switzerland",
+      "lat": 47.5414,
+      "lon": 7.6206
+    },
+    "Bayer Leverkusen": {
+      "stadium": "BayArena",
+      "city": "Leverkusen",
+      "country": "Germany",
+      "lat": 51.0383,
+      "lon": 7.0024
+    },
+    "Bayern Munich": {
+      "stadium": "Allianz Arena",
+      "city": "Munich",
+      "country": "Germany",
+      "lat": 48.2188,
+      "lon": 11.6247
+    },
+    "Benfica": {
+      "stadium": "Estadio da Luz",
+      "city": "Lisbon",
+      "country": "Portugal",
+      "lat": 38.7526,
+      "lon": -9.1847
+    },
+    "Besiktas": {
+      "stadium": "Tupras Stadium",
+      "city": "Istanbul",
+      "country": "Turkey",
+      "lat": 41.0392,
+      "lon": 28.9947
+    },
+    "Boca Juniors": {
+      "stadium": "La Bombonera",
+      "city": "Buenos Aires",
+      "country": "Argentina",
+      "lat": -34.6356,
+      "lon": -58.3647
+    },
+    "Bodø/Glimt": {
+      "stadium": "Aspmyra Stadion",
+      "city": "Bodo",
+      "country": "Norway",
+      "lat": 67.2764,
+      "lon": 14.3847
+    },
+    "Bologna": {
+      "stadium": "Stadio Renato Dall'Ara",
+      "city": "Bologna",
+      "country": "Italy",
+      "lat": 44.4923,
+      "lon": 11.3097
+    },
+    "Borussia Dortmund": {
+      "stadium": "Signal Iduna Park",
+      "city": "Dortmund",
+      "country": "Germany",
+      "lat": 51.4926,
+      "lon": 7.4519
+    },
+    "Borussia Monchengladbach": {
+      "stadium": "Borussia-Park",
+      "city": "Monchengladbach",
+      "country": "Germany",
+      "lat": 51.1745,
+      "lon": 6.3854
+    },
+    "Botafogo": {
+      "stadium": "Estadio Nilton Santos",
+      "city": "Rio de Janeiro",
+      "country": "Brazil",
+      "lat": -22.8932,
+      "lon": -43.2922
+    },
+    "Braga": {
+      "stadium": "Estadio Municipal de Braga",
+      "city": "Braga",
+      "country": "Portugal",
+      "lat": 41.5628,
+      "lon": -8.43
+    },
+    "Brentford": {
+      "stadium": "Gtech Community Stadium",
+      "city": "London",
+      "country": "England",
+      "lat": 51.4907,
+      "lon": -0.2887
+    },
+    "Brest": {
+      "stadium": "Stade Francis-Le Ble",
+      "city": "Brest",
+      "country": "France",
+      "lat": 48.4036,
+      "lon": -4.4667
+    },
+    "Brighton & Hove Albion": {
+      "stadium": "Amex Stadium",
+      "city": "Brighton",
+      "country": "England",
+      "lat": 50.8616,
+      "lon": -0.0837
+    },
+    "Brondby": {
+      "stadium": "Brondby Stadium",
+      "city": "Brondby",
+      "country": "Denmark",
+      "lat": 55.6494,
+      "lon": 12.3514
+    },
+    "Burnley": {
+      "stadium": "Turf Moor",
+      "city": "Burnley",
+      "country": "England",
+      "lat": 53.789,
+      "lon": -2.2304
+    },
+    "CF Montreal": {
+      "stadium": "Stade Saputo",
+      "city": "Montreal",
+      "country": "Canada",
+      "lat": 45.563,
+      "lon": -73.552
+    },
+    "Celta Vigo": {
+      "stadium": "Balaidos",
+      "city": "Vigo",
+      "country": "Spain",
+      "lat": 42.2119,
+      "lon": -8.7397
+    },
+    "Celtic": {
+      "stadium": "Celtic Park",
+      "city": "Glasgow",
+      "country": "Scotland",
+      "lat": 55.8497,
+      "lon": -4.2055
+    },
+    "Cercle Brugge": {
+      "stadium": "Jan Breydel Stadium",
+      "city": "Bruges",
+      "country": "Belgium",
+      "lat": 51.1932,
+      "lon": 3.1808
+    },
+    "Cerro Porteno": {
+      "stadium": "Estadio General Pablo Rojas",
+      "city": "Asuncion",
+      "country": "Paraguay",
+      "lat": -25.3197,
+      "lon": -57.6125
+    },
+    "Charleroi": {
+      "stadium": "Stade du Pays de Charleroi",
+      "city": "Charleroi",
+      "country": "Belgium",
+      "lat": 50.4086,
+      "lon": 4.4447
+    },
+    "Chelsea": {
+      "stadium": "Stamford Bridge",
+      "city": "London",
+      "country": "England",
+      "lat": 51.4817,
+      "lon": -0.191
+    },
+    "Chicago Fire": {
+      "stadium": "Soldier Field",
+      "city": "Chicago",
+      "country": "United States",
+      "lat": 41.8623,
+      "lon": -87.6167
+    },
+    "Club America": {
+      "stadium": "Estadio Azteca",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "lat": 19.3029,
+      "lon": -99.1505
+    },
+    "Club Brugge": {
+      "stadium": "Jan Breydel Stadium",
+      "city": "Bruges",
+      "country": "Belgium",
+      "lat": 51.1932,
+      "lon": 3.1808
+    },
+    "Club Tijuana": {
+      "stadium": "Estadio Caliente",
+      "city": "Tijuana",
+      "country": "Mexico",
+      "lat": 32.5028,
+      "lon": -117.0039
+    },
+    "Columbus Crew": {
+      "stadium": "Lower.com Field",
+      "city": "Columbus",
+      "country": "United States",
+      "lat": 39.9689,
+      "lon": -83.0175
+    },
+    "Como": {
+      "stadium": "Stadio Giuseppe Sinigaglia",
+      "city": "Como",
+      "country": "Italy",
+      "lat": 45.8167,
+      "lon": 9.0731
+    },
+    "Copenhagen": {
+      "stadium": "Parken",
+      "city": "Copenhagen",
+      "country": "Denmark",
+      "lat": 55.7027,
+      "lon": 12.5726
+    },
+    "Corinthians": {
+      "stadium": "Neo Quimica Arena",
+      "city": "Sao Paulo",
+      "country": "Brazil",
+      "lat": -23.5453,
+      "lon": -46.4742
+    },
+    "Coventry City": {
+      "stadium": "Coventry Building Society Arena",
+      "city": "Coventry",
+      "country": "England",
+      "lat": 52.4481,
+      "lon": -1.4956
+    },
+    "Cruz Azul": {
+      "stadium": "Estadio Ciudad de los Deportes",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "lat": 19.3886,
+      "lon": -99.1869
+    },
+    "Crystal Palace": {
+      "stadium": "Selhurst Park",
+      "city": "London",
+      "country": "England",
+      "lat": 51.3983,
+      "lon": -0.0855
+    },
+    "Daejeon Hana Citizen": {
+      "stadium": "Daejeon World Cup Stadium",
+      "city": "Daejeon",
+      "country": "South Korea",
+      "lat": 36.317,
+      "lon": 127.428
+    },
+    "Dender": {
+      "stadium": "Dender Football Complex",
+      "city": "Denderleeuw",
+      "country": "Belgium",
+      "lat": 50.8833,
+      "lon": 4.0667
+    },
+    "Dinamo Zagreb": {
+      "stadium": "Stadion Maksimir",
+      "city": "Zagreb",
+      "country": "Croatia",
+      "lat": 45.819,
+      "lon": 16.0181
+    },
+    "Dynamo Kyiv": {
+      "stadium": "Valeriy Lobanovskyi Stadium",
+      "city": "Kyiv",
+      "country": "Ukraine",
+      "lat": 50.4444,
+      "lon": 30.5333
+    },
+    "Dynamo Moscow": {
+      "stadium": "VTB Arena",
+      "city": "Moscow",
+      "country": "Russia",
+      "lat": 55.7914,
+      "lon": 37.5594
+    },
+    "Eintracht Frankfurt": {
+      "stadium": "Deutsche Bank Park",
+      "city": "Frankfurt",
+      "country": "Germany",
+      "lat": 50.0686,
+      "lon": 8.6455
+    },
+    "Empoli": {
+      "stadium": "Stadio Carlo Castellani",
+      "city": "Empoli",
+      "country": "Italy",
+      "lat": 43.7261,
+      "lon": 10.955
+    },
+    "Espanyol": {
+      "stadium": "RCDE Stadium",
+      "city": "Cornella",
+      "country": "Spain",
+      "lat": 41.3478,
+      "lon": 2.0756
+    },
+    "Esperance de Tunis": {
+      "stadium": "Stade Hammadi Agrebi",
+      "city": "Tunis",
+      "country": "Tunisia",
+      "lat": 36.8453,
+      "lon": 10.2719
+    },
+    "Esteghlal": {
+      "stadium": "Azadi Stadium",
+      "city": "Tehran",
+      "country": "Iran",
+      "lat": 35.7244,
+      "lon": 51.2756
+    },
+    "Everton": {
+      "stadium": "Hill Dickinson Stadium",
+      "city": "Liverpool",
+      "country": "England",
+      "lat": 53.4108,
+      "lon": -3.001
+    },
+    "FC Augsburg": {
+      "stadium": "WWK Arena",
+      "city": "Augsburg",
+      "country": "Germany",
+      "lat": 48.5914,
+      "lon": 10.9381
+    },
+    "FC Dallas": {
+      "stadium": "Toyota Stadium",
+      "city": "Frisco",
+      "country": "United States",
+      "lat": 33.1544,
+      "lon": -96.8353
+    },
+    "FC Seoul": {
+      "stadium": "Seoul World Cup Stadium",
+      "city": "Seoul",
+      "country": "South Korea",
+      "lat": 37.5683,
+      "lon": 126.8972
+    },
+    "FC Tokyo": {
+      "stadium": "Ajinomoto Stadium",
+      "city": "Tokyo",
+      "country": "Japan",
+      "lat": 35.664,
+      "lon": 139.5272
+    },
+    "Fenerbahce": {
+      "stadium": "Sukru Saracoglu Stadium",
+      "city": "Istanbul",
+      "country": "Turkey",
+      "lat": 40.9879,
+      "lon": 29.0369
+    },
+    "Ferencvaros": {
+      "stadium": "Groupama Arena",
+      "city": "Budapest",
+      "country": "Hungary",
+      "lat": 47.475,
+      "lon": 19.0958
+    },
+    "Feyenoord": {
+      "stadium": "De Kuip",
+      "city": "Rotterdam",
+      "country": "Netherlands",
+      "lat": 51.8939,
+      "lon": 4.5231
+    },
+    "Fiorentina": {
+      "stadium": "Stadio Artemio Franchi",
+      "city": "Florence",
+      "country": "Italy",
+      "lat": 43.7809,
+      "lon": 11.2823
+    },
+    "Flamengo": {
+      "stadium": "Maracana",
+      "city": "Rio de Janeiro",
+      "country": "Brazil",
+      "lat": -22.9121,
+      "lon": -43.2302
+    },
+    "Fluminense": {
+      "stadium": "Maracana",
+      "city": "Rio de Janeiro",
+      "country": "Brazil",
+      "lat": -22.9121,
+      "lon": -43.2302
+    },
+    "Freiburg": {
+      "stadium": "Europa-Park Stadion",
+      "city": "Freiburg",
+      "country": "Germany",
+      "lat": 48.0214,
+      "lon": 7.8297
+    },
+    "Fulham": {
+      "stadium": "Craven Cottage",
+      "city": "London",
+      "country": "England",
+      "lat": 51.4749,
+      "lon": -0.2217
+    },
+    "Galatasaray": {
+      "stadium": "RAMS Park",
+      "city": "Istanbul",
+      "country": "Turkey",
+      "lat": 41.1036,
+      "lon": 28.9908
+    },
+    "Gangwon FC": {
+      "stadium": "Chuncheon Songam Stadium",
+      "city": "Chuncheon",
+      "country": "South Korea",
+      "lat": 37.8747,
+      "lon": 127.7342
+    },
+    "Genk": {
+      "stadium": "Cegeka Arena",
+      "city": "Genk",
+      "country": "Belgium",
+      "lat": 50.965,
+      "lon": 5.5006
+    },
+    "Genoa": {
+      "stadium": "Stadio Luigi Ferraris",
+      "city": "Genoa",
+      "country": "Italy",
+      "lat": 44.4142,
+      "lon": 8.9544
+    },
+    "Gent": {
+      "stadium": "Planet Group Arena",
+      "city": "Ghent",
+      "country": "Belgium",
+      "lat": 51.0833,
+      "lon": 3.7167
+    },
+    "Girona": {
+      "stadium": "Montilivi",
+      "city": "Girona",
+      "country": "Spain",
+      "lat": 41.9613,
+      "lon": 2.8285
+    },
+    "Grêmio": {
+      "stadium": "Arena do Gremio",
+      "city": "Porto Alegre",
+      "country": "Brazil",
+      "lat": -30.065,
+      "lon": -51.235
+    },
+    "Guadalajara": {
+      "stadium": "Estadio Akron",
+      "city": "Guadalajara",
+      "country": "Mexico",
+      "lat": 20.6819,
+      "lon": -103.4628
+    },
+    "Hamburger SV": {
+      "stadium": "Volksparkstadion",
+      "city": "Hamburg",
+      "country": "Germany",
+      "lat": 53.5872,
+      "lon": 9.8983
+    },
+    "Hannover 96": {
+      "stadium": "Heinz von Heiden Arena",
+      "city": "Hannover",
+      "country": "Germany",
+      "lat": 52.36,
+      "lon": 9.731
+    },
+    "Hatayspor": {
+      "stadium": "Mersin Stadium (host)",
+      "city": "Mersin",
+      "country": "Turkey",
+      "lat": 36.8121,
+      "lon": 34.6415
+    },
+    "Heart of Midlothian": {
+      "stadium": "Tynecastle Park",
+      "city": "Edinburgh",
+      "country": "Scotland",
+      "lat": 55.9392,
+      "lon": -3.2322
+    },
+    "Hellas Verona": {
+      "stadium": "Stadio Marcantonio Bentegodi",
+      "city": "Verona",
+      "country": "Italy",
+      "lat": 45.4356,
+      "lon": 10.9683
+    },
+    "Hibernian": {
+      "stadium": "Easter Road",
+      "city": "Edinburgh",
+      "country": "Scotland",
+      "lat": 55.9617,
+      "lon": -3.1656
+    },
+    "Hoffenheim": {
+      "stadium": "PreZero Arena",
+      "city": "Sinsheim",
+      "country": "Germany",
+      "lat": 49.2386,
+      "lon": 8.8875
+    },
+    "Hradec Kralove": {
+      "stadium": "Viceberg Stadium",
+      "city": "Hradec Kralove",
+      "country": "Czechia",
+      "lat": 50.2092,
+      "lon": 15.8325
+    },
+    "Hull City": {
+      "stadium": "MKM Stadium",
+      "city": "Hull",
+      "country": "England",
+      "lat": 53.7461,
+      "lon": -0.3677
+    },
+    "Huracán": {
+      "stadium": "Estadio Tomas Adolfo Duco",
+      "city": "Buenos Aires",
+      "country": "Argentina",
+      "lat": -34.635,
+      "lon": -58.365
+    },
+    "Independiente": {
+      "stadium": "Estadio Libertadores de America",
+      "city": "Avellaneda",
+      "country": "Argentina",
+      "lat": -34.675,
+      "lon": -58.365
+    },
+    "Independiente del Valle": {
+      "stadium": "Estadio Banco Guayaquil",
+      "city": "Sangolqui",
+      "country": "Ecuador",
+      "lat": -0.3167,
+      "lon": -78.45
+    },
+    "Inter Miami": {
+      "stadium": "Chase Stadium",
+      "city": "Fort Lauderdale",
+      "country": "United States",
+      "lat": 26.1934,
+      "lon": -80.1614
+    },
+    "Inter Milan": {
+      "stadium": "San Siro",
+      "city": "Milan",
+      "country": "Italy",
+      "lat": 45.4781,
+      "lon": 9.124
+    },
+    "Internacional": {
+      "stadium": "Estadio Beira-Rio",
+      "city": "Porto Alegre",
+      "country": "Brazil",
+      "lat": -30.065,
+      "lon": -51.235
+    },
+    "JS Kabylie": {
+      "stadium": "Stade du 1er Novembre",
+      "city": "Tizi Ouzou",
+      "country": "Algeria",
+      "lat": 36.7167,
+      "lon": 4.05
+    },
+    "Jeonbuk Hyundai Motors": {
+      "stadium": "Jeonju World Cup Stadium",
+      "city": "Jeonju",
+      "country": "South Korea",
+      "lat": 35.8689,
+      "lon": 127.0639
+    },
+    "Juventus": {
+      "stadium": "Allianz Stadium",
+      "city": "Turin",
+      "country": "Italy",
+      "lat": 45.1096,
+      "lon": 7.6413
+    },
+    "Kaizer Chiefs": {
+      "stadium": "FNB Stadium",
+      "city": "Johannesburg",
+      "country": "South Africa",
+      "lat": -26.2347,
+      "lon": 27.9822
+    },
+    "Kashima Antlers": {
+      "stadium": "Kashima Soccer Stadium",
+      "city": "Kashima",
+      "country": "Japan",
+      "lat": 35.992,
+      "lon": 140.64
+    },
+    "Kasimpasa": {
+      "stadium": "Recep Tayyip Erdogan Stadium",
+      "city": "Istanbul",
+      "country": "Turkey",
+      "lat": 41.0392,
+      "lon": 28.97
+    },
+    "Kawasaki Frontale": {
+      "stadium": "Todoroki Stadium",
+      "city": "Kawasaki",
+      "country": "Japan",
+      "lat": 35.5806,
+      "lon": 139.6594
+    },
+    "Kilmarnock": {
+      "stadium": "Rugby Park",
+      "city": "Kilmarnock",
+      "country": "Scotland",
+      "lat": 55.6042,
+      "lon": -4.5083
+    },
+    "Krasnodar": {
+      "stadium": "Krasnodar Stadium",
+      "city": "Krasnodar",
+      "country": "Russia",
+      "lat": 45.035,
+      "lon": 38.975
+    },
+    "LA Galaxy": {
+      "stadium": "Dignity Health Sports Park",
+      "city": "Carson",
+      "country": "United States",
+      "lat": 33.8644,
+      "lon": -118.2611
+    },
+    "LASK": {
+      "stadium": "Raiffeisen Arena",
+      "city": "Linz",
+      "country": "Austria",
+      "lat": 48.25,
+      "lon": 14.2833
+    },
+    "LDU Quito": {
+      "stadium": "Estadio Rodrigo Paz Delgado",
+      "city": "Quito",
+      "country": "Ecuador",
+      "lat": -0.1331,
+      "lon": -78.4569
+    },
+    "Lazio": {
+      "stadium": "Stadio Olimpico",
+      "city": "Rome",
+      "country": "Italy",
+      "lat": 41.9339,
+      "lon": 12.4547
+    },
+    "Le Havre": {
+      "stadium": "Stade Oceane",
+      "city": "Le Havre",
+      "country": "France",
+      "lat": 49.4983,
+      "lon": 0.1833
+    },
+    "Leeds United": {
+      "stadium": "Elland Road",
+      "city": "Leeds",
+      "country": "England",
+      "lat": 53.7778,
+      "lon": -1.5722
+    },
+    "Leicester City": {
+      "stadium": "King Power Stadium",
+      "city": "Leicester",
+      "country": "England",
+      "lat": 52.6204,
+      "lon": -1.1422
+    },
+    "Lens": {
+      "stadium": "Stade Bollaert-Delelis",
+      "city": "Lens",
+      "country": "France",
+      "lat": 50.4328,
+      "lon": 2.8147
+    },
+    "Leon": {
+      "stadium": "Estadio Leon",
+      "city": "Leon",
+      "country": "Mexico",
+      "lat": 21.1219,
+      "lon": -101.6792
+    },
+    "Lille": {
+      "stadium": "Stade Pierre-Mauroy",
+      "city": "Lille",
+      "country": "France",
+      "lat": 50.6119,
+      "lon": 3.1304
+    },
+    "Liverpool": {
+      "stadium": "Anfield",
+      "city": "Liverpool",
+      "country": "England",
+      "lat": 53.4308,
+      "lon": -2.9608
+    },
+    "Lokomotiv Moscow": {
+      "stadium": "RZD Arena",
+      "city": "Moscow",
+      "country": "Russia",
+      "lat": 55.8142,
+      "lon": 37.7303
+    },
+    "Lorient": {
+      "stadium": "Stade du Moustoir",
+      "city": "Lorient",
+      "country": "France",
+      "lat": 47.7486,
+      "lon": -3.3681
+    },
+    "Los Angeles FC": {
+      "stadium": "BMO Stadium",
+      "city": "Los Angeles",
+      "country": "United States",
+      "lat": 34.0128,
+      "lon": -118.2851
+    },
+    "Lugano": {
+      "stadium": "Stadio di Cornaredo",
+      "city": "Lugano",
+      "country": "Switzerland",
+      "lat": 46.0036,
+      "lon": 8.9511
+    },
+    "Luton Town": {
+      "stadium": "Kenilworth Road",
+      "city": "Luton",
+      "country": "England",
+      "lat": 51.8839,
+      "lon": -0.4306
+    },
+    "Lyon": {
+      "stadium": "Groupama Stadium",
+      "city": "Lyon",
+      "country": "France",
+      "lat": 45.7653,
+      "lon": 4.9821
+    },
+    "Maccabi Haifa": {
+      "stadium": "Sammy Ofer Stadium",
+      "city": "Haifa",
+      "country": "Israel",
+      "lat": 32.7833,
+      "lon": 34.9667
+    },
+    "Mainz 05": {
+      "stadium": "Mewa Arena",
+      "city": "Mainz",
+      "country": "Germany",
+      "lat": 50.0214,
+      "lon": 8.2219
+    },
+    "Mallorca": {
+      "stadium": "Son Moix",
+      "city": "Palma",
+      "country": "Spain",
+      "lat": 39.5897,
+      "lon": 2.63
+    },
+    "Mamelodi Sundowns": {
+      "stadium": "Loftus Versfeld",
+      "city": "Pretoria",
+      "country": "South Africa",
+      "lat": -25.7536,
+      "lon": 28.2228
+    },
+    "Manchester City": {
+      "stadium": "Etihad Stadium",
+      "city": "Manchester",
+      "country": "England",
+      "lat": 53.4831,
+      "lon": -2.2004
+    },
+    "Manchester United": {
+      "stadium": "Old Trafford",
+      "city": "Manchester",
+      "country": "England",
+      "lat": 53.4631,
+      "lon": -2.2913
+    },
+    "Marseille": {
+      "stadium": "Stade Velodrome",
+      "city": "Marseille",
+      "country": "France",
+      "lat": 43.2699,
+      "lon": 5.3958
+    },
+    "Melbourne City": {
+      "stadium": "AAMI Park",
+      "city": "Melbourne",
+      "country": "Australia",
+      "lat": -37.825,
+      "lon": 144.9835
+    },
+    "Miami FC": {
+      "stadium": "Pitbull Stadium",
+      "city": "Miami",
+      "country": "United States",
+      "lat": 25.752,
+      "lon": -80.377
+    },
+    "Middlesbrough": {
+      "stadium": "Riverside Stadium",
+      "city": "Middlesbrough",
+      "country": "England",
+      "lat": 54.5781,
+      "lon": -1.2169
+    },
+    "Midtjylland": {
+      "stadium": "MCH Arena",
+      "city": "Herning",
+      "country": "Denmark",
+      "lat": 56.1331,
+      "lon": 8.9336
+    },
+    "Minnesota United": {
+      "stadium": "Allianz Field",
+      "city": "Saint Paul",
+      "country": "United States",
+      "lat": 44.9528,
+      "lon": -93.165
+    },
+    "Molde": {
+      "stadium": "Aker Stadion",
+      "city": "Molde",
+      "country": "Norway",
+      "lat": 62.7333,
+      "lon": 7.15
+    },
+    "Monaco": {
+      "stadium": "Stade Louis II",
+      "city": "Monaco",
+      "country": "Monaco",
+      "lat": 43.7273,
+      "lon": 7.4156
+    },
+    "Monterrey": {
+      "stadium": "Estadio BBVA",
+      "city": "Monterrey",
+      "country": "Mexico",
+      "lat": 25.6694,
+      "lon": -100.2447
+    },
+    "Montpellier": {
+      "stadium": "Stade de la Mosson",
+      "city": "Montpellier",
+      "country": "France",
+      "lat": 43.6222,
+      "lon": 3.8119
+    },
+    "NEC": {
+      "stadium": "Goffertstadion",
+      "city": "Nijmegen",
+      "country": "Netherlands",
+      "lat": 51.8225,
+      "lon": 5.8375
+    },
+    "Nacional": {
+      "stadium": "Gran Parque Central",
+      "city": "Montevideo",
+      "country": "Uruguay",
+      "lat": -34.8861,
+      "lon": -56.1622
+    },
+    "Nantes": {
+      "stadium": "Stade de la Beaujoire",
+      "city": "Nantes",
+      "country": "France",
+      "lat": 47.2558,
+      "lon": -1.5247
+    },
+    "Napoli": {
+      "stadium": "Stadio Diego Armando Maradona",
+      "city": "Naples",
+      "country": "Italy",
+      "lat": 40.8279,
+      "lon": 14.1931
+    },
+    "Nasaf": {
+      "stadium": "Markaziy Stadium",
+      "city": "Qarshi",
+      "country": "Uzbekistan",
+      "lat": 38.86,
+      "lon": 65.785
+    },
+    "Nashville SC": {
+      "stadium": "GEODIS Park",
+      "city": "Nashville",
+      "country": "United States",
+      "lat": 36.1303,
+      "lon": -86.7656
+    },
+    "Neftchi Fergana": {
+      "stadium": "Fargona Stadium",
+      "city": "Fergana",
+      "country": "Uzbekistan",
+      "lat": 40.3864,
+      "lon": 71.7864
+    },
+    "Neom SC": {
+      "stadium": "Prince Sultan bin Fahd Stadium (host)",
+      "city": "Riyadh",
+      "country": "Saudi Arabia",
+      "lat": 24.7136,
+      "lon": 46.6753
+    },
+    "New York City FC": {
+      "stadium": "Yankee Stadium",
+      "city": "New York",
+      "country": "United States",
+      "lat": 40.8296,
+      "lon": -73.9262
+    },
+    "Newcastle United": {
+      "stadium": "St James' Park",
+      "city": "Newcastle",
+      "country": "England",
+      "lat": 54.9756,
+      "lon": -1.6217
+    },
+    "Nice": {
+      "stadium": "Allianz Riviera",
+      "city": "Nice",
+      "country": "France",
+      "lat": 43.705,
+      "lon": 7.1925
+    },
+    "Nordsjaelland": {
+      "stadium": "Right to Dream Park",
+      "city": "Farum",
+      "country": "Denmark",
+      "lat": 55.8167,
+      "lon": 12.3667
+    },
+    "Norwich City": {
+      "stadium": "Carrow Road",
+      "city": "Norwich",
+      "country": "England",
+      "lat": 52.622,
+      "lon": 1.309
+    },
+    "Nottingham Forest": {
+      "stadium": "City Ground",
+      "city": "Nottingham",
+      "country": "England",
+      "lat": 52.94,
+      "lon": -1.1327
+    },
+    "Olimpia": {
+      "stadium": "Estadio Manuel Ferreira",
+      "city": "Asuncion",
+      "country": "Paraguay",
+      "lat": -25.2828,
+      "lon": -57.6306
+    },
+    "Olympiacos": {
+      "stadium": "Karaiskakis Stadium",
+      "city": "Piraeus",
+      "country": "Greece",
+      "lat": 37.945,
+      "lon": 23.665
+    },
+    "Orlando City": {
+      "stadium": "Inter&Co Stadium",
+      "city": "Orlando",
+      "country": "United States",
+      "lat": 28.5389,
+      "lon": -81.3832
+    },
+    "Orlando Pirates": {
+      "stadium": "Orlando Stadium",
+      "city": "Johannesburg",
+      "country": "South Africa",
+      "lat": -26.235,
+      "lon": 27.975
+    },
+    "Osasuna": {
+      "stadium": "El Sadar",
+      "city": "Pamplona",
+      "country": "Spain",
+      "lat": 42.7964,
+      "lon": -1.6372
+    },
+    "Oviedo": {
+      "stadium": "Estadio Carlos Tartiere",
+      "city": "Oviedo",
+      "country": "Spain",
+      "lat": 43.3611,
+      "lon": -5.8592
+    },
+    "PAOK": {
+      "stadium": "Toumba Stadium",
+      "city": "Thessaloniki",
+      "country": "Greece",
+      "lat": 40.6139,
+      "lon": 22.9703
+    },
+    "PEC Zwolle": {
+      "stadium": "MAC3PARK Stadion",
+      "city": "Zwolle",
+      "country": "Netherlands",
+      "lat": 52.5,
+      "lon": 6.0833
+    },
+    "PSV": {
+      "stadium": "Philips Stadion",
+      "city": "Eindhoven",
+      "country": "Netherlands",
+      "lat": 51.4417,
+      "lon": 5.4674
+    },
+    "Pafos": {
+      "stadium": "Stelios Kyriakides Stadium",
+      "city": "Paphos",
+      "country": "Cyprus",
+      "lat": 34.7667,
+      "lon": 32.4167
+    },
+    "Pakhtakor": {
+      "stadium": "Pakhtakor Central Stadium",
+      "city": "Tashkent",
+      "country": "Uzbekistan",
+      "lat": 41.3144,
+      "lon": 69.2406
+    },
+    "Palmeiras": {
+      "stadium": "Allianz Parque",
+      "city": "Sao Paulo",
+      "country": "Brazil",
+      "lat": -23.5274,
+      "lon": -46.6781
+    },
+    "Panathinaikos": {
+      "stadium": "Leoforos Alexandras Stadium",
+      "city": "Athens",
+      "country": "Greece",
+      "lat": 37.9925,
+      "lon": 23.7636
+    },
+    "Paris Saint-Germain": {
+      "stadium": "Parc des Princes",
+      "city": "Paris",
+      "country": "France",
+      "lat": 48.8414,
+      "lon": 2.253
+    },
+    "Parma": {
+      "stadium": "Stadio Ennio Tardini",
+      "city": "Parma",
+      "country": "Italy",
+      "lat": 44.7947,
+      "lon": 10.34
+    },
+    "Penarol": {
+      "stadium": "Estadio Campeon del Siglo",
+      "city": "Montevideo",
+      "country": "Uruguay",
+      "lat": -34.8118,
+      "lon": -56.0258
+    },
+    "Persepolis": {
+      "stadium": "Azadi Stadium",
+      "city": "Tehran",
+      "country": "Iran",
+      "lat": 35.7244,
+      "lon": 51.2756
+    },
+    "Philadelphia Union": {
+      "stadium": "Subaru Park",
+      "city": "Chester",
+      "country": "United States",
+      "lat": 39.8328,
+      "lon": -75.3786
+    },
+    "Plymouth Argyle": {
+      "stadium": "Home Park",
+      "city": "Plymouth",
+      "country": "England",
+      "lat": 50.3881,
+      "lon": -4.1508
+    },
+    "Polokwane City": {
+      "stadium": "Peter Mokaba Stadium",
+      "city": "Polokwane",
+      "country": "South Africa",
+      "lat": -23.9,
+      "lon": 29.45
+    },
+    "Port": {
+      "stadium": "Estadio do Dragao",
+      "city": "Porto",
+      "country": "Portugal",
+      "lat": 41.1617,
+      "lon": -8.5836
+    },
+    "Porto": {
+      "stadium": "Estadio do Dragao",
+      "city": "Porto",
+      "country": "Portugal",
+      "lat": 41.1617,
+      "lon": -8.5836
+    },
+    "Pumas UNAM": {
+      "stadium": "Estadio Olimpico Universitario",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "lat": 19.332,
+      "lon": -99.1944
+    },
+    "Pyramids": {
+      "stadium": "30 June Stadium",
+      "city": "Cairo",
+      "country": "Egypt",
+      "lat": 30.06,
+      "lon": 31.22
+    },
+    "RB Leipzig": {
+      "stadium": "Red Bull Arena",
+      "city": "Leipzig",
+      "country": "Germany",
+      "lat": 51.3459,
+      "lon": 12.3483
+    },
+    "RKC Waalwijk": {
+      "stadium": "Mandemakers Stadion",
+      "city": "Waalwijk",
+      "country": "Netherlands",
+      "lat": 51.6833,
+      "lon": 5.0667
+    },
+    "Raja CA": {
+      "stadium": "Stade Mohammed V",
+      "city": "Casablanca",
+      "country": "Morocco",
+      "lat": 33.5519,
+      "lon": -7.6497
+    },
+    "Raja Casablanca": {
+      "stadium": "Stade Mohammed V",
+      "city": "Casablanca",
+      "country": "Morocco",
+      "lat": 33.5519,
+      "lon": -7.6497
+    },
+    "Rangers": {
+      "stadium": "Ibrox Stadium",
+      "city": "Glasgow",
+      "country": "Scotland",
+      "lat": 55.8531,
+      "lon": -4.3094
+    },
+    "Rayo Vallecano": {
+      "stadium": "Campo de Futbol de Vallecas",
+      "city": "Madrid",
+      "country": "Spain",
+      "lat": 40.3919,
+      "lon": -3.6586
+    },
+    "Real Betis": {
+      "stadium": "Benito Villamarin",
+      "city": "Seville",
+      "country": "Spain",
+      "lat": 37.3565,
+      "lon": -5.9817
+    },
+    "Real Madrid": {
+      "stadium": "Santiago Bernabeu",
+      "city": "Madrid",
+      "country": "Spain",
+      "lat": 40.4531,
+      "lon": -3.6883
+    },
+    "Real Sociedad": {
+      "stadium": "Reale Arena",
+      "city": "San Sebastian",
+      "country": "Spain",
+      "lat": 43.3013,
+      "lon": -1.9735
+    },
+    "Red Bull Salzburg": {
+      "stadium": "Red Bull Arena",
+      "city": "Salzburg",
+      "country": "Austria",
+      "lat": 47.8167,
+      "lon": 13.0083
+    },
+    "Red Star Belgrade": {
+      "stadium": "Rajko Mitic Stadium",
+      "city": "Belgrade",
+      "country": "Serbia",
+      "lat": 44.7833,
+      "lon": 20.465
+    },
+    "Reims": {
+      "stadium": "Stade Auguste-Delaune",
+      "city": "Reims",
+      "country": "France",
+      "lat": 49.2467,
+      "lon": 4.025
+    },
+    "Rennes": {
+      "stadium": "Roazhon Park",
+      "city": "Rennes",
+      "country": "France",
+      "lat": 48.1075,
+      "lon": -1.7128
+    },
+    "Rijeka": {
+      "stadium": "Stadion Rujevica",
+      "city": "Rijeka",
+      "country": "Croatia",
+      "lat": 45.3397,
+      "lon": 14.4094
+    },
+    "River Plate": {
+      "stadium": "Estadio Monumental",
+      "city": "Buenos Aires",
+      "country": "Argentina",
+      "lat": -34.5453,
+      "lon": -58.4498
+    },
+    "Roma": {
+      "stadium": "Stadio Olimpico",
+      "city": "Rome",
+      "country": "Italy",
+      "lat": 41.9339,
+      "lon": 12.4547
+    },
+    "Royal Antwerp": {
+      "stadium": "Bosuilstadion",
+      "city": "Antwerp",
+      "country": "Belgium",
+      "lat": 51.2306,
+      "lon": 4.4719
+    },
+    "Saint-Étienne": {
+      "stadium": "Stade Geoffroy-Guichard",
+      "city": "Saint-Etienne",
+      "country": "France",
+      "lat": 45.4608,
+      "lon": 4.3928
+    },
+    "San Diego FC": {
+      "stadium": "Snapdragon Stadium",
+      "city": "San Diego",
+      "country": "United States",
+      "lat": 32.784,
+      "lon": -117.1175
+    },
+    "Sanfrecce Hiroshima": {
+      "stadium": "Edion Stadium Hiroshima",
+      "city": "Hiroshima",
+      "country": "Japan",
+      "lat": 34.3833,
+      "lon": 132.4833
+    },
+    "Santos": {
+      "stadium": "Estadio Urbano Caldeira",
+      "city": "Santos",
+      "country": "Brazil",
+      "lat": -23.9608,
+      "lon": -46.3331
+    },
+    "Santos Laguna": {
+      "stadium": "Estadio Corona",
+      "city": "Torreon",
+      "country": "Mexico",
+      "lat": 25.5428,
+      "lon": -103.4069
+    },
+    "Sao Paulo": {
+      "stadium": "Estadio do Morumbi",
+      "city": "Sao Paulo",
+      "country": "Brazil",
+      "lat": -23.6006,
+      "lon": -46.7197
+    },
+    "Saprissa": {
+      "stadium": "Estadio Ricardo Saprissa",
+      "city": "San Jose",
+      "country": "Costa Rica",
+      "lat": 9.965,
+      "lon": -84.0772
+    },
+    "Sassuolo": {
+      "stadium": "Mapei Stadium",
+      "city": "Reggio Emilia",
+      "country": "Italy",
+      "lat": 44.7142,
+      "lon": 10.6497
+    },
+    "Schalke 04": {
+      "stadium": "Veltins-Arena",
+      "city": "Gelsenkirchen",
+      "country": "Germany",
+      "lat": 51.5547,
+      "lon": 7.0675
+    },
+    "Seattle Sounders": {
+      "stadium": "Lumen Field",
+      "city": "Seattle",
+      "country": "United States",
+      "lat": 47.5952,
+      "lon": -122.3316
+    },
+    "Sepahan": {
+      "stadium": "Foolad Shahr Stadium",
+      "city": "Isfahan",
+      "country": "Iran",
+      "lat": 32.75,
+      "lon": 51.5667
+    },
+    "Sevilla": {
+      "stadium": "Ramon Sanchez-Pizjuan",
+      "city": "Seville",
+      "country": "Spain",
+      "lat": 37.3841,
+      "lon": -5.9705
+    },
+    "Shabab Al Ahli": {
+      "stadium": "Rashid Stadium",
+      "city": "Dubai",
+      "country": "United Arab Emirates",
+      "lat": 25.23,
+      "lon": 55.33
+    },
+    "Shakhtar Donetsk": {
+      "stadium": "Arena Lviv (host)",
+      "city": "Lviv",
+      "country": "Ukraine",
+      "lat": 49.777,
+      "lon": 24.0277
+    },
+    "Sheffield United": {
+      "stadium": "Bramall Lane",
+      "city": "Sheffield",
+      "country": "England",
+      "lat": 53.3703,
+      "lon": -1.4709
+    },
+    "Simba SC": {
+      "stadium": "Benjamin Mkapa Stadium",
+      "city": "Dar es Salaam",
+      "country": "Tanzania",
+      "lat": -6.8639,
+      "lon": 39.275
+    },
+    "Sint-Truiden": {
+      "stadium": "Daknamstadion",
+      "city": "Sint-Truiden",
+      "country": "Belgium",
+      "lat": 50.8167,
+      "lon": 5.1833
+    },
+    "Siwelele": {
+      "stadium": "Charles Mopeli Stadium",
+      "city": "QwaQwa",
+      "country": "South Africa",
+      "lat": -28.5167,
+      "lon": 28.8667
+    },
+    "Slavia Prague": {
+      "stadium": "Fortuna Arena",
+      "city": "Prague",
+      "country": "Czechia",
+      "lat": 50.068,
+      "lon": 14.4717
+    },
+    "Southampton": {
+      "stadium": "St Mary's Stadium",
+      "city": "Southampton",
+      "country": "England",
+      "lat": 50.9058,
+      "lon": -1.3911
+    },
+    "Sparta Prague": {
+      "stadium": "epet Arena",
+      "city": "Prague",
+      "country": "Czechia",
+      "lat": 50.0997,
+      "lon": 14.4161
+    },
+    "Spartak Moscow": {
+      "stadium": "Lukoil Arena",
+      "city": "Moscow",
+      "country": "Russia",
+      "lat": 55.8181,
+      "lon": 37.4406
+    },
+    "Sporting CP": {
+      "stadium": "Estadio Jose Alvalade",
+      "city": "Lisbon",
+      "country": "Portugal",
+      "lat": 38.7613,
+      "lon": -9.161
+    },
+    "St. Pauli": {
+      "stadium": "Millerntor-Stadion",
+      "city": "Hamburg",
+      "country": "Germany",
+      "lat": 53.5547,
+      "lon": 9.9678
+    },
+    "Standard Liege": {
+      "stadium": "Stade Maurice Dufrasne",
+      "city": "Liege",
+      "country": "Belgium",
+      "lat": 50.6097,
+      "lon": 5.5436
+    },
+    "Stoke City": {
+      "stadium": "bet365 Stadium",
+      "city": "Stoke-on-Trent",
+      "country": "England",
+      "lat": 52.9883,
+      "lon": -2.1756
+    },
+    "Strasbourg": {
+      "stadium": "Stade de la Meinau",
+      "city": "Strasbourg",
+      "country": "France",
+      "lat": 48.5583,
+      "lon": 7.7547
+    },
+    "Sunderland": {
+      "stadium": "Stadium of Light",
+      "city": "Sunderland",
+      "country": "England",
+      "lat": 54.9145,
+      "lon": -1.3882
+    },
+    "Swansea City": {
+      "stadium": "Swansea.com Stadium",
+      "city": "Swansea",
+      "country": "Wales",
+      "lat": 51.6428,
+      "lon": -3.9347
+    },
+    "TP Mazembe": {
+      "stadium": "Stade TP Mazembe",
+      "city": "Lubumbashi",
+      "country": "DR Congo",
+      "lat": -11.6647,
+      "lon": 27.4794
+    },
+    "Tigres UANL": {
+      "stadium": "Estadio Universitario",
+      "city": "Monterrey",
+      "country": "Mexico",
+      "lat": 25.7222,
+      "lon": -100.3107
+    },
+    "Toluca": {
+      "stadium": "Estadio Nemesio Diez",
+      "city": "Toluca",
+      "country": "Mexico",
+      "lat": 19.2833,
+      "lon": -99.6667
+    },
+    "Tondela": {
+      "stadium": "Estadio Joao Cardoso",
+      "city": "Tondela",
+      "country": "Portugal",
+      "lat": 40.5167,
+      "lon": -8.0833
+    },
+    "Torino": {
+      "stadium": "Stadio Olimpico Grande Torino",
+      "city": "Turin",
+      "country": "Italy",
+      "lat": 45.0418,
+      "lon": 7.65
+    },
+    "Toronto FC": {
+      "stadium": "BMO Field",
+      "city": "Toronto",
+      "country": "Canada",
+      "lat": 43.6332,
+      "lon": -79.4185
+    },
+    "Tottenham Hotspur": {
+      "stadium": "Tottenham Hotspur Stadium",
+      "city": "London",
+      "country": "England",
+      "lat": 51.6043,
+      "lon": -0.0664
+    },
+    "Trabzonspor": {
+      "stadium": "Senol Gunes Stadium",
+      "city": "Trabzon",
+      "country": "Turkey",
+      "lat": 41.0136,
+      "lon": 39.6753
+    },
+    "Tractor": {
+      "stadium": "Yadegar-e Emam Stadium",
+      "city": "Tabriz",
+      "country": "Iran",
+      "lat": 38.0667,
+      "lon": 46.3
+    },
+    "Tunis": {
+      "stadium": "Stade Olympique de Rades",
+      "city": "Rades",
+      "country": "Tunisia",
+      "lat": 36.7667,
+      "lon": 10.2833
+    },
+    "Twente": {
+      "stadium": "De Grolsch Veste",
+      "city": "Enschede",
+      "country": "Netherlands",
+      "lat": 52.3383,
+      "lon": 6.7825
+    },
+    "UNAM": {
+      "stadium": "Estadio Olimpico Universitario",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "lat": 19.332,
+      "lon": -99.1944
+    },
+    "USM Alger": {
+      "stadium": "Stade du 5 Juillet",
+      "city": "Algiers",
+      "country": "Algeria",
+      "lat": 36.75,
+      "lon": 3.0667
+    },
+    "Ulsan HD": {
+      "stadium": "Munsu Football Stadium",
+      "city": "Ulsan",
+      "country": "South Korea",
+      "lat": 35.5347,
+      "lon": 129.2628
+    },
+    "Union Saint-Gilloise": {
+      "stadium": "Dender Football Complex",
+      "city": "Denderleeuw",
+      "country": "Belgium",
+      "lat": 50.8833,
+      "lon": 4.0667
+    },
+    "Urawa Red Diamonds": {
+      "stadium": "Saitama Stadium 2002",
+      "city": "Saitama",
+      "country": "Japan",
+      "lat": 35.9036,
+      "lon": 139.7172
+    },
+    "Utrecht": {
+      "stadium": "Stadion Galgenwaard",
+      "city": "Utrecht",
+      "country": "Netherlands",
+      "lat": 52.081,
+      "lon": 5.1486
+    },
+    "Valencia": {
+      "stadium": "Mestalla",
+      "city": "Valencia",
+      "country": "Spain",
+      "lat": 39.4748,
+      "lon": -0.3582
+    },
+    "Vancouver Whitecaps": {
+      "stadium": "BC Place",
+      "city": "Vancouver",
+      "country": "Canada",
+      "lat": 49.2768,
+      "lon": -123.1119
+    },
+    "Venezia": {
+      "stadium": "Stadio Pier Luigi Penzo",
+      "city": "Venice",
+      "country": "Italy",
+      "lat": 45.4278,
+      "lon": 12.3764
+    },
+    "VfB Stuttgart": {
+      "stadium": "MHPArena",
+      "city": "Stuttgart",
+      "country": "Germany",
+      "lat": 48.7923,
+      "lon": 9.232
+    },
+    "VfL Wolfsburg": {
+      "stadium": "Volkswagen Arena",
+      "city": "Wolfsburg",
+      "country": "Germany",
+      "lat": 52.4319,
+      "lon": 10.8038
+    },
+    "Viking": {
+      "stadium": "Viking Stadion",
+      "city": "Stavanger",
+      "country": "Norway",
+      "lat": 58.9,
+      "lon": 5.7333
+    },
+    "Viktoria Plzen": {
+      "stadium": "Doosan Arena",
+      "city": "Plzen",
+      "country": "Czechia",
+      "lat": 49.7475,
+      "lon": 13.3775
+    },
+    "Villarreal": {
+      "stadium": "Estadio de la Ceramica",
+      "city": "Villarreal",
+      "country": "Spain",
+      "lat": 39.9441,
+      "lon": -0.1035
+    },
+    "Volendam": {
+      "stadium": "Kras Stadion",
+      "city": "Volendam",
+      "country": "Netherlands",
+      "lat": 52.495,
+      "lon": 5.07
+    },
+    "Watford": {
+      "stadium": "Vicarage Road",
+      "city": "Watford",
+      "country": "England",
+      "lat": 51.6498,
+      "lon": -0.4015
+    },
+    "Wellington Phoenix": {
+      "stadium": "Sky Stadium",
+      "city": "Wellington",
+      "country": "New Zealand",
+      "lat": -41.2883,
+      "lon": 174.7761
+    },
+    "Werder Bremen": {
+      "stadium": "Weserstadion",
+      "city": "Bremen",
+      "country": "Germany",
+      "lat": 53.0664,
+      "lon": 8.8376
+    },
+    "West Ham United": {
+      "stadium": "London Stadium",
+      "city": "London",
+      "country": "England",
+      "lat": 51.5386,
+      "lon": -0.0166
+    },
+    "Westerlo": {
+      "stadium": "Het Kuipje",
+      "city": "Westerlo",
+      "country": "Belgium",
+      "lat": 51.0903,
+      "lon": 4.9606
+    },
+    "Wolverhampton Wanderers": {
+      "stadium": "Molineux",
+      "city": "Wolverhampton",
+      "country": "England",
+      "lat": 52.5903,
+      "lon": -2.1303
+    },
+    "Wrexham": {
+      "stadium": "SToK Cae Ras",
+      "city": "Wrexham",
+      "country": "Wales",
+      "lat": 53.0519,
+      "lon": -3.0036
+    },
+    "Wydad AC": {
+      "stadium": "Stade Mohammed V",
+      "city": "Casablanca",
+      "country": "Morocco",
+      "lat": 33.5519,
+      "lon": -7.6497
+    },
+    "Yokohama F. Marinos": {
+      "stadium": "Nissan Stadium",
+      "city": "Yokohama",
+      "country": "Japan",
+      "lat": 35.51,
+      "lon": 139.6063
+    },
+    "Young Boys": {
+      "stadium": "Wankdorf",
+      "city": "Bern",
+      "country": "Switzerland",
+      "lat": 46.9631,
+      "lon": 7.4656
+    },
+    "Zamalek": {
+      "stadium": "Cairo International Stadium",
+      "city": "Cairo",
+      "country": "Egypt",
+      "lat": 30.0686,
+      "lon": 31.3119
+    },
+    "Zenit Saint Petersburg": {
+      "stadium": "Gazprom Arena",
+      "city": "Saint Petersburg",
+      "country": "Russia",
+      "lat": 59.9727,
+      "lon": 30.2214
+    },
+    "Zhejiang": {
+      "stadium": "Yellow Dragon Sports Center",
+      "city": "Hangzhou",
+      "country": "China",
+      "lat": 30.2667,
+      "lon": 120.1667
+    },
+    "Çaykur Rizespor": {
+      "stadium": "Caykur Didi Stadium",
+      "city": "Rize",
+      "country": "Turkey",
+      "lat": 41.05,
+      "lon": 40.5167
+    },
+    "İstanbul Başakşehir": {
+      "stadium": "Basaksehir Fatih Terim Stadium",
+      "city": "Istanbul",
+      "country": "Turkey",
+      "lat": 41.0931,
+      "lon": 28.8042
+    }
   }
 }
