@@ -13,8 +13,8 @@ ground (name, position, **date of birth**, **age**, **caps**, **goals**).
 Flight paths are visual only — they do not have hovers.
 
 - **Capital markers** = national-team capitals, coloured by **confederation**
-  (UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC). **Click a capital** to draw arcs
-  out to that squad's clubs.
+  (UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC). **Click a capital dot** to draw
+  arcs out to that squad's clubs.
 - **Club dots** = always visible at each stadium with squad players. **Hover** a
   club for every nation and player at that ground. **Click a club** or **capital**
   to show the same great-circle arc for each linked pair (not two different

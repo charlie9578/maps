@@ -1,14 +1,9 @@
 """Plotly figure builder for the World Cup teams flight-path map.
 
-Trace layout (important: the hover/click JavaScript in main.py relies on it):
+Trace layout (indices passed to main.py via ``trace_layout``):
 
-    [0 .. R-1]        one great-circle arc per capital↔club link (shared by
-                      club and capital clicks; hidden until either end is selected)
-    [R]               club markers (always visible)
-    [R+1]             invisible enlarged click targets on clubs
-    [R+2]             capitals marker trace (visible flags)
-    [R+3]             invisible enlarged targets at capitals (click / hover)
-    [R+4 ..]          confederation legend dummy traces
+    arcs → clubs → club targets → capital dots → capital targets → legend →
+    **flag labels → flag targets** (topmost; wins clicks over paths/clubs)
 
 Flight paths are not clickable — only club and capital markers toggle arcs.
 """
@@ -186,11 +181,14 @@ def aggregate_stadium_sites(teams: list[Team]) -> list[dict]:
     return sites
 
 
-def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[dict], list[dict]]:
-    """Assemble the scattergeo figure; return stadium sites and route meta for main.py."""
+def build_figure(
+    tournament: str, teams: list[Team]
+) -> tuple[go.Figure, list[dict], list[dict], dict[str, int]]:
+    """Assemble the scattergeo figure; return sites, route meta, and trace indices."""
     fig = go.Figure()
     stadium_sites = aggregate_stadium_sites(teams)
     route_meta = build_route_meta(teams, stadium_sites)
+    trace_idx = 0
 
     stadium_hover = (
         "<b>%{customdata[0]}</b><br>"
@@ -218,7 +216,10 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
                     name=f"{team.nation} → {_clubs_label(route.clubs)}",
                 )
             )
+            trace_idx += 1
 
+    layout: dict[str, int] = {}
+    layout["club"] = trace_idx
     # 2) Club markers (always visible).
     fig.add_trace(
         go.Scattergeo(
@@ -238,7 +239,9 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
             name="clubs",
         )
     )
+    trace_idx += 1
 
+    layout["clubHit"] = trace_idx
     # 3) Invisible enlarged targets so clicks near a club still register.
     fig.add_trace(
         go.Scattergeo(
@@ -252,6 +255,7 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
             name="club-targets",
         )
     )
+    trace_idx += 1
 
     cap_customdata = [
         [t.nation, t.capital, t.confederation, t.n_players, t.n_destinations]
@@ -262,18 +266,16 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
         "Capital: %{customdata[1]}<br>"
         "%{customdata[2]}<br>"
         "%{customdata[3]} players at %{customdata[4]} clubs"
-        "<extra>click to show paths to clubs</extra>"
+        "<extra></extra>"
     )
 
-    # 4) Capitals (visible markers + flag labels).
+    layout["cap"] = trace_idx
+    # Capital dots (confederation colour; flags drawn in a later top layer).
     fig.add_trace(
         go.Scattergeo(
             lat=[t.lat for t in teams],
             lon=[t.lon for t in teams],
-            mode="markers+text",
-            text=[t.flag for t in teams],
-            textfont=dict(size=15),
-            textposition="top center",
+            mode="markers",
             marker=dict(
                 size=9,
                 color=[confed_color(t.confederation) for t in teams],
@@ -285,21 +287,22 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
             name="capitals",
         )
     )
+    trace_idx += 1
 
-    # 5) Invisible enlarged targets at capitals (click / hover).
+    layout["capHit"] = trace_idx
+    # Invisible enlarged targets at capitals (easier clicks near the dot).
     fig.add_trace(
         go.Scattergeo(
             lat=[t.lat for t in teams],
             lon=[t.lon for t in teams],
             mode="markers",
             marker=dict(size=26, color="rgba(0,0,0,0)", line=dict(width=0)),
-            customdata=cap_customdata,
-            text=[t.flag for t in teams],
-            hovertemplate=cap_hover,
+            hoverinfo="skip",
             showlegend=False,
             name="capital-targets",
         )
     )
+    trace_idx += 1
 
     for confed, color in CONFED_COLORS.items():
         fig.add_trace(
@@ -313,6 +316,42 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
                 hoverinfo="skip",
             )
         )
+        trace_idx += 1
+
+    layout["flag"] = trace_idx
+    # Flag labels on the top layer so they trump clubs and flight paths.
+    fig.add_trace(
+        go.Scattergeo(
+            lat=[t.lat for t in teams],
+            lon=[t.lon for t in teams],
+            mode="text",
+            text=[t.flag for t in teams],
+            textfont=dict(size=16),
+            textposition="top center",
+            customdata=cap_customdata,
+            hovertemplate=cap_hover,
+            hoverlabel=dict(bgcolor="#1e293b", font=dict(color="#e2e8f0")),
+            showlegend=False,
+            name="flags",
+        )
+    )
+    trace_idx += 1
+
+    layout["flagHit"] = trace_idx
+    # Invisible targets over flags (topmost trace — highest click priority).
+    fig.add_trace(
+        go.Scattergeo(
+            lat=[t.lat for t in teams],
+            lon=[t.lon for t in teams],
+            mode="markers",
+            marker=dict(size=30, color="rgba(0,0,0,0)", line=dict(width=0)),
+            customdata=cap_customdata,
+            text=[t.flag for t in teams],
+            hovertemplate=cap_hover,
+            showlegend=False,
+            name="flag-targets",
+        )
+    )
 
     fig.update_geos(
         projection_type="natural earth",
@@ -354,4 +393,4 @@ def build_figure(tournament: str, teams: list[Team]) -> tuple[go.Figure, list[di
         ),
         margin=dict(l=0, r=0, t=70, b=30),
     )
-    return fig, stadium_sites, route_meta
+    return fig, stadium_sites, route_meta, layout

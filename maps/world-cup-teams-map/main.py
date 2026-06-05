@@ -29,10 +29,13 @@ var R = __R__;
 var S = __S__;
 var N = __N__;
 var ROUTE_META = __ROUTE_META__;
-var clubIdx = R;
-var clubHitIdx = R + 1;
-var capIdx = R + 2;
-var capHitIdx = R + 3;
+var T = __TRACE_LAYOUT__;
+var clubIdx = T.club;
+var clubHitIdx = T.clubHit;
+var capIdx = T.cap;
+var capHitIdx = T.capHit;
+var flagIdx = T.flag;
+var flagHitIdx = T.flagHit;
 var selectedClubs = {};
 var selectedTeams = {};
 
@@ -130,7 +133,7 @@ gd.on('plotly_click', function (ev) {
     var curve = p.curveNumber;
     if (curve === clubIdx || curve === clubHitIdx) {
         toggleClub(p.pointNumber);
-    } else if (curve === capHitIdx) {
+    } else if (curve === capIdx || curve === capHitIdx || curve === flagIdx || curve === flagHitIdx) {
         toggleTeam(p.pointNumber);
     }
 });
@@ -140,12 +143,13 @@ gd.on('plotly_click', function (ev) {
 def write_map(output_path: Path) -> Path:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     tournament, teams = build_teams(strict=False)
-    fig, stadium_sites, route_meta = build_figure(tournament, teams)
+    fig, stadium_sites, route_meta, trace_layout = build_figure(tournament, teams)
     post_script = (
         CLICK_SCRIPT.replace("__R__", str(len(route_meta)))
         .replace("__S__", str(len(stadium_sites)))
         .replace("__N__", str(len(teams)))
         .replace("__ROUTE_META__", json.dumps(route_meta))
+        .replace("__TRACE_LAYOUT__", json.dumps(trace_layout))
     )
     fig.write_html(
         output_path,
