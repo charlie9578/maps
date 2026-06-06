@@ -3,8 +3,9 @@
 Run from repo root:
     python maps/world-cup-teams-map/fetch_squads.py
 
-Requires network access. Does not modify clubs.json — run data_processing.py
-afterwards to list clubs that still need coordinates.
+Requires network access. Extracts club Wikipedia links from the squad tables
+and writes data/club_wiki.json. Does not modify clubs.json — run enrich_clubs.py
+afterwards, then data_processing.py to list any clubs still missing.
 """
 
 from __future__ import annotations
@@ -13,12 +14,12 @@ import json
 import re
 import sys
 from datetime import datetime
-from io import StringIO
 from pathlib import Path
 
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+
+from enrich_clubs import CLUB_WIKI_JSON, canonical_club, wiki_title_from_href
 
 MAP_DIR = Path(__file__).resolve().parent
 DATA_DIR = MAP_DIR / "data"
@@ -369,64 +370,6 @@ NATIONS: dict[str, dict] = {
     },
 }
 
-# Wikipedia club label -> clubs.json key (extend as needed when parsing new squads).
-CLUB_ALIASES: dict[str, str] = {
-    "PSV Eindhoven": "PSV",
-    "TSG 1899 Hoffenheim": "Hoffenheim",
-    "TSG Hoffenheim": "Hoffenheim",
-    "Bayer 04 Leverkusen": "Bayer Leverkusen",
-    "SK Slavia Prague": "Slavia Prague",
-    "AC Sparta Prague": "Sparta Prague",
-    "FC Viktoria Plzeň": "Viktoria Plzen",
-    "FC Viktoria Plzen": "Viktoria Plzen",
-    "FC Hradec Králové": "Hradec Kralove",
-    "Olympique Lyonnais": "Lyon",
-    "S.C. Braga": "Braga",
-    "West Ham United F.C.": "West Ham United",
-    "Wolverhampton Wanderers F.C.": "Wolverhampton Wanderers",
-    "Burnley F.C.": "Burnley",
-    "Fulham F.C.": "Fulham",
-    "Birmingham City F.C.": "Birmingham City",
-    "C.D. Guadalajara": "Guadalajara",
-    "Club América": "Club America",
-    "Deportivo Toluca FC": "Toluca",
-    "Santos Laguna": "Santos Laguna",
-    "AEL Limassol": "AEL Limassol",
-    "Al Qadsiah FC": "Al Qadsiah",
-    "PAOK FC": "PAOK",
-    "FC Lokomotiv Moscow": "Lokomotiv Moscow",
-    "Fenerbahçe S.K. (football)": "Fenerbahce",
-    "Genoa CFC": "Genoa",
-    "Real Betis": "Real Betis",
-    "Atlético Madrid": "Atletico Madrid",
-    "AZ Alkmaar": "AZ",
-    "RSC Anderlecht": "Anderlecht",
-    "Pumas UNAM": "Pumas UNAM",
-    "FC Dynamo Moscow": "Dynamo Moscow",
-    "AEK Athens F.C.": "AEK Athens",
-    "FC Bayern Munich": "Bayern Munich",
-    "FC Midtjylland": "Midtjylland",
-    "Los Angeles FC": "Los Angeles FC",
-    "1. FSV Mainz 05": "Mainz 05",
-    "FK Austria Wien": "Austria Wien",
-    "FC Tokyo": "FC Tokyo",
-    "Kashima Antlers": "Kashima Antlers",
-    "Gangwon FC": "Gangwon FC",
-    "Jeonbuk Hyundai Motors": "Jeonbuk Hyundai Motors",
-    "Daejeon Hana Citizen": "Daejeon Hana Citizen",
-    "Zhejiang Professional F.C.": "Zhejiang",
-    "Mamelodi Sundowns F.C.": "Mamelodi Sundowns",
-    "Orlando Pirates F.C.": "Orlando Pirates",
-    "Polokwane City F.C.": "Polokwane City",
-    "Chicago Fire FC": "Chicago Fire",
-    "Philadelphia Union": "Philadelphia Union",
-    "Molde FK": "Molde",
-    "Hannover 96": "Hannover 96",
-    "C.D. Tondela": "Tondela",
-    "Siwelele F.C.": "Siwelele",
-    "Kaizer Chiefs F.C.": "Kaizer Chiefs",
-}
-
 POS_MAP = {"1": "GK", "2": "DF", "3": "MF", "4": "FW"}
 AGE_RE = re.compile(r"\(aged\s+(\d+)\)")
 DOB_ISO_RE = re.compile(r"\((\d{4}-\d{2}-\d{2})\)")
@@ -435,7 +378,7 @@ POS_NUM_RE = re.compile(r"^(\d)")
 
 
 def _cell_text(value: object) -> str:
-    if pd.isna(value):
+    if value is None:
         return ""
     return str(value).strip()
 
@@ -486,43 +429,61 @@ def _parse_int(raw: object) -> int | None:
         return None
 
 
-def _parse_club(raw: str) -> str:
-    """Extract club name from Wikipedia's club cell (often federation + club)."""
-    text = _cell_text(raw)
-    if not text:
-        return text
-    # pandas may flatten links to "Federation Club" — take segment after last known federation noise.
-    parts = re.split(r"\s{2,}|\n", text)
-    club = parts[-1].strip() if parts else text
-    # Strip trailing parenthetical disambiguators from link text.
-    club = re.sub(r"\s*\([^)]*\)\s*$", "", club).strip()
-    return CLUB_ALIASES.get(club, club)
+def _parse_club_cell(cell) -> tuple[str, str | None]:
+    """Club display name and Wikipedia page title from the squad-table club cell."""
+    links = [
+        anchor
+        for anchor in cell.find_all("a", href=True)
+        if anchor["href"].startswith("/wiki/")
+    ]
+    if links:
+        club_link = links[-1]
+        name = club_link.get_text(strip=True)
+        wiki_title = wiki_title_from_href(club_link["href"])
+    else:
+        name = cell.get_text(" ", strip=True)
+        wiki_title = None
+    name = re.sub(r"\s*\([^)]*\)\s*$", "", name).strip()
+    return canonical_club(name), wiki_title
 
 
-def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    rename: dict[str, str] = {}
-    for col in df.columns:
-        lower = str(col).lower()
-        if lower.startswith("no"):
-            rename[col] = "no"
-        elif "pos" in lower:
-            rename[col] = "pos"
-        elif lower == "player":
-            rename[col] = "player"
-        elif "date" in lower and "birth" in lower:
-            rename[col] = "dob"
-        elif lower == "club":
-            rename[col] = "club"
-        elif lower == "caps":
-            rename[col] = "caps"
-        elif lower == "goals":
-            rename[col] = "goals"
-    return df.rename(columns=rename)
+def _parse_player_row(row) -> dict | None:
+    """Parse one squad-table row; return None for header or malformed rows."""
+    cells = row.find_all(["td", "th"])
+    if len(cells) < 7:
+        return None
 
+    name = cells[2].get_text(" ", strip=True)
+    name = re.sub(r"\s*\(captain\)\s*$", "", name, flags=re.IGNORECASE).strip()
+    if not name:
+        return None
 
-def _is_squad_table(df: pd.DataFrame) -> bool:
-    cols = {str(c).lower() for c in df.columns}
-    return "player" in cols and any("club" in c for c in cols)
+    dob_cell = cells[3].get_text(" ", strip=True)
+    club, club_wiki = _parse_club_cell(cells[6])
+    entry: dict = {
+        "name": name,
+        "pos": _parse_position(cells[1].get_text(" ", strip=True)),
+        "club": club,
+    }
+    if club_wiki:
+        entry["club_wiki"] = club_wiki
+
+    no = _parse_int(cells[0].get_text(" ", strip=True))
+    caps = _parse_int(cells[4].get_text(" ", strip=True))
+    goals = _parse_int(cells[5].get_text(" ", strip=True))
+    dob = _parse_dob(dob_cell)
+    age = _parse_age(dob_cell)
+    if no is not None:
+        entry["no"] = no
+    if dob is not None:
+        entry["dob"] = dob
+    if age is not None:
+        entry["age"] = age
+    if caps is not None:
+        entry["caps"] = caps
+    if goals is not None:
+        entry["goals"] = goals
+    return entry
 
 
 def fetch_squads_from_wikipedia() -> list[dict]:
@@ -540,69 +501,37 @@ def fetch_squads_from_wikipedia() -> list[dict]:
     if content is None:
         raise RuntimeError("Could not find Wikipedia article body")
 
-    squad_tables: list[tuple[str, pd.DataFrame]] = []
+    parsed_nations = 0
 
     for heading in content.find_all("h3"):
-        title = heading.get_text(strip=True)
-        if title not in NATIONS:
+        nation = heading.get_text(strip=True)
+        if nation not in NATIONS:
             continue
         table = heading.find_next("table", class_="wikitable")
         if table is None:
             continue
-        try:
-            df_list = pd.read_html(StringIO(str(table)))
-        except ValueError:
+        rows = table.find_all("tr")[1:]
+        if len(rows) < 20:
             continue
-        if not df_list:
+
+        players: list[dict] = []
+        for row in rows:
+            entry = _parse_player_row(row)
+            if entry is not None:
+                players.append(entry)
+        if len(players) < 20:
             continue
-        df = _normalize_columns(df_list[0])
-        if _is_squad_table(df) and len(df) >= 20:
-            squad_tables.append((title, df))
 
-    if len(squad_tables) != 48:
-        print(
-            f"Warning: expected 48 squad tables, parsed {len(squad_tables)}",
-            file=sys.stderr,
-        )
-
-    for nation, df in squad_tables:
         if nation in seen:
             continue
         seen.add(nation)
-        meta = NATIONS[nation]
-        players: list[dict] = []
-        for _, row in df.iterrows():
-            name = _cell_text(row.get("player", ""))
-            name = re.sub(r"\s*\(captain\)\s*$", "", name, flags=re.IGNORECASE).strip()
-            if not name:
-                continue
-            dob_cell = _cell_text(row.get("dob", ""))
-            pos = _parse_position(_cell_text(row.get("pos", "")))
-            dob = _parse_dob(dob_cell)
-            age = _parse_age(dob_cell)
-            club = _parse_club(row.get("club", ""))
-            no = _parse_int(row.get("no"))
-            caps = _parse_int(row.get("caps"))
-            goals = _parse_int(row.get("goals"))
-            entry: dict = {"name": name, "pos": pos, "club": club}
-            if no is not None:
-                entry["no"] = no
-            if dob is not None:
-                entry["dob"] = dob
-            if age is not None:
-                entry["age"] = age
-            if caps is not None:
-                entry["caps"] = caps
-            if goals is not None:
-                entry["goals"] = goals
-            players.append(entry)
+        parsed_nations += 1
+        teams.append({"nation": nation, **NATIONS[nation], "players": players})
 
-        teams.append(
-            {
-                "nation": nation,
-                **meta,
-                "players": players,
-            }
+    if parsed_nations != 48:
+        print(
+            f"Warning: expected 48 squad tables, parsed {parsed_nations}",
+            file=sys.stderr,
         )
 
     missing_meta = set(NATIONS) - seen
@@ -613,18 +542,22 @@ def fetch_squads_from_wikipedia() -> list[dict]:
     return teams
 
 
+def _build_club_wiki_index(teams: list[dict]) -> dict[str, str]:
+    index: dict[str, str] = {}
+    for team in teams:
+        for player in team["players"]:
+            wiki = player.get("club_wiki")
+            if wiki:
+                index.setdefault(player["club"], wiki)
+    return dict(sorted(index.items()))
+
+
 def write_squads(teams: list[dict]) -> None:
-    from enrich_clubs import apply_aliases_to_squads
-
-    squad_payload_teams = teams
-    tmp = {"teams": squad_payload_teams}
-    apply_aliases_to_squads(tmp)
-    teams = tmp["teams"]
-
     payload = {
         "_comment": (
             "Official 2026 FIFA World Cup squads (26 players per nation). "
             "Parsed from Wikipedia; club names must match keys in clubs.json. "
+            "club_wiki is the linked Wikipedia article title from the squad page. "
             "Age is as of 11 June 2026 (tournament opening day); caps/goals exclude "
             "matches after tournament start, per FIFA/Wikipedia."
         ),
@@ -635,6 +568,24 @@ def write_squads(teams: list[dict]) -> None:
     }
     SQUADS_JSON.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    wiki_index = _build_club_wiki_index(teams)
+    CLUB_WIKI_JSON.write_text(
+        json.dumps(
+            {
+                "_comment": (
+                    "Canonical clubs.json keys mapped to Wikipedia article titles "
+                    "from the squad page club links. Used by enrich_clubs.py."
+                ),
+                "source": SOURCE,
+                "clubs": wiki_index,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
         encoding="utf-8",
     )
 

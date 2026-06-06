@@ -1,10 +1,13 @@
-"""Add missing squad clubs to clubs.json using Wikipedia stadium coordinates.
+"""Add missing squad clubs to clubs.json using squad-page Wikipedia links.
 
 Run after fetch_squads.py:
     python maps/world-cup-teams-map/enrich_clubs.py
 
-Uses the Wikipedia API (network required). Clubs that cannot be resolved are
-listed for manual entry in clubs.json.
+fetch_squads.py stores each player's ``club_wiki`` title (from the squad table
+link on Wikipedia) and writes ``data/club_wiki.json``. This script resolves
+those titles to stadium coordinates via Wikipedia/Wikidata (P115 home venue),
+falling back to title search only when no link is available. Clubs that cannot
+be resolved are listed for manual entry in clubs.json or seed_clubs.py.
 """
 
 from __future__ import annotations
@@ -20,9 +23,18 @@ MAP_DIR = Path(__file__).resolve().parent
 DATA_DIR = MAP_DIR / "data"
 SQUADS_JSON = DATA_DIR / "squads.json"
 CLUBS_JSON = DATA_DIR / "clubs.json"
+CLUB_WIKI_JSON = DATA_DIR / "club_wiki.json"
 
 WIKI_API = "https://en.wikipedia.org/w/api.php"
+WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 USER_AGENT = "maps-world-cup-teams/1.0 (educational map; github.com/maps)"
+# Space out every Wikipedia API call (each club lookup uses several).
+MIN_REQUEST_GAP = 1.0
+_last_wiki_request = 0.0
+
+
+class WikiRateLimitedError(Exception):
+    """Raised when Wikipedia returns 429 after retries."""
 
 # Wikipedia / FIFA label -> clubs.json key (existing or preferred canonical name).
 CLUB_ALIASES: dict[str, str] = {
@@ -55,9 +67,11 @@ CLUB_ALIASES: dict[str, str] = {
     "Olympique Marseille": "Marseille",
     "Bayer 04 Leverkusen": "Bayer Leverkusen",
     "TSG 1899 Hoffenheim": "Hoffenheim",
+    "TSG Hoffenheim": "Hoffenheim",
     "SK Slavia Prague": "Slavia Prague",
     "AC Sparta Prague": "Sparta Prague",
     "FC Viktoria Plzeň": "Viktoria Plzen",
+    "Viktoria Plzeň": "Viktoria Plzen",
     "RSC Anderlecht": "Anderlecht",
     "Mamelodi Sundowns F.C.": "Mamelodi Sundowns",
     "Orlando Pirates F.C.": "Orlando Pirates",
@@ -71,6 +85,11 @@ CLUB_ALIASES: dict[str, str] = {
     "Fenerbahçe": "Fenerbahce",
     "Beşiktaş": "Besiktas",
     "PAOK FC": "PAOK",
+    "AZ Alkmaar": "AZ",
+    "FK Austria Wien": "Austria Wien",
+    "Al Qadsiah FC": "Al Qadsiah",
+    "FC Lokomotiv Moscow": "Lokomotiv Moscow",
+    "FC Dynamo Moscow": "Dynamo Moscow",
     "AEK Athens F.C.": "AEK Athens",
     "FC Bayern Munich": "Bayern Munich",
     "Birmingham City F.C.": "Birmingham City",
@@ -242,24 +261,39 @@ CLUB_ALIASES: dict[str, str] = {
 SEARCH_SUFFIXES = ("FC", "football club", "stadium")
 
 
-def _wiki_get(params: dict, *, retries: int = 5) -> dict:
+def _api_get(api: str, params: dict, *, retries: int = 5) -> dict:
+    global _last_wiki_request
     query = urllib.parse.urlencode({**params, "format": "json"})
     req = urllib.request.Request(
-        f"{WIKI_API}?{query}",
+        f"{api}?{query}",
         headers={"User-Agent": USER_AGENT},
     )
-    delay = 2.0
+    delay = 5.0
     for attempt in range(retries):
+        gap = MIN_REQUEST_GAP - (time.monotonic() - _last_wiki_request)
+        if gap > 0:
+            time.sleep(gap)
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
+                _last_wiki_request = time.monotonic()
                 return json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
-            if exc.code == 429 and attempt < retries - 1:
-                time.sleep(delay)
-                delay *= 2
-                continue
+            if exc.code == 429:
+                if attempt < retries - 1:
+                    time.sleep(delay)
+                    delay *= 2
+                    continue
+                raise WikiRateLimitedError("Wikipedia API rate limit (429)") from exc
             raise
     raise RuntimeError("Wikipedia API retries exhausted")
+
+
+def _wiki_get(params: dict, *, retries: int = 5) -> dict:
+    return _api_get(WIKI_API, params, retries=retries)
+
+
+def _wikidata_get(params: dict, *, retries: int = 5) -> dict:
+    return _api_get(WIKIDATA_API, params, retries=retries)
 
 
 def _page_coords(title: str) -> tuple[float, float] | None:
@@ -324,8 +358,136 @@ def _infer_location(title: str) -> tuple[str, str]:
     return "Unknown", "Unknown"
 
 
-def lookup_club(label: str) -> dict | None:
+def wiki_title_from_href(href: str) -> str | None:
+    """Decode a /wiki/... href to a Wikipedia page title."""
+    if not href.startswith("/wiki/"):
+        return None
+    slug = urllib.parse.unquote(href.removeprefix("/wiki/").split("#", maxsplit=1)[0])
+    return slug.replace("_", " ")
+
+
+def club_wiki_map(squads: dict) -> dict[str, str]:
+    """Canonical club name -> Wikipedia page title (from squad page links)."""
+    mapping: dict[str, str] = {}
+    for team in squads.get("teams", []):
+        for player in team.get("players", []):
+            wiki = player.get("club_wiki")
+            if not wiki:
+                continue
+            key = canonical_club(player["club"])
+            mapping.setdefault(key, wiki)
+    if CLUB_WIKI_JSON.exists():
+        file_map = _load_json(CLUB_WIKI_JSON).get("clubs", {})
+        for key, wiki in file_map.items():
+            mapping.setdefault(canonical_club(key), wiki)
+    return mapping
+
+
+def _wikibase_qid(title: str) -> str | None:
+    data = _wiki_get(
+        {
+            "action": "query",
+            "titles": title,
+            "prop": "pageprops",
+            "ppprop": "wikibase_item",
+        }
+    )
+    for page in data.get("query", {}).get("pages", {}).values():
+        return page.get("pageprops", {}).get("wikibase_item")
+    return None
+
+
+def _wd_entity(qid: str) -> dict:
+    data = _wikidata_get(
+        {"action": "wbgetentities", "ids": qid, "props": "claims|labels"}
+    )
+    return data.get("entities", {}).get(qid, {})
+
+
+def _wd_label(entity: dict, *, lang: str = "en") -> str:
+    return entity.get("labels", {}).get(lang, {}).get("value", "Unknown")
+
+
+def _wd_claim_qid(entity: dict, prop: str) -> str | None:
+    claims = entity.get("claims", {}).get(prop, [])
+    if not claims:
+        return None
+    value = claims[0]["mainsnak"]["datavalue"]["value"]
+    if isinstance(value, dict) and "id" in value:
+        return value["id"]
+    return None
+
+
+def _wd_claim_coords(entity: dict) -> tuple[float, float] | None:
+    claims = entity.get("claims", {}).get("P625", [])
+    if not claims:
+        return None
+    value = claims[0]["mainsnak"]["datavalue"]["value"]
+    return float(value["latitude"]), float(value["longitude"])
+
+
+def _club_info_from_wikidata(title: str) -> dict | None:
+    """Home venue + coordinates via Wikidata (P115/P625) for a Wikipedia title."""
+    qid = _wikibase_qid(title)
+    if not qid:
+        return None
+    club = _wd_entity(qid)
+    stadium_qid = _wd_claim_qid(club, "P115")
+    if not stadium_qid:
+        return None
+    stadium = _wd_entity(stadium_qid)
+    coords = _wd_claim_coords(stadium)
+    if coords is None:
+        return None
+    country_qid = _wd_claim_qid(club, "P17")
+    city_qid = _wd_claim_qid(stadium, "P131")
+    country = _wd_label(_wd_entity(country_qid)) if country_qid else "Unknown"
+    city = _wd_label(_wd_entity(city_qid)) if city_qid else "Unknown"
+    lat, lon = coords
+    return {
+        "stadium": _wd_label(stadium),
+        "city": city,
+        "country": country,
+        "lat": round(lat, 4),
+        "lon": round(lon, 4),
+    }
+
+
+def _club_info_from_title(title: str) -> dict | None:
+    """Resolve a known Wikipedia page title to stadium metadata."""
+    coords = _page_coords(title)
+    resolved_title = title
+    if coords is None:
+        for candidate in (f"{title} Stadium", f"{title} (stadium)"):
+            coords = _page_coords(candidate)
+            if coords:
+                resolved_title = candidate
+                break
+    if coords is not None:
+        city, country = _infer_location(resolved_title)
+        lat, lon = coords
+        stadium = (
+            resolved_title
+            if "stadium" in resolved_title.lower()
+            else f"{resolved_title} (home)"
+        )
+        return {
+            "stadium": stadium,
+            "city": city,
+            "country": country,
+            "lat": round(lat, 4),
+            "lon": round(lon, 4),
+        }
+    return _club_info_from_wikidata(title)
+
+
+def lookup_club(label: str, *, wiki_title: str | None = None) -> dict | None:
     """Resolve club label to stadium metadata via Wikipedia."""
+    if wiki_title:
+        info = _club_info_from_title(wiki_title)
+        if info is not None:
+            return info
+
     candidates = [label]
     for suffix in SEARCH_SUFFIXES:
         candidates.append(f"{label} {suffix}")
@@ -334,26 +496,9 @@ def lookup_club(label: str) -> dict | None:
         title = _search_title(query)
         if not title:
             continue
-        coords = _page_coords(title)
-        if coords is None:
-            # Try "<Club> Stadium" if the club page lacks coordinates.
-            stadium_title = _search_title(f"{label} Stadium")
-            if stadium_title:
-                coords = _page_coords(stadium_title)
-                if coords:
-                    title = stadium_title
-        if coords is None:
-            continue
-        city, country = _infer_location(title)
-        lat, lon = coords
-        stadium = title if "stadium" in title.lower() else f"{title} (home)"
-        return {
-            "stadium": stadium,
-            "city": city,
-            "country": country,
-            "lat": round(lat, 4),
-            "lon": round(lon, 4),
-        }
+        info = _club_info_from_title(title)
+        if info is not None:
+            return info
     return None
 
 
@@ -406,28 +551,35 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    wiki_map = club_wiki_map(squads)
     missing = missing_club_names(squads, clubs)
-    print(f"{len(missing)} clubs to resolve via Wikipedia")
+    with_wiki = sum(1 for name in missing if name in wiki_map)
+    print(f"{len(missing)} clubs to resolve via Wikipedia ({with_wiki} with squad-page links)")
 
     added = 0
     failed: list[str] = []
     for i, name in enumerate(missing):
+        print(f"  [{i + 1}/{len(missing)}] resolving {name}…", flush=True)
         try:
-            info = lookup_club(name)
-        except urllib.error.HTTPError:
-            print(f"  rate-limited at {name}; saving progress and stopping", flush=True)
+            info = lookup_club(name, wiki_title=wiki_map.get(name))
+        except WikiRateLimitedError:
+            print(
+                f"  rate-limited at {name}; saved {added} new clubs — re-run later to continue",
+                flush=True,
+            )
             _save_clubs(clubs)
-            raise
+            return
         if info is None:
             failed.append(name)
+            print(f"           skip (no coordinates found)", flush=True)
         else:
             clubs[name] = info
             added += 1
-            if added % 10 == 0:
-                _save_clubs(clubs)
-        if (i + 1) % 20 == 0:
-            print(f"  … {i + 1}/{len(missing)} queried, {added} added", flush=True)
-        time.sleep(1.2)
+            _save_clubs(clubs)
+            print(
+                f"           + {info['stadium']}, {info['city']}, {info['country']}",
+                flush=True,
+            )
 
     _save_clubs(clubs)
     print(f"Added {added} clubs to {CLUBS_JSON}")

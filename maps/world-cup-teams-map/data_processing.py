@@ -55,6 +55,10 @@ class Team:
     lat: float
     lon: float
     routes: list[DestinationRoute] = field(default_factory=list)
+    squad: list[
+        tuple[int | None, str, str, str | None, int | None, int | None, int | None, str]
+    ] = field(default_factory=list)
+    # Full official squad (shirt no., name, pos, dob, age, caps, goals, club).
 
     @property
     def n_players(self) -> int:
@@ -232,6 +236,25 @@ def build_teams(*, strict: bool = True) -> tuple[str, list[Team]]:
             lat=float(raw["lat"]),
             lon=float(raw["lon"]),
         )
+        squad_rows: list[
+            tuple[int | None, str, str, str | None, int | None, int | None, int | None, str]
+        ] = []
+        for player in raw["players"]:
+            squad_rows.append(
+                (
+                    player.get("no"),
+                    player["name"],
+                    player.get("pos", ""),
+                    player.get("dob"),
+                    player.get("age"),
+                    player.get("caps"),
+                    player.get("goals"),
+                    player["club"],
+                )
+            )
+        squad_rows.sort(key=lambda row: (row[0] is None, row[0] if row[0] is not None else 999))
+        team.squad = squad_rows
+
         grouped: dict[tuple[float, float], dict] = {}
         for player in raw["players"]:
             club = clubs.get(player["club"])

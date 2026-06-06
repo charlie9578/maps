@@ -53,27 +53,56 @@ def _format_dob(iso: str | None) -> str | None:
     return f"b. {d.day} {d.strftime('%b %Y')}"
 
 
+def _player_line_bits(
+    no: int | None,
+    name: str,
+    pos: str,
+    dob: str | None,
+    age: int | None,
+    caps: int | None,
+    goals: int | None,
+    *,
+    club: str | None = None,
+) -> str:
+    bits: list[str] = []
+    if no is not None:
+        bits.append(f"#{no}")
+    bits.append(name)
+    if pos:
+        bits.append(pos)
+    dob_label = _format_dob(dob)
+    if dob_label:
+        bits.append(dob_label)
+    if age is not None:
+        bits.append(f"age {age}")
+    if caps is not None:
+        bits.append(f"{caps} caps")
+    if goals is not None:
+        bits.append(f"{goals} goals")
+    if club:
+        bits.append(club)
+    return " · ".join(bits)
+
+
 def _players_label(
     players: list[tuple[int | None, str, str, str | None, int | None, int | None, int | None]],
 ) -> str:
-    lines: list[str] = []
-    for no, name, pos, dob, age, caps, goals in players:
-        bits: list[str] = []
-        if no is not None:
-            bits.append(f"#{no}")
-        bits.append(name)
-        if pos:
-            bits.append(pos)
-        dob_label = _format_dob(dob)
-        if dob_label:
-            bits.append(dob_label)
-        if age is not None:
-            bits.append(f"age {age}")
-        if caps is not None:
-            bits.append(f"{caps} caps")
-        if goals is not None:
-            bits.append(f"{goals} goals")
-        lines.append(" · ".join(bits))
+    lines = [
+        _player_line_bits(no, name, pos, dob, age, caps, goals)
+        for no, name, pos, dob, age, caps, goals in players
+    ]
+    return "<br>".join(lines)
+
+
+def _squad_label(
+    players: list[
+        tuple[int | None, str, str, str | None, int | None, int | None, int | None, str]
+    ],
+) -> str:
+    lines = [
+        _player_line_bits(no, name, pos, dob, age, caps, goals, club=club)
+        for no, name, pos, dob, age, caps, goals, club in players
+    ]
     return "<br>".join(lines)
 
 
@@ -195,7 +224,7 @@ def build_figure(
         "%{customdata[1]}<br>"
         "%{customdata[2]}<br><br>"
         "%{customdata[3]}"
-        "<extra>click for flight paths</extra>"
+        "<extra></extra>"
     )
 
     # 1) One arc per capital↔club link (shown when either endpoint is selected).
@@ -258,14 +287,23 @@ def build_figure(
     trace_idx += 1
 
     cap_customdata = [
-        [t.nation, t.capital, t.confederation, t.n_players, t.n_destinations]
+        [
+            t.nation,
+            t.capital,
+            t.confederation,
+            t.n_players,
+            t.n_destinations,
+            _squad_label(t.squad),
+        ]
         for t in teams
     ]
     cap_hover = (
         "<b>%{customdata[0]}</b> %{text}<br>"
         "Capital: %{customdata[1]}<br>"
         "%{customdata[2]}<br>"
-        "%{customdata[3]} players at %{customdata[4]} clubs"
+        "%{customdata[3]} players at %{customdata[4]} clubs<br><br>"
+        "<b>Squad</b><br>"
+        "%{customdata[5]}"
         "<extra></extra>"
     )
 

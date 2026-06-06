@@ -61,7 +61,7 @@ When FIFA publishes squad updates, re-fetch from Wikipedia and enrich club coord
 ```bash
 python maps/world-cup-teams-map/fetch_squads.py
 python maps/world-cup-teams-map/seed_clubs.py     # curated coordinates for common clubs
-python maps/world-cup-teams-map/enrich_clubs.py   # optional: fill gaps via Wikipedia API
+python maps/world-cup-teams-map/enrich_clubs.py   # fill gaps via squad-page Wikipedia links
 python maps/world-cup-teams-map/data_processing.py  # list any clubs still missing
 python maps/world-cup-teams-map/main.py
 ```
@@ -77,8 +77,9 @@ Coordinates only need city/stadium-level precision because the map is global —
 being within the right city is visually exact at world scale.
 
 Players whose club is not yet in `clubs.json` are skipped (no flight path). After
-`fetch_squads.py`, run `seed_clubs.py` and optionally `enrich_clubs.py` to improve
-coverage; re-run `data_processing.py` to see what is still missing.
+`fetch_squads.py` (which also writes `data/club_wiki.json` from squad-page club
+links), run `seed_clubs.py` and `enrich_clubs.py` to improve coverage; re-run
+`data_processing.py` to see what is still missing.
 
 ## Data sources & caveats
 
