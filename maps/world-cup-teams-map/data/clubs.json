@@ -876,6 +876,13 @@
       "lat": -23.5453,
       "lon": -46.4742
     },
+    "Cosmos Koblenz": {
+      "stadium": "Stadion Oberwerth",
+      "city": "Koblenz",
+      "country": "Germany",
+      "lat": 50.3305,
+      "lon": 7.5866
+    },
     "Coventry City": {
       "stadium": "Coventry Building Society Arena",
       "city": "Coventry",
@@ -2318,6 +2325,13 @@
       "lat": 50.7964,
       "lon": -1.0639
     },
+    "Puerto Cabello": {
+      "stadium": "Complejo Deportivo Socialista",
+      "city": "Puerto Cabello",
+      "country": "Venezuela",
+      "lat": 10.468,
+      "lon": -68.0098
+    },
     "Pumas UNAM": {
       "stadium": "Estadio Olimpico Universitario",
       "city": "Mexico City",
@@ -2359,6 +2373,13 @@
       "country": "Netherlands",
       "lat": 51.6833,
       "lon": 5.0667
+    },
+    "RS Berkane": {
+      "stadium": "Stade Municipal de Berkane",
+      "city": "Berkane",
+      "country": "Morocco",
+      "lat": 34.917,
+      "lon": -2.317
     },
     "Racing Santander": {
       "stadium": "Campos de Sport de El Sardinero",
@@ -2821,6 +2842,13 @@
       "country": "England",
       "lat": 54.9145,
       "lon": -1.3882
+    },
+    "Surkhon Termiz": {
+      "stadium": "Surkhon Arena",
+      "city": "Termez",
+      "country": "Uzbekistan",
+      "lat": 37.2413,
+      "lon": 67.304
     },
     "Swansea City": {
       "stadium": "Swansea.com Stadium",

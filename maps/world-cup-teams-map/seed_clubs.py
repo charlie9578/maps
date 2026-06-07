@@ -155,6 +155,11 @@ SUPPLEMENT: dict[str, dict] = {
     "Nantes": {"stadium": "Stade de la Beaujoire", "city": "Nantes", "country": "France", "lat": 47.2558, "lon": -1.5247},
     "Reims": {"stadium": "Stade Auguste-Delaune", "city": "Reims", "country": "France", "lat": 49.2467, "lon": 4.0250},
     "Tunis": {"stadium": "Stade Olympique de Rades", "city": "Rades", "country": "Tunisia", "lat": 36.7667, "lon": 10.2833},
+    # enrich_clubs gaps — no Wikidata home venue (P115) on club page; stadium coords from Wikipedia/OSM.
+    "Cosmos Koblenz": {"stadium": "Stadion Oberwerth", "city": "Koblenz", "country": "Germany", "lat": 50.3305, "lon": 7.5866},
+    "Puerto Cabello": {"stadium": "Complejo Deportivo Socialista", "city": "Puerto Cabello", "country": "Venezuela", "lat": 10.4680, "lon": -68.0098},
+    "RS Berkane": {"stadium": "Stade Municipal de Berkane", "city": "Berkane", "country": "Morocco", "lat": 34.9170, "lon": -2.3170},
+    "Surkhon Termiz": {"stadium": "Surkhon Arena", "city": "Termez", "country": "Uzbekistan", "lat": 37.2413, "lon": 67.3040},
 }
 
 
