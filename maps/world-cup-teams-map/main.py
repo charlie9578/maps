@@ -21,6 +21,7 @@ from viz import build_figure, confed_key
 MAP_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = MAP_DIR / "output"
 OUTPUT_HTML = OUTPUT_DIR / "world_cup_teams_map.html"
+OUTPUT_DASHBOARD = OUTPUT_DIR / "world_cup_dashboard.html"
 
 # Injected after the Plotly chart loads. Trace indices must match viz.py layout.
 CLICK_SCRIPT = """
@@ -222,6 +223,16 @@ function toggleConfed(confed) {
     }
     bar.appendChild(makeBtn("Show all", showAll));
     bar.appendChild(makeBtn("Hide all", hideAll));
+    var dashLink = document.createElement("a");
+    dashLink.href = "world_cup_dashboard.html";
+    dashLink.textContent = "Dashboard";
+    dashLink.style.cssText =
+        "padding:8px 14px;border:1px solid #475569;border-radius:6px;" +
+        "background:#1e293b;color:#93c5fd;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.35);" +
+        "text-decoration:none;display:inline-block;";
+    dashLink.onmouseenter = function () { dashLink.style.background = "#334155"; };
+    dashLink.onmouseleave = function () { dashLink.style.background = "#1e293b"; };
+    bar.appendChild(dashLink);
     document.body.appendChild(bar);
 })();
 
@@ -292,7 +303,24 @@ def main() -> None:
         default=OUTPUT_HTML,
         help=f"Output HTML path (default: {OUTPUT_HTML.name}).",
     )
+    parser.add_argument(
+        "--dashboard",
+        action="store_true",
+        help="Also build output/world_cup_dashboard.html (squad statistics).",
+    )
+    parser.add_argument(
+        "--dashboard-only",
+        action="store_true",
+        help="Build only the squad statistics dashboard (skip the map).",
+    )
     args = parser.parse_args()
+
+    if args.dashboard_only:
+        from dashboard import write_dashboard
+
+        write_dashboard(OUTPUT_DASHBOARD)
+        print(f"Wrote {OUTPUT_DASHBOARD}")
+        return
 
     tournament, teams = build_teams(strict=False)
     path = write_map(args.output)
@@ -304,6 +332,12 @@ def main() -> None:
         "Open the HTML: legend toggles confederation paths; capitals/clubs toggle individuals "
         "(or hide them when a group is active); Show all / Hide all (top left)."
     )
+
+    if args.dashboard:
+        from dashboard import write_dashboard
+
+        dash_path = write_dashboard(OUTPUT_DASHBOARD)
+        print(f"Wrote {dash_path}")
 
 
 if __name__ == "__main__":

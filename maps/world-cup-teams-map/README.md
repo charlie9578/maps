@@ -30,9 +30,14 @@ Flight paths are visual only — they do not have hovers.
 ```bash
 python maps/world-cup-teams-map/main.py
 # open output/world_cup_teams_map.html in a browser
+
+python maps/world-cup-teams-map/dashboard.py
+# or: python maps/world-cup-teams-map/main.py --dashboard
+# open output/world_cup_dashboard.html — squad stats, Sankey, age plots
 ```
 
-This writes a self-contained `output/world_cup_teams_map.html` (Plotly via CDN).
+This writes self-contained HTML under `output/` (Plotly via CDN). The map toolbar
+includes a **Dashboard** link; the dashboard header links back to the map.
 
 ## Dependencies
 
@@ -105,7 +110,12 @@ Basemap geometry is Plotly's built-in Natural Earth layer.
 
 ## Outputs
 
-`output/world_cup_teams_map.html` (gitignored). Open it in any modern browser.
+- `output/world_cup_teams_map.html` — interactive flight-path map (gitignored).
+- `output/world_cup_dashboard.html` — squad statistics dashboard: top clubs,
+  confederation Sankey, age dot plot, playing-abroad share, caps vs age, and
+  flight-distance histogram (gitignored).
+
+Open either file in a modern browser.
 
 Note: flag emojis render as flags on macOS/iOS/Android. **England** uses the St
 George's cross (🏴󠁧󠁢󠁥󠁮󠁧󠁿), not the UK Union Jack, because home nations enter the World
