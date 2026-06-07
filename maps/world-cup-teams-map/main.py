@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 
 from data_processing import build_teams
-from viz import build_figure
+from viz import build_figure, confed_key
 
 MAP_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = MAP_DIR / "output"
@@ -31,22 +31,83 @@ var N = __N__;
 var ROUTE_META = __ROUTE_META__;
 var T = __TRACE_LAYOUT__;
 var clubIdx = T.club;
-var clubHitIdx = T.clubHit;
 var capIdx = T.cap;
 var capHitIdx = T.capHit;
 var flagIdx = T.flag;
 var flagHitIdx = T.flagHit;
+var LEGEND = T.legend;
+var CONFED_BY_CURVE = {};
+for (var ck in LEGEND) {
+    if (Object.prototype.hasOwnProperty.call(LEGEND, ck)) {
+        CONFED_BY_CURVE[LEGEND[ck]] = ck;
+    }
+}
+var TEAM_CONFED = __TEAM_CONFED__;
+var CONFED_TEAMS = __CONFED_TEAMS__;
 var selectedClubs = {};
 var selectedTeams = {};
+var visibleConfeds = {};
+var suppressedTeams = {};
+var suppressedClubs = {};
+
+function arcVisible(meta) {
+    if (suppressedTeams[meta.team] || suppressedClubs[meta.stadium]) {
+        return false;
+    }
+    if (visibleConfeds[meta.confed]) {
+        return true;
+    }
+    if (selectedTeams[meta.team]) {
+        return true;
+    }
+    if (selectedClubs[meta.stadium]) {
+        return true;
+    }
+    return false;
+}
+
+function teamHighlighted(i) {
+    if (suppressedTeams[i]) {
+        return false;
+    }
+    if (visibleConfeds[TEAM_CONFED[i]]) {
+        return true;
+    }
+    return selectedTeams[i] === true;
+}
+
+function routesVisibleWithoutClubSelection(stadiumIdx) {
+    for (var r = 0; r < R; r++) {
+        var meta = ROUTE_META[r];
+        if (meta.stadium !== stadiumIdx) {
+            continue;
+        }
+        if (suppressedTeams[meta.team]) {
+            continue;
+        }
+        if (visibleConfeds[meta.confed] || selectedTeams[meta.team]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function clubHighlighted(i) {
+    if (suppressedClubs[i]) {
+        return false;
+    }
+    if (selectedClubs[i]) {
+        return true;
+    }
+    return routesVisibleWithoutClubSelection(i);
+}
 
 function refresh() {
     if (R > 0) {
         var arcIdx = [], arcVis = [];
         for (var r = 0; r < R; r++) {
-            var meta = ROUTE_META[r];
-            var on = selectedClubs[meta.stadium] === true || selectedTeams[meta.team] === true;
             arcIdx.push(r);
-            arcVis.push(on);
+            arcVis.push(arcVisible(ROUTE_META[r]));
         }
         Plotly.restyle(gd, {visible: arcVis}, arcIdx);
     }
@@ -54,8 +115,8 @@ function refresh() {
     if (S > 0) {
         var clubSizes = [], clubColors = [];
         for (var c = 0; c < S; c++) {
-            clubSizes.push(selectedClubs[c] ? 11 : 8);
-            clubColors.push(selectedClubs[c] ? "#e2e8f0" : "#94a3b8");
+            clubSizes.push(clubHighlighted(c) ? 11 : 8);
+            clubColors.push(clubHighlighted(c) ? "#e2e8f0" : "#94a3b8");
         }
         Plotly.restyle(gd, {
             "marker.size": [clubSizes],
@@ -66,14 +127,20 @@ function refresh() {
     if (N > 0) {
         var capSizes = [];
         for (var k = 0; k < N; k++) {
-            capSizes.push(selectedTeams[k] ? 12 : 9);
+            capSizes.push(teamHighlighted(k) ? 12 : 9);
         }
         Plotly.restyle(gd, {"marker.size": [capSizes]}, [capIdx]);
     }
 }
 
 function toggleClub(i) {
-    if (selectedClubs[i]) {
+    if (routesVisibleWithoutClubSelection(i)) {
+        if (suppressedClubs[i]) {
+            delete suppressedClubs[i];
+        } else {
+            suppressedClubs[i] = true;
+        }
+    } else if (selectedClubs[i]) {
         delete selectedClubs[i];
     } else {
         selectedClubs[i] = true;
@@ -82,7 +149,13 @@ function toggleClub(i) {
 }
 
 function toggleTeam(i) {
-    if (selectedTeams[i]) {
+    if (visibleConfeds[TEAM_CONFED[i]]) {
+        if (suppressedTeams[i]) {
+            delete suppressedTeams[i];
+        } else {
+            suppressedTeams[i] = true;
+        }
+    } else if (selectedTeams[i]) {
         delete selectedTeams[i];
     } else {
         selectedTeams[i] = true;
@@ -91,11 +164,15 @@ function toggleTeam(i) {
 }
 
 function showAll() {
-    for (var i = 0; i < S; i++) {
-        selectedClubs[i] = true;
-    }
-    for (var t = 0; t < N; t++) {
-        selectedTeams[t] = true;
+    selectedClubs = {};
+    selectedTeams = {};
+    suppressedTeams = {};
+    suppressedClubs = {};
+    visibleConfeds = {};
+    for (var confed in LEGEND) {
+        if (Object.prototype.hasOwnProperty.call(LEGEND, confed)) {
+            visibleConfeds[confed] = true;
+        }
     }
     refresh();
 }
@@ -103,6 +180,26 @@ function showAll() {
 function hideAll() {
     selectedClubs = {};
     selectedTeams = {};
+    suppressedTeams = {};
+    suppressedClubs = {};
+    visibleConfeds = {};
+    refresh();
+}
+
+function toggleConfed(confed) {
+    var teams = CONFED_TEAMS[confed] || [];
+    if (visibleConfeds[confed]) {
+        delete visibleConfeds[confed];
+        for (var j = 0; j < teams.length; j++) {
+            delete suppressedTeams[teams[j]];
+        }
+    } else {
+        visibleConfeds[confed] = true;
+        for (var k = 0; k < teams.length; k++) {
+            delete selectedTeams[teams[k]];
+            delete suppressedTeams[teams[k]];
+        }
+    }
     refresh();
 }
 
@@ -128,10 +225,26 @@ function hideAll() {
     document.body.appendChild(bar);
 })();
 
+gd.on('plotly_legendclick', function (ev) {
+    var confed = CONFED_BY_CURVE[ev.curveNumber];
+    if (!confed) {
+        return true;
+    }
+    toggleConfed(confed);
+    return false;
+});
+
+gd.on('plotly_legenddoubleclick', function (ev) {
+    if (CONFED_BY_CURVE[ev.curveNumber]) {
+        return false;
+    }
+    return true;
+});
+
 gd.on('plotly_click', function (ev) {
     var p = ev.points[0];
     var curve = p.curveNumber;
-    if (curve === clubIdx || curve === clubHitIdx) {
+    if (curve === clubIdx) {
         toggleClub(p.pointNumber);
     } else if (curve === capIdx || curve === capHitIdx || curve === flagIdx || curve === flagHitIdx) {
         toggleTeam(p.pointNumber);
@@ -144,12 +257,21 @@ def write_map(output_path: Path) -> Path:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     tournament, teams = build_teams(strict=False)
     fig, stadium_sites, route_meta, trace_layout = build_figure(tournament, teams)
+    team_confeds = [confed_key(t.confederation) for t in teams]
+    confed_teams: dict[str, list[int]] = {
+        confed: [] for confed in trace_layout["legend"]  # type: ignore[index]
+    }
+    for team_idx, confed in enumerate(team_confeds):
+        if confed in confed_teams:
+            confed_teams[confed].append(team_idx)
     post_script = (
         CLICK_SCRIPT.replace("__R__", str(len(route_meta)))
         .replace("__S__", str(len(stadium_sites)))
         .replace("__N__", str(len(teams)))
         .replace("__ROUTE_META__", json.dumps(route_meta))
         .replace("__TRACE_LAYOUT__", json.dumps(trace_layout))
+        .replace("__TEAM_CONFED__", json.dumps(team_confeds))
+        .replace("__CONFED_TEAMS__", json.dumps(confed_teams))
     )
     fig.write_html(
         output_path,
@@ -179,8 +301,8 @@ def main() -> None:
     print(f"Wrote {path}")
     print(f"{tournament}: {len(teams)} teams, {total_players} players plotted.")
     print(
-        "Open the HTML: click a club or capital for flight paths (not the lines); "
-        "use Show all / Hide all (top left)."
+        "Open the HTML: legend toggles confederation paths; capitals/clubs toggle individuals "
+        "(or hide them when a group is active); Show all / Hide all (top left)."
     )
 
 

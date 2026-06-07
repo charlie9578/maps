@@ -2,7 +2,7 @@
 
 Trace layout (indices passed to main.py via ``trace_layout``):
 
-    arcs → clubs → club targets → capital dots → capital targets → legend →
+    arcs → clubs → capital dots → capital targets → legend →
     **flag labels → flag targets** (topmost; wins clicks over paths/clubs)
 
 Flight paths are not clickable — only club and capital markers toggle arcs.
@@ -34,6 +34,13 @@ COUNTRY_LINE = "#1f3a63"
 
 STADIUM_MARKER_SIZE = 8
 STADIUM_MARKER_COLOR = "#94a3b8"
+
+
+def confed_key(confederation: str) -> str:
+    for key in CONFED_COLORS:
+        if confederation.startswith(key):
+            return key
+    return "OTHER"
 
 
 def confed_color(confederation: str) -> str:
@@ -137,7 +144,13 @@ def build_route_meta(teams: list[Team], stadium_sites: list[dict]) -> list[dict]
     for team_idx, team in enumerate(teams):
         for route in team.routes:
             stadium_idx = site_index[_stadium_key(route.dest_lat, route.dest_lon)]
-            meta.append({"team": team_idx, "stadium": stadium_idx})
+            meta.append(
+                {
+                    "team": team_idx,
+                    "stadium": stadium_idx,
+                    "confed": confed_key(team.confederation),
+                }
+            )
     return meta
 
 
@@ -212,7 +225,7 @@ def aggregate_stadium_sites(teams: list[Team]) -> list[dict]:
 
 def build_figure(
     tournament: str, teams: list[Team]
-) -> tuple[go.Figure, list[dict], list[dict], dict[str, int]]:
+) -> tuple[go.Figure, list[dict], list[dict], dict[str, int | dict[str, int]]]:
     """Assemble the scattergeo figure; return sites, route meta, and trace indices."""
     fig = go.Figure()
     stadium_sites = aggregate_stadium_sites(teams)
@@ -249,7 +262,8 @@ def build_figure(
 
     layout: dict[str, int] = {}
     layout["club"] = trace_idx
-    # 2) Club markers (always visible).
+    # 2) Club markers (always visible; single trace — a transparent hit layer
+    #    duplicated every point and still rendered in Scattergeo).
     fig.add_trace(
         go.Scattergeo(
             lat=[s["lat"] for s in stadium_sites],
@@ -266,22 +280,6 @@ def build_figure(
             hoverlabel=dict(bgcolor="#1e293b", font=dict(color="#e2e8f0")),
             showlegend=False,
             name="clubs",
-        )
-    )
-    trace_idx += 1
-
-    layout["clubHit"] = trace_idx
-    # 3) Invisible enlarged targets so clicks near a club still register.
-    fig.add_trace(
-        go.Scattergeo(
-            lat=[s["lat"] for s in stadium_sites],
-            lon=[s["lon"] for s in stadium_sites],
-            mode="markers",
-            marker=dict(size=22, color="rgba(0,0,0,0)", line=dict(width=0)),
-            customdata=[_stadium_hover_row(s) for s in stadium_sites],
-            hovertemplate=stadium_hover,
-            showlegend=False,
-            name="club-targets",
         )
     )
     trace_idx += 1
@@ -334,7 +332,7 @@ def build_figure(
             lat=[t.lat for t in teams],
             lon=[t.lon for t in teams],
             mode="markers",
-            marker=dict(size=26, color="rgba(0,0,0,0)", line=dict(width=0)),
+            marker=dict(size=26, color="rgba(0,0,0,0)", opacity=0, line=dict(width=0)),
             hoverinfo="skip",
             showlegend=False,
             name="capital-targets",
@@ -342,7 +340,9 @@ def build_figure(
     )
     trace_idx += 1
 
+    layout["legend"] = {}
     for confed, color in CONFED_COLORS.items():
+        layout["legend"][confed] = trace_idx
         fig.add_trace(
             go.Scattergeo(
                 lat=[None],
@@ -382,7 +382,7 @@ def build_figure(
             lat=[t.lat for t in teams],
             lon=[t.lon for t in teams],
             mode="markers",
-            marker=dict(size=30, color="rgba(0,0,0,0)", line=dict(width=0)),
+            marker=dict(size=30, color="rgba(0,0,0,0)", opacity=0, line=dict(width=0)),
             customdata=cap_customdata,
             text=[t.flag for t in teams],
             hovertemplate=cap_hover,
@@ -409,8 +409,8 @@ def build_figure(
         title=dict(
             text=(
                 f"{tournament} — where the players play<br>"
-                "<sup>Click a club or capital for flight paths · hover clubs for all players · "
-                "Show/Hide all (top left) · capitals coloured by confederation</sup>"
+                "<sup>Legend: toggle confederation paths (click capitals to hide individuals) · "
+                "click a club or capital when no group is active · Show/Hide all (top left)</sup>"
             ),
             x=0.5,
             xanchor="center",
