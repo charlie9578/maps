@@ -372,7 +372,7 @@ NATIONS: dict[str, dict] = {
 
 POS_MAP = {"1": "GK", "2": "DF", "3": "MF", "4": "FW"}
 AGE_RE = re.compile(r"\(aged\s+(\d+)\)")
-DOB_ISO_RE = re.compile(r"\((\d{4}-\d{2}-\d{2})\)")
+DOB_ISO_RE = re.compile(r"\(\s*(\d{4}-\d{2}-\d{2})\s*\)")
 DOB_TEXT_RE = re.compile(r"^(.+?)\s*\(aged\s+\d+\)", re.IGNORECASE)
 POS_NUM_RE = re.compile(r"^(\d)")
 
@@ -399,8 +399,18 @@ def _parse_age(dob_cell: str) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def _parse_dob(dob_cell: str) -> str | None:
+def _parse_dob_from_cell(cell) -> str | None:
     """Return ISO date (YYYY-MM-DD) from Wikipedia's 'Date of birth (age)' cell."""
+    bday = cell.find("span", class_="bday")
+    if bday is not None:
+        iso = bday.get_text(strip=True)
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", iso):
+            return iso
+    return _parse_dob(cell.get_text(" ", strip=True))
+
+
+def _parse_dob(dob_cell: str) -> str | None:
+    """Return ISO date (YYYY-MM-DD) from flattened DOB cell text."""
     text = _cell_text(dob_cell)
     if not text:
         return None
@@ -453,26 +463,30 @@ def _parse_player_row(row) -> dict | None:
     if len(cells) < 7:
         return None
 
-    name = cells[2].get_text(" ", strip=True)
-    name = re.sub(r"\s*\(captain\)\s*$", "", name, flags=re.IGNORECASE).strip()
+    raw_name = cells[2].get_text(" ", strip=True)
+    is_captain = bool(re.search(r"\(\s*captain\s*\)", raw_name, flags=re.IGNORECASE))
+    name = re.sub(r"\s*\(captain\)\s*$", "", raw_name, flags=re.IGNORECASE).strip()
     if not name:
         return None
 
-    dob_cell = cells[3].get_text(" ", strip=True)
+    dob_cell = cells[3]
+    dob_text = dob_cell.get_text(" ", strip=True)
     club, club_wiki = _parse_club_cell(cells[6])
     entry: dict = {
         "name": name,
         "pos": _parse_position(cells[1].get_text(" ", strip=True)),
         "club": club,
     }
+    if is_captain:
+        entry["captain"] = True
     if club_wiki:
         entry["club_wiki"] = club_wiki
 
     no = _parse_int(cells[0].get_text(" ", strip=True))
     caps = _parse_int(cells[4].get_text(" ", strip=True))
     goals = _parse_int(cells[5].get_text(" ", strip=True))
-    dob = _parse_dob(dob_cell)
-    age = _parse_age(dob_cell)
+    dob = _parse_dob_from_cell(dob_cell)
+    age = _parse_age(dob_text)
     if no is not None:
         entry["no"] = no
     if dob is not None:

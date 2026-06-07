@@ -6,7 +6,18 @@ from pathlib import Path
 
 import plotly.graph_objects as go
 
-from dashboard_viz import DASH_BG, build_dashboard, build_extra_figures
+from dashboard_data import (
+    DASH_BG,
+    birthday_table_html,
+    build_player_rows,
+    captain_profiles,
+    captains_table_html,
+    leaderboard_table_html,
+    top_players,
+    tournament_birthdays,
+    veterans,
+)
+from dashboard_viz import build_dashboard, build_extra_figures
 from data_processing import build_teams, load_clubs, load_squads
 
 MAP_DIR = Path(__file__).resolve().parent
@@ -32,12 +43,59 @@ def write_dashboard(output_path: Path) -> Path:
 
     main_fig = build_dashboard(tournament, teams, clubs, source_accessed=accessed)
     extras = build_extra_figures(tournament, teams, clubs)
+    rows = build_player_rows(teams, clubs)
+    birthday_html = birthday_table_html(tournament_birthdays(rows))
+    scorers_html = leaderboard_table_html(
+        top_players(rows, "goals", limit=30),
+        title="Top international goal scorers",
+        metric="goals",
+    )
+    caps_html = leaderboard_table_html(
+        top_players(rows, "caps", limit=30),
+        title="Most international caps",
+        metric="caps",
+    )
+    veterans_html = leaderboard_table_html(
+        veterans(rows),
+        title="100+ cap veterans",
+        metric="caps",
+    )
+    captains_html = captains_table_html(captain_profiles(rows))
 
-    sections = [_figure_to_div(main_fig, include_plotlyjs="cdn")]
-    for _title, fig in extras:
-        sections.append(_figure_to_div(fig, include_plotlyjs=False))
+    sections_html: list[str] = []
+    sections_html.append(
+        f'<section class="chart-block chart-overview">{_figure_to_div(main_fig, include_plotlyjs="cdn")}</section>'
+    )
+    for i, (title, fig) in enumerate(extras):
+        sections_html.append(
+            f'<section class="chart-block">'
+            f'<h2 class="section-title">{title}</h2>'
+            f"{_figure_to_div(fig, include_plotlyjs=False)}"
+            f"</section>"
+        )
+        if title == "Captains vs squad mates":
+            sections_html.append(
+                f'<section class="chart-block table-section">'
+                f'<h2 class="section-title">All 48 captains</h2>'
+                f"{captains_html}"
+                f"</section>"
+            )
+        if title == "Records & positions":
+            sections_html.append(
+                f'<section class="chart-block table-section">'
+                f'<h2 class="section-title">Full leaderboards</h2>'
+                f'<div class="table-grid">{scorers_html}{caps_html}{veterans_html}</div>'
+                f"</section>"
+            )
+        if title == "Youngest, oldest & birthdays":
+            sections_html.append(
+                f'<section class="chart-block table-section">'
+                f'<h2 class="section-title">Birthday list</h2>'
+                f"{birthday_html}"
+                f"</section>"
+            )
 
-    body = "\n".join(f'<section class="chart-block">{html}</section>' for html in sections)
+    body = "\n".join(sections_html)
     page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,8 +128,54 @@ def write_dashboard(output_path: Path) -> Path:
     }}
     .top-nav a:hover {{ text-decoration: underline; }}
     .top-nav span {{ color: #94a3b8; font-size: 14px; }}
+    .section-title {{
+      max-width: 1400px;
+      margin: 24px auto 4px;
+      padding: 0 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #cbd5e1;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }}
     .chart-block {{ margin: 0 auto 8px; max-width: 1400px; }}
     .chart-block .plotly-graph-div {{ margin: 0 auto; }}
+    .table-section {{ max-width: 1400px; margin: 0 auto 24px; padding: 0 8px; }}
+    .table-note {{ color: #94a3b8; font-size: 13px; margin: 0 0 10px; }}
+    .table-grid {{
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }}
+    @media (min-width: 1100px) {{
+      .table-grid {{ grid-template-columns: 1fr 1fr; }}
+      .table-grid .table-wrap:last-child {{ grid-column: 1 / -1; }}
+    }}
+    .table-wrap {{
+      max-height: 420px;
+      overflow: auto;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #1e293b;
+    }}
+    .data-table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }}
+    .data-table th, .data-table td {{
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }}
+    .data-table th {{
+      position: sticky;
+      top: 0;
+      background: #0f172a;
+      color: #cbd5e1;
+      font-weight: 600;
+    }}
+    .data-table tr:hover td {{ background: rgba(51, 65, 85, 0.45); }}
   </style>
 </head>
 <body>
