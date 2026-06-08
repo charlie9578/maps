@@ -24,6 +24,7 @@ PAGES_REQUIREMENTS: tuple[str, ...] = (
     "maps/osm-solar-map/requirements.txt",
     "maps/academic-citations-map/requirements.txt",
     "maps/basic-world-map/requirements.txt",
+    "maps/gem-wind-map/requirements.txt",
 )
 
 
@@ -210,6 +211,29 @@ def publish_world_map(site_dir: Path, _site_url: str) -> None:
     shutil.rmtree(staging)
 
 
+def publish_gem_wind(site_dir: Path, _site_url: str) -> None:
+    map_dir = MAPS_DIR / "gem-wind-map"
+    staging = _staging_dir("gem-wind-map")
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True, exist_ok=True)
+    output_path = staging / "gem_wind_map.html"
+    subprocess.run(
+        [
+            sys.executable,
+            str(map_dir / "static_site.py"),
+            "-o",
+            str(output_path),
+        ],
+        check=True,
+        cwd=REPO_ROOT,
+    )
+    dest = site_dir / "gem-wind"
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(output_path, dest / "index.html")
+    shutil.rmtree(staging)
+
+
 PUBLISHED_MAPS: tuple[PublishedMap, ...] = (
     PublishedMap(
         slug="world-cup-2026",
@@ -240,6 +264,16 @@ PUBLISHED_MAPS: tuple[PublishedMap, ...] = (
         ),
         tags=("Folium", "Solar", "OSM"),
         publish=publish_osm_solar,
+    ),
+    PublishedMap(
+        slug="gem-wind",
+        title="GEM global wind farms",
+        summary=(
+            "February 2026 Global Wind Power Tracker — bubble map by capacity and status, "
+            "plus capacity breakdowns and top projects."
+        ),
+        tags=("Plotly", "Wind", "GEM"),
+        publish=publish_gem_wind,
     ),
     PublishedMap(
         slug="citation-network",
@@ -356,7 +390,7 @@ def write_landing_page(site_dir: Path, site_url: str) -> None:
     </main>
     <footer>
       Source: <a href="https://github.com/{escape(repo)}">github.com/{escape(repo)}</a>
-      · Dash live dashboards (TfL, GEM wind) are not hosted here.
+      · Dash live dashboard (TfL) is not hosted here.
     </footer>
   </div>
 </body>

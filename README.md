@@ -140,9 +140,10 @@ and never committed to `main`.
 | `/co2-per-capita/` | OWID CO₂ per capita choropleth (year slider) |
 | `/osm-solar-malta/` | Malta solar plants (OpenStreetMap / Folium) |
 | `/citation-network/` | OpenAlex citation network demo |
+| `/gem-wind/` | GEM wind farms static snapshot (map + breakdown charts) |
 | `/world-map/` | Cartopy political world map (PNG) |
 
-**Not on Pages:** `gem-wind-map` and `tfl-live-map` are live Dash apps (need a running server).
+**Not on Pages:** `tfl-live-map` is a live Dash app (needs a running server and TfL API key).
 
 ### Why “Deploy from a branch” does not work
 

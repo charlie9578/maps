@@ -1,3 +1,6 @@
-dash
+# Map-only packages (installed into the repo root .venv, not a separate env)
+# uv pip install -r maps/gem-wind-map/requirements.txt
+plotly>=5.24
 openpyxl
+dash
 dash-bootstrap-components

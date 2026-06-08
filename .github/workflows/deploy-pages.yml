@@ -38,7 +38,8 @@ jobs:
             maps/interactive-owid-map/requirements.txt \
             maps/osm-solar-map/requirements.txt \
             maps/academic-citations-map/requirements.txt \
-            maps/basic-world-map/requirements.txt
+            maps/basic-world-map/requirements.txt \
+            maps/gem-wind-map/requirements.txt
           do
             pip install -r "$req"
           done

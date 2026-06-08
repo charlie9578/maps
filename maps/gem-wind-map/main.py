@@ -584,6 +584,30 @@ def make_app(df: pd.DataFrame) -> Dash:
 
 
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="GEM wind farms dashboard or static HTML.")
+    parser.add_argument(
+        "--static",
+        action="store_true",
+        help="Write static HTML to output/ instead of running the Dash server.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        help="Output path for --static (default: output/gem_wind_map.html).",
+    )
+    args = parser.parse_args()
+
+    if args.static:
+        from static_site import build_static_html
+
+        path = build_static_html(args.output)
+        print(f"Wrote {path}")
+        print("Open in a browser — use main.py without --static for the interactive Dash app.")
+        return
+
     df = load_data(DATA_PATH)
     app = make_app(df)
     app.run(debug=True, host="127.0.0.1", port=8050)
@@ -591,3 +615,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
