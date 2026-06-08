@@ -1,0 +1,348 @@
+"""Interactive flight-path map for embedding in the squad dashboard."""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+
+import plotly.graph_objects as go
+
+from data_processing import Team
+from viz import build_figure, confed_key
+
+MAP_PLOTLY_CONFIG = {"displayModeBar": True, "scrollZoom": True, "responsive": True}
+
+# Trace indices must match viz.py layout. Plotly substitutes {plot_id} in post_script.
+MAP_CLICK_SCRIPT = """
+var gd = document.getElementById('{plot_id}');
+var R = __R__;
+var S = __S__;
+var N = __N__;
+var ROUTE_META = __ROUTE_META__;
+var T = __TRACE_LAYOUT__;
+var clubIdx = T.club;
+var capIdx = T.cap;
+var capHitIdx = T.capHit;
+var flagIdx = T.flag;
+var flagHitIdx = T.flagHit;
+var LEGEND = T.legend;
+var CONFED_BY_CURVE = {};
+for (var ck in LEGEND) {
+    if (Object.prototype.hasOwnProperty.call(LEGEND, ck)) {
+        CONFED_BY_CURVE[LEGEND[ck]] = ck;
+    }
+}
+var TEAM_CONFED = __TEAM_CONFED__;
+var CONFED_TEAMS = __CONFED_TEAMS__;
+var selectedClubs = {};
+var selectedTeams = {};
+var visibleConfeds = {};
+var suppressedTeams = {};
+var suppressedClubs = {};
+
+function arcVisible(meta) {
+    if (suppressedTeams[meta.team] || suppressedClubs[meta.stadium]) {
+        return false;
+    }
+    if (visibleConfeds[meta.confed]) {
+        return true;
+    }
+    if (selectedTeams[meta.team]) {
+        return true;
+    }
+    if (selectedClubs[meta.stadium]) {
+        return true;
+    }
+    return false;
+}
+
+function teamHighlighted(i) {
+    if (suppressedTeams[i]) {
+        return false;
+    }
+    if (visibleConfeds[TEAM_CONFED[i]]) {
+        return true;
+    }
+    return selectedTeams[i] === true;
+}
+
+function routesVisibleWithoutClubSelection(stadiumIdx) {
+    for (var r = 0; r < R; r++) {
+        var meta = ROUTE_META[r];
+        if (meta.stadium !== stadiumIdx) {
+            continue;
+        }
+        if (suppressedTeams[meta.team]) {
+            continue;
+        }
+        if (visibleConfeds[meta.confed] || selectedTeams[meta.team]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function clubHighlighted(i) {
+    if (suppressedClubs[i]) {
+        return false;
+    }
+    if (selectedClubs[i]) {
+        return true;
+    }
+    return routesVisibleWithoutClubSelection(i);
+}
+
+function refresh() {
+    if (R > 0) {
+        var arcIdx = [], arcVis = [];
+        for (var r = 0; r < R; r++) {
+            arcIdx.push(r);
+            arcVis.push(arcVisible(ROUTE_META[r]));
+        }
+        Plotly.restyle(gd, {visible: arcVis}, arcIdx);
+    }
+
+    if (S > 0) {
+        var clubSizes = [], clubColors = [];
+        for (var c = 0; c < S; c++) {
+            clubSizes.push(clubHighlighted(c) ? 11 : 8);
+            clubColors.push(clubHighlighted(c) ? "#e2e8f0" : "#94a3b8");
+        }
+        Plotly.restyle(gd, {
+            "marker.size": [clubSizes],
+            "marker.color": [clubColors]
+        }, [clubIdx]);
+    }
+
+    if (N > 0) {
+        var capSizes = [];
+        for (var k = 0; k < N; k++) {
+            capSizes.push(teamHighlighted(k) ? 12 : 9);
+        }
+        Plotly.restyle(gd, {"marker.size": [capSizes]}, [capIdx]);
+    }
+}
+
+function toggleClub(i) {
+    if (routesVisibleWithoutClubSelection(i)) {
+        if (suppressedClubs[i]) {
+            delete suppressedClubs[i];
+        } else {
+            suppressedClubs[i] = true;
+        }
+    } else if (selectedClubs[i]) {
+        delete selectedClubs[i];
+    } else {
+        selectedClubs[i] = true;
+    }
+    refresh();
+}
+
+function toggleTeam(i) {
+    if (visibleConfeds[TEAM_CONFED[i]]) {
+        if (suppressedTeams[i]) {
+            delete suppressedTeams[i];
+        } else {
+            suppressedTeams[i] = true;
+        }
+    } else if (selectedTeams[i]) {
+        delete selectedTeams[i];
+    } else {
+        selectedTeams[i] = true;
+    }
+    refresh();
+}
+
+function showAll() {
+    selectedClubs = {};
+    selectedTeams = {};
+    suppressedTeams = {};
+    suppressedClubs = {};
+    visibleConfeds = {};
+    for (var confed in LEGEND) {
+        if (Object.prototype.hasOwnProperty.call(LEGEND, confed)) {
+            visibleConfeds[confed] = true;
+        }
+    }
+    refresh();
+}
+
+function hideAll() {
+    selectedClubs = {};
+    selectedTeams = {};
+    suppressedTeams = {};
+    suppressedClubs = {};
+    visibleConfeds = {};
+    refresh();
+}
+
+function toggleConfed(confed) {
+    var teams = CONFED_TEAMS[confed] || [];
+    if (visibleConfeds[confed]) {
+        delete visibleConfeds[confed];
+        for (var j = 0; j < teams.length; j++) {
+            delete suppressedTeams[teams[j]];
+        }
+    } else {
+        visibleConfeds[confed] = true;
+        for (var k = 0; k < teams.length; k++) {
+            delete selectedTeams[teams[k]];
+            delete suppressedTeams[teams[k]];
+        }
+    }
+    refresh();
+}
+
+window.showAll = showAll;
+window.hideAll = hideAll;
+
+gd.on('plotly_legendclick', function (ev) {
+    var confed = CONFED_BY_CURVE[ev.curveNumber];
+    if (!confed) {
+        return true;
+    }
+    toggleConfed(confed);
+    return false;
+});
+
+gd.on('plotly_legenddoubleclick', function (ev) {
+    if (CONFED_BY_CURVE[ev.curveNumber]) {
+        return false;
+    }
+    return true;
+});
+
+gd.on('plotly_click', function (ev) {
+    var p = ev.points[0];
+    var curve = p.curveNumber;
+    if (curve === clubIdx) {
+        toggleClub(p.pointNumber);
+    } else if (curve === capIdx || curve === capHitIdx || curve === flagIdx || curve === flagHitIdx) {
+        toggleTeam(p.pointNumber);
+    }
+});
+"""
+
+STANDALONE_TOOLBAR_SCRIPT = """
+(function addToolbar() {
+    var bar = document.createElement("div");
+    bar.style.cssText =
+        "position:fixed;top:12px;left:12px;z-index:10000;display:flex;gap:8px;" +
+        "font:14px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;";
+    function makeBtn(label, onClick) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = label;
+        btn.style.cssText =
+            "padding:8px 14px;border:1px solid #475569;border-radius:6px;" +
+            "background:#1e293b;color:#e2e8f0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.35);";
+        btn.onmouseenter = function () { btn.style.background = "#334155"; };
+        btn.onmouseleave = function () { btn.style.background = "#1e293b"; };
+        btn.onclick = onClick;
+        return btn;
+    }
+    bar.appendChild(makeBtn("Show all", showAll));
+    bar.appendChild(makeBtn("Hide all", hideAll));
+    var dashLink = document.createElement("a");
+    dashLink.href = "world_cup_dashboard_map.html";
+    dashLink.textContent = "Dashboard";
+    dashLink.style.cssText =
+        "padding:8px 14px;border:1px solid #475569;border-radius:6px;" +
+        "background:#1e293b;color:#93c5fd;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.35);" +
+        "text-decoration:none;display:inline-block;";
+    dashLink.onmouseenter = function () { dashLink.style.background = "#334155"; };
+    dashLink.onmouseleave = function () { dashLink.style.background = "#1e293b"; };
+    bar.appendChild(dashLink);
+    document.body.appendChild(bar);
+})();
+"""
+
+
+@dataclass(frozen=True)
+class MapBundle:
+    div_html: str
+    route_count: int
+    stadium_count: int
+    nation_count: int
+
+
+def build_map_post_script(
+    teams: list[Team],
+    stadium_sites: list,
+    route_meta: list,
+    trace_layout: dict,
+    *,
+    standalone_toolbar: bool = False,
+) -> str:
+    team_confeds = [confed_key(t.confederation) for t in teams]
+    confed_teams: dict[str, list[int]] = {
+        confed: [] for confed in trace_layout["legend"]  # type: ignore[index]
+    }
+    for team_idx, confed in enumerate(team_confeds):
+        if confed in confed_teams:
+            confed_teams[confed].append(team_idx)
+    script = (
+        MAP_CLICK_SCRIPT.replace("__R__", str(len(route_meta)))
+        .replace("__S__", str(len(stadium_sites)))
+        .replace("__N__", str(len(teams)))
+        .replace("__ROUTE_META__", json.dumps(route_meta))
+        .replace("__TRACE_LAYOUT__", json.dumps(trace_layout))
+        .replace("__TEAM_CONFED__", json.dumps(team_confeds))
+        .replace("__CONFED_TEAMS__", json.dumps(confed_teams))
+    )
+    if standalone_toolbar:
+        script += STANDALONE_TOOLBAR_SCRIPT
+    return script
+
+
+def prepare_map_bundle(
+    tournament: str,
+    teams: list[Team],
+    *,
+    include_plotlyjs: bool | str = False,
+    embedded: bool = True,
+) -> MapBundle:
+    """Build the flight-path map Plotly div and interaction script for dashboard embedding."""
+    fig, stadium_sites, route_meta, trace_layout = build_figure(
+        tournament, teams, embedded=embedded
+    )
+    if embedded:
+        fig.update_layout(
+            height=680,
+            margin=dict(l=0, r=0, t=48, b=28),
+        )
+    post_script = build_map_post_script(teams, stadium_sites, route_meta, trace_layout)
+    div_html = fig.to_html(
+        full_html=False,
+        include_plotlyjs=include_plotlyjs,
+        post_script=post_script,
+        config=MAP_PLOTLY_CONFIG,
+    )
+    return MapBundle(
+        div_html=div_html,
+        route_count=len(route_meta),
+        stadium_count=len(stadium_sites),
+        nation_count=len(teams),
+    )
+
+
+def write_standalone_map(output_path: Path, tournament: str, teams: list[Team]) -> Path:
+    """Write a standalone HTML map (legacy entry point for main.py)."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig, stadium_sites, route_meta, trace_layout = build_figure(tournament, teams, embedded=False)
+    post_script = build_map_post_script(
+        teams,
+        stadium_sites,
+        route_meta,
+        trace_layout,
+        standalone_toolbar=True,
+    )
+    fig.write_html(
+        output_path,
+        include_plotlyjs="cdn",
+        full_html=True,
+        post_script=post_script,
+        config=MAP_PLOTLY_CONFIG,
+    )
+    return output_path

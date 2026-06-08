@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import statistics
+from collections import Counter
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -11,6 +12,7 @@ from dashboard_data import (
     CAPTAIN_LABEL,
     GRID,
     MATE_LABEL,
+    POS_ORDER,
     PlayerRow,
     add_violin_box,
     captain_group,
@@ -82,6 +84,59 @@ def _delta_bars(
         zerolinecolor="#475569",
     )
     fig.update_yaxes(automargin=True, tickfont={"size": 11}, row=row, col=col)
+
+
+def build_captain_position_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
+    """Grouped bars comparing position mix among captains vs all squad players."""
+    captains = [r for r in rows if r.is_captain]
+    cap_counts = Counter(r.pos for r in captains if r.pos in POS_ORDER)
+    squad_counts = Counter(r.pos for r in rows if r.pos in POS_ORDER)
+    cap_n = max(1, sum(cap_counts.values()))
+    squad_n = max(1, sum(squad_counts.values()))
+
+    cap_pcts = [100 * cap_counts[p] / cap_n for p in POS_ORDER]
+    squad_pcts = [100 * squad_counts[p] / squad_n for p in POS_ORDER]
+    cap_vals = [cap_counts[p] for p in POS_ORDER]
+    squad_vals = [squad_counts[p] for p in POS_ORDER]
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Bar(
+            name=CAPTAIN_LABEL,
+            x=POS_ORDER,
+            y=cap_pcts,
+            marker={"color": "#fbbf24"},
+            text=[f"{v:.0f}%" for v in cap_pcts],
+            textposition="outside",
+            cliponaxis=False,
+            customdata=cap_vals,
+            hovertemplate="%{x}<br>" + CAPTAIN_LABEL + ": %{customdata} (%{y:.1f}%)<extra></extra>",
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            name="All squads",
+            x=POS_ORDER,
+            y=squad_pcts,
+            marker={"color": "#64748b"},
+            text=[f"{v:.0f}%" for v in squad_pcts],
+            textposition="outside",
+            cliponaxis=False,
+            customdata=squad_vals,
+            hovertemplate="%{x}<br>All squads: %{customdata} (%{y:.1f}%)<extra></extra>",
+        )
+    )
+    dark_layout(
+        fig,
+        f"{tournament} — position mix: captains vs squads",
+        height=400,
+        showlegend=True,
+        legend_below=True,
+    )
+    fig.update_layout(barmode="group")
+    fig.update_xaxes(title_text="Position")
+    fig.update_yaxes(title_text="Share of group (%)", range=[0, max(cap_pcts + squad_pcts) + 12], gridcolor=GRID)
+    return fig
 
 
 def build_captains_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:

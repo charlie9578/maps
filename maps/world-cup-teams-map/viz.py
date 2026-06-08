@@ -224,7 +224,10 @@ def aggregate_stadium_sites(teams: list[Team]) -> list[dict]:
 
 
 def build_figure(
-    tournament: str, teams: list[Team]
+    tournament: str,
+    teams: list[Team],
+    *,
+    embedded: bool = False,
 ) -> tuple[go.Figure, list[dict], list[dict], dict[str, int | dict[str, int]]]:
     """Assemble the scattergeo figure; return sites, route meta, and trace indices."""
     fig = go.Figure()
@@ -405,13 +408,18 @@ def build_figure(
         bgcolor="rgba(0,0,0,0)",
         lataxis_range=[-60, 85],
     )
+    if embedded:
+        subtitle = (
+            "Legend: toggle confederation paths · click clubs and capitals to reveal routes"
+        )
+    else:
+        subtitle = (
+            "Legend: toggle confederation paths (click capitals to hide individuals) · "
+            "click a club or capital when no group is active · Show/Hide all (top left)"
+        )
     fig.update_layout(
         title=dict(
-            text=(
-                f"{tournament} — where the players play<br>"
-                "<sup>Legend: toggle confederation paths (click capitals to hide individuals) · "
-                "click a club or capital when no group is active · Show/Hide all (top left)</sup>"
-            ),
+            text=f"{tournament} — where the players play<br><sup>{subtitle}</sup>",
             x=0.5,
             xanchor="center",
             font=dict(color="#e2e8f0", size=20),

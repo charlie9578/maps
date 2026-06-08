@@ -44,43 +44,23 @@ from viz import DEFAULT_COLOR
 PLOT_BG = "#1e293b"
 
 
-def build_dashboard(
+def build_top_clubs_panel(
     tournament: str,
-    teams: list[Team],
+    rows: list[PlayerRow],
     clubs: dict[str, dict],
     *,
-    source_accessed: str = "2026-06-05",
+    limit: int = 18,
 ) -> go.Figure:
-    rows = build_player_rows(teams, clubs)
+    """Horizontal bar chart of clubs supplying the most squad players."""
     club_counts = Counter(r.club for r in rows)
-    pos_counts = Counter(r.pos for r in rows if r.pos in POS_ORDER)
-
-    fig = make_subplots(
-        rows=2,
-        cols=2,
-        column_widths=[0.58, 0.42],
-        row_heights=[0.40, 0.60],
-        specs=[
-            [{"type": "bar"}, {"type": "pie"}],
-            [{"type": "sankey", "colspan": 2}, None],
-        ],
-        subplot_titles=(
-            "Clubs supplying the most players",
-            "Squad by position",
-            "Where squads play: national → club confederation",
-            "",
-        ),
-        horizontal_spacing=0.12,
-        vertical_spacing=0.10,
-    )
-
-    top_clubs = club_counts.most_common(18)
+    top_clubs = club_counts.most_common(limit)
     top_club_countries = [
         clubs.get(club, {}).get("country", "Unknown") for club, _count in reversed(top_clubs)
     ]
     club_vals = [n for _, n in reversed(top_clubs)]
     max_club = max(club_vals) if club_vals else 1
-    fig.add_trace(
+
+    fig = go.Figure(
         go.Bar(
             y=[c for c, _ in reversed(top_clubs)],
             x=club_vals,
@@ -101,28 +81,16 @@ def build_dashboard(
             ],
             hovertemplate="%{y}<br>%{x} players · %{customdata[1]:.1f}% of all squads"
             "<br>%{customdata[0]}<extra></extra>",
-        ),
-        row=1,
-        col=1,
+        )
     )
+    dark_layout(fig, f"{tournament} — top supplying clubs", height=460, showlegend=False)
+    fig.update_xaxes(title_text="Players", gridcolor=GRID, zeroline=False)
+    fig.update_yaxes(gridcolor=GRID, automargin=True)
+    return fig
 
-    pos_labels = [p for p in POS_ORDER if pos_counts[p]]
-    pos_values = [pos_counts[p] for p in pos_labels]
-    fig.add_trace(
-        go.Pie(
-            labels=pos_labels,
-            values=pos_values,
-            marker={"colors": [POS_COLORS[p] for p in pos_labels]},
-            hole=0.48,
-            sort=False,
-            textinfo="label+value",
-            textfont={"size": 12},
-            hovertemplate="%{label}: %{value} players (%{percent})<extra></extra>",
-        ),
-        row=1,
-        col=2,
-    )
 
+def build_confed_sankey_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
+    """Sankey of players flowing from national confederation to club confederation."""
     flow: dict[tuple[str, str], int] = Counter()
     for r in rows:
         flow[(r.nation_confed, r.club_confed)] += 1
@@ -139,10 +107,12 @@ def build_dashboard(
             targets.append(right_idx[tgt])
             values.append(val)
             hex_c = confed_color(src)
-            r, g, b = int(hex_c[1:3], 16), int(hex_c[3:5], 16), int(hex_c[5:7], 16)
-            link_colors.append(f"rgba({r},{g},{b},0.42)")
+            red, green, blue = int(hex_c[1:3], 16), int(hex_c[3:5], 16), int(hex_c[5:7], 16)
+            link_colors.append(f"rgba({red},{green},{blue},0.42)")
 
-    fig.add_trace(
+    abroad_n = sum(1 for r in rows if not r.domestic)
+    abroad_pct = round(100 * abroad_n / max(1, len(rows)))
+    fig = go.Figure(
         go.Sankey(
             arrangement="snap",
             node={
@@ -160,45 +130,15 @@ def build_dashboard(
                 "hovertemplate": "%{source.label} → %{target.label}<br>%{value} players<extra></extra>",
             },
             textfont={"color": TEXT, "size": 12},
-        ),
-        row=2,
-        col=1,
+        )
     )
-
-    _ = source_accessed  # cited in page footer
-    abroad_n = sum(1 for r in rows if not r.domestic)
-    abroad_pct = round(100 * abroad_n / max(1, len(rows)))
     dark_layout(
         fig,
-        f"{tournament} — squad overview · {abroad_pct}% play outside their home federation",
-        height=860,
+        f"{tournament} — national → club confederation · {abroad_pct}% play abroad",
+        height=420,
         showlegend=False,
     )
-    fig.update_xaxes(title_text="Players", row=1, col=1, gridcolor=GRID, zeroline=False)
-    fig.update_yaxes(row=1, col=1, gridcolor=GRID, automargin=True)
-
-    style_subplot_titles(fig, font_size=12)
-
-    if pos_values:
-        pie_trace = next((t for t in fig.data if t.type == "pie"), None)
-        if pie_trace is not None and pie_trace.domain is not None:
-            x0, x1 = pie_trace.domain.x
-            y0, y1 = pie_trace.domain.y
-            cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-        else:
-            cx, cy = 0.815, 0.82
-        fig.add_annotation(
-            text=f"<b>{sum(pos_values):,}</b><br>players",
-            x=cx,
-            y=cy,
-            xref="paper",
-            yref="paper",
-            showarrow=False,
-            font={"size": 14, "color": TEXT},
-            xanchor="center",
-            yanchor="middle",
-        )
-
+    fig.update_layout(margin=dict(l=24, r=24, t=56, b=24))
     return fig
 
 
