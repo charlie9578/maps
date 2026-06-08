@@ -27,6 +27,9 @@ htmlcov/
 maps/**/output/*
 !maps/**/output/.gitkeep
 
+# GitHub Pages build tree (regenerate: python scripts/build_pages_site.py)
+site/
+
 # Downloaded map data (document sources in map README; keep .gitkeep)
 maps/**/data/*.csv
 maps/**/data/**/*.csv

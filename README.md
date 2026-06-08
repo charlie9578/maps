@@ -123,3 +123,35 @@ Document required variable names in each map’s README and add placeholders to 
 4. Create a venv and run as documented in the map README.
 
 Maps must not import from other map folders.
+
+## Publishing (GitHub Pages)
+
+Static HTML maps can be published from this repo to GitHub Pages. The workflow
+builds a `site/` tree and deploys it on every push to `main`.
+
+**Live site:** [charlie9578.github.io/maps](https://charlie9578.github.io/maps/) (after Pages is enabled — see below)
+
+| Path | Content |
+|------|---------|
+| `/` | Landing page listing published maps |
+| `/world-cup-2026/` | 2026 World Cup squad dashboard |
+
+### One-time setup
+
+1. Repo **Settings → Pages → Build and deployment → Source:** GitHub Actions.
+2. Push to `main` (or run the **Deploy GitHub Pages** workflow manually).
+
+### Local preview
+
+```bash
+python scripts/build_pages_site.py --site-url https://charlie9578.github.io/maps
+# open site/index.html in a browser (or serve site/ with any static server)
+```
+
+### Adding a map to the site
+
+1. Ensure the map writes self-contained HTML (Plotly/Folium via CDN is fine).
+2. Add a build step in `scripts/build_pages_site.py` (`PUBLISHED_MAPS` + publish function).
+3. Push to `main` — CI rebuilds and deploys.
+
+Dash dashboards (live server + API) are not suited to static Pages; host those elsewhere or export snapshots.

@@ -74,8 +74,10 @@ def main() -> None:
     squads = load_squads()
     tournament = squads.get("tournament", "World Cup")
     n_teams = len(squads.get("teams", []))
-    print(f"{tournament}: dashboard for {n_teams} nations ({len(paths)} pages).")
+    print(f"{tournament}: dashboard for {n_teams} nations ({len(paths) - 1} pages + single-file bundle).")
     print("Open output/world_cup_dashboard.html — five pages linked from the nav.")
+    print("Share output/world_cup_dashboard_all.html — all pages in one file.")
+    print("Include output/share-map.png alongside the HTML for link-preview thumbnails.")
 
 
 if __name__ == "__main__":

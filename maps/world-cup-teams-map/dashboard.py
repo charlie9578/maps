@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import re
+import shutil
 import statistics
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
 import plotly.graph_objects as go
+import plotly.io as pio
 
 from dashboard_data import (
     DASH_BG,
@@ -34,12 +37,10 @@ from dashboard_data import (
     youngest_oldest,
 )
 from dashboard_viz import (
-    build_abroad_by_confed_panel,
     build_age_bands_panel,
     build_age_milestones_panel,
     build_club_countries_treemap,
     build_confed_sankey_panel,
-    build_geography_panel,
     build_nation_experience_panel,
     build_records_panel,
     build_top_clubs_panel,
@@ -52,6 +53,12 @@ from map_embed import MapBundle, prepare_map_bundle
 MAP_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = MAP_DIR / "output"
 DEFAULT_OUTPUT = OUTPUT_DIR / "world_cup_dashboard.html"
+SINGLE_OUTPUT = OUTPUT_DIR / "world_cup_dashboard_all.html"
+SHARE_IMAGE_NAME = "share-map.png"
+SHARE_IMAGE_SOURCE = MAP_DIR / "assets" / SHARE_IMAGE_NAME
+SHARE_IMAGE_ALT = (
+    "2026 FIFA World Cup flight paths from national capitals to club cities worldwide"
+)
 
 
 @dataclass(frozen=True)
@@ -76,6 +83,85 @@ DASHBOARD_PAGES: tuple[DashboardPage, ...] = (
 )
 
 PLOTLY_CONFIG = {"displayModeBar": False, "responsive": True}
+_PLOTLY_CDN_SCRIPT: str | None = None
+
+
+def _plotly_cdn_script() -> str:
+    """Plotly.js tag matching the installed Python package (not plotly-latest)."""
+    global _PLOTLY_CDN_SCRIPT
+    if _PLOTLY_CDN_SCRIPT is None:
+        snippet = pio.to_html(go.Figure(), include_plotlyjs="cdn", full_html=False)
+        match = re.search(r"<script[^>]*plotly[^>]*></script>", snippet)
+        if not match:
+            msg = "Could not extract Plotly CDN script tag from plotly.io.to_html"
+            raise RuntimeError(msg)
+        _PLOTLY_CDN_SCRIPT = match.group(0)
+    return _PLOTLY_CDN_SCRIPT
+
+
+def _html_attr(text: str) -> str:
+    return (
+        text.replace("&", "&amp;")
+        .replace('"', "&quot;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
+def _share_image_url(pages_url: str | None) -> str:
+    if pages_url:
+        return f"{pages_url.rstrip('/')}/{SHARE_IMAGE_NAME}"
+    return SHARE_IMAGE_NAME
+
+
+def _share_meta_html(
+    tournament: str,
+    *,
+    page_title: str | None = None,
+    n_players: int | None = None,
+    n_nations: int | None = None,
+    pages_url: str | None = None,
+) -> str:
+    """Open Graph / Twitter Card tags for link previews (share-map.png alongside HTML)."""
+    title = f"{tournament} — squad dashboard"
+    if page_title and page_title != "Overview":
+        title = f"{title} — {page_title}"
+    if n_players is not None and n_nations is not None:
+        description = (
+            f"{n_players:,} players from {n_nations} nations — squad stats, records, "
+            "and capital-to-club flight paths for the 2026 finals."
+        )
+    else:
+        description = (
+            "Interactive squad dashboard for the 2026 FIFA World Cup — stats, records, "
+            "and capital-to-club flight paths worldwide."
+        )
+    title_esc = _html_attr(title)
+    desc_esc = _html_attr(description)
+    alt_esc = _html_attr(SHARE_IMAGE_ALT)
+    image_url = _html_attr(_share_image_url(pages_url))
+    og_url = ""
+    if pages_url:
+        og_url = f'\n  <meta property="og:url" content="{_html_attr(pages_url.rstrip("/"))}"/>'
+    return f"""  <meta name="description" content="{desc_esc}"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="{title_esc}"/>
+  <meta property="og:description" content="{desc_esc}"/>
+  <meta property="og:image" content="{image_url}"/>
+  <meta property="og:image:alt" content="{alt_esc}"/>{og_url}
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="{title_esc}"/>
+  <meta name="twitter:description" content="{desc_esc}"/>
+  <meta name="twitter:image" content="{image_url}"/>"""
+
+
+def _copy_share_image(output_dir: Path) -> Path | None:
+    """Copy the map preview PNG into output/ next to the HTML files."""
+    if not SHARE_IMAGE_SOURCE.is_file():
+        return None
+    dest = output_dir / SHARE_IMAGE_NAME
+    shutil.copy2(SHARE_IMAGE_SOURCE, dest)
+    return dest
 
 
 def _figure_to_div(fig: go.Figure, *, include_plotlyjs: bool | str = False) -> str:
@@ -427,21 +513,47 @@ def _page_styles() -> str:
       text-decoration: none;
     }}
     .guide-link:hover {{ color: #bfdbfe; text-decoration: underline; }}
+    body.dashboard-single .dashboard-panel:not(.is-active) {{
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0;
+      max-width: var(--page-max-width);
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: var(--page-gutter);
+      padding-right: var(--page-gutter);
+      box-sizing: border-box;
+    }}
+    body.dashboard-single .dashboard-panel.is-active {{
+      position: relative;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: auto;
+      opacity: 1;
+    }}
     """
 
 
-def _page_href(slug: str) -> str:
+def _page_href(slug: str, *, single_file: bool = False) -> str:
+    if single_file:
+        return f"#{slug}"
     for page in DASHBOARD_PAGES:
         if page.slug == slug:
             return page.filename
     return "#"
 
 
-def _nav_html(tournament: str, active_slug: str) -> str:
+def _nav_html(tournament: str, active_slug: str, *, single_file: bool = False) -> str:
     links: list[str] = []
     for page in DASHBOARD_PAGES:
         cls = ' class="nav-active"' if page.slug == active_slug else ""
-        links.append(f'<a href="{page.filename}"{cls}>{page.label}</a>')
+        href = _page_href(page.slug, single_file=single_file)
+        links.append(f'<a href="{href}"{cls}>{page.label}</a>')
     dash_links = "\n    <span class=\"nav-sep\">|</span>\n    ".join(links)
     return f"""  <nav class="top-nav">
     <div class="site-width top-nav-inner">
@@ -622,8 +734,8 @@ def _page_intro(
         ),
         "records": (
             "Records & leaderboards",
-            "Pre-tournament international goals and caps — every player on the scatter plot, "
-            "distance and abroad context, plus scrollable leaderboards.",
+            "Pre-tournament international goals and caps — every player on the scatter plot "
+            "plus scrollable leaderboards.",
         ),
         "captains": (
             "Captains",
@@ -670,7 +782,7 @@ def _guide_card(title: str, stat: str, blurb: str, href: str) -> str:
     </article>"""
 
 
-def _render_overview_guide(rows: list) -> str:
+def _render_overview_guide(rows: list, *, single_file: bool = False) -> str:
     """Themed jump sections linking each analysis page."""
     h = _dashboard_highlights(rows)
     cap_age_gap = (
@@ -689,7 +801,7 @@ def _render_overview_guide(rows: list) -> str:
             "Where they play",
             f"{h.top_club_name} · {h.top_club_n} players",
             f"{h.top_host_name} hosts {h.top_host_n}. Top clubs, confederation flows, map, and treemap.",
-            _page_href("where"),
+            _page_href("where", single_file=single_file),
         ),
         (
             "Squads",
@@ -697,13 +809,13 @@ def _render_overview_guide(rows: list) -> str:
             if h.median_age is not None
             else f"{h.n_players:,} players",
             f"Ages {h.youngest_age}–{h.oldest_age}; {h.tournament_birthdays} tournament birthdays; abroad share by nation.",
-            _page_href("squads"),
+            _page_href("squads", single_file=single_file),
         ),
         (
             "Records",
             record_stat,
-            f"{h.centurions} centurions; {h.median_distance_km:,} km median capital-to-club route.",
-            _page_href("records"),
+            f"{h.centurions} centurions; {h.uncapped} uncapped debutants.",
+            _page_href("records", single_file=single_file),
         ),
         (
             "Captains",
@@ -711,7 +823,7 @@ def _render_overview_guide(rows: list) -> str:
             f"Captains avg {cap_age_gap:+.1f} years vs squad mates; {h.captains_most_capped} are cap leaders."
             if cap_age_gap is not None
             else f"{h.captains_most_capped} captains are also their squad's cap leader.",
-            _page_href("captains"),
+            _page_href("captains", single_file=single_file),
         ),
     ]
     return '  <section class="guide-grid">\n' + "\n".join(
@@ -732,6 +844,8 @@ def _page_insights(
         if h.captain_avg_age is not None and h.squad_avg_age is not None
         else None
     )
+
+    goal_scorers = sum(1 for r in rows if r.goals > 0)
 
     cards_by_slug: dict[str, list[tuple[str, str, str]]] = {
         "squads": [
@@ -769,9 +883,9 @@ def _page_insights(
                     "Squad members with 100+ pre-tournament senior caps.",
                 ),
                 (
-                    "Median route",
-                    f"{h.median_distance_km:,} km",
-                    "Typical great-circle distance from national capital to club city.",
+                    "Goal scorers",
+                    f"{goal_scorers} players",
+                    "Squad members with at least one pre-tournament senior international goal.",
                 ),
                 (
                     "Uncapped",
@@ -797,9 +911,9 @@ def _page_insights(
                     "Squad members with 100+ pre-tournament senior caps.",
                 ),
                 (
-                    "Median route",
-                    f"{h.median_distance_km:,} km",
-                    "Typical great-circle distance from national capital to club city.",
+                    "Uncapped",
+                    f"{h.uncapped} players",
+                    "Squad selections with zero pre-tournament senior international caps.",
                 ),
             ]
         ),
@@ -870,6 +984,7 @@ def _page_shell(
     source_accessed: str,
     rows: list,
     map_bundle: MapBundle | None = None,
+    pages_url: str | None = None,
 ) -> str:
     intro = _page_intro(active_slug, tournament, rows, map_bundle=map_bundle)
     insights = "" if active_slug == "overview" else _page_insights(
@@ -881,12 +996,15 @@ def _page_shell(
         else ""
     )
     footer = _footer_html(source_accessed)
+    n_players = len(rows)
+    n_nations = len({r.nation for r in rows})
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>{tournament} — squad dashboard — {page_title}</title>
+{_share_meta_html(tournament, page_title=page_title, n_players=n_players, n_nations=n_nations, pages_url=pages_url)}
   <style>
 {_page_styles()}
   </style>
@@ -993,6 +1111,8 @@ def _build_page_bodies(
     *,
     source_accessed: str,
     map_bundle: MapBundle | None = None,
+    plotlyjs: bool | str = "cdn",
+    single_file: bool = False,
 ) -> dict[str, str]:
     rows = build_player_rows(teams, clubs)
     top_clubs_fig = build_top_clubs_panel(tournament, rows, clubs)
@@ -1005,8 +1125,6 @@ def _build_page_bodies(
     age_milestones_fig = build_age_milestones_panel(tournament, rows)
     age_bands_fig = build_age_bands_panel(tournament, rows)
     treemap_fig = build_club_countries_treemap(tournament, rows)
-    geography_fig = build_geography_panel(tournament, rows)
-    abroad_confed_fig = build_abroad_by_confed_panel(tournament, rows)
 
     leaderboards_html = (
         f'<div class="table-grid">'
@@ -1016,7 +1134,7 @@ def _build_page_bodies(
         f"</div>"
     )
 
-    overview = _render_overview_guide(rows)
+    overview = _render_overview_guide(rows, single_file=single_file)
 
     youngest, oldest = youngest_oldest(rows, n=6)
     age_highlights_html = (
@@ -1033,7 +1151,7 @@ def _build_page_bodies(
                 "Squad experience by nation",
                 nation_experience_fig,
                 lead="Average international caps per squad member — most and least experienced nations.",
-                include_plotlyjs="cdn",
+                include_plotlyjs=plotlyjs,
             ),
             _render_figure_section(
                 "Breakdown by position",
@@ -1071,19 +1189,7 @@ def _build_page_bodies(
                 "Goals vs caps",
                 scatter_fig,
                 lead="Every player plotted by pre-tournament international record. Marker size reflects age; colour is position.",
-                include_plotlyjs="cdn",
-            ),
-            _render_chart_row(
-                _render_chart_column(
-                    "Playing abroad",
-                    abroad_confed_fig,
-                    lead="Domestic vs abroad split within each national confederation.",
-                ),
-                _render_chart_column(
-                    "Flight distances",
-                    geography_fig,
-                    lead="Great-circle distance from national capital to club city.",
-                ),
+                include_plotlyjs=plotlyjs,
             ),
             _render_table_section(
                 "Leaderboards",
@@ -1099,7 +1205,7 @@ def _build_page_bodies(
                 "Position mix",
                 captain_position_fig,
                 lead="Share of captains vs all squad players at each position (GK / DF / MF / FW).",
-                include_plotlyjs="cdn",
+                include_plotlyjs=plotlyjs,
             ),
             _render_figure_section(
                 "Captains vs squad mates",
@@ -1120,7 +1226,7 @@ def _build_page_bodies(
                 "Clubs supplying the most players",
                 top_clubs_fig,
                 lead="Hotspots to explore on the map below — click a club city to reveal flight paths.",
-                include_plotlyjs="cdn",
+                include_plotlyjs=plotlyjs,
             ),
             _render_figure_section(
                 "National → club confederation",
@@ -1145,16 +1251,208 @@ def _build_page_bodies(
     }
 
 
-def write_dashboard_site(output_dir: Path | None = None) -> list[Path]:
-    """Build the multi-page squad dashboard and write standalone HTML files."""
-    out = output_dir or OUTPUT_DIR
-    out.mkdir(parents=True, exist_ok=True)
+def _single_page_script() -> str:
+    return """  <script>
+    (function () {
+      var panels = document.querySelectorAll(".dashboard-panel");
+      var navLinks = document.querySelectorAll(".top-nav a[href^='#']");
 
+      function resizeCharts(root) {
+        if (!window.Plotly || !root) {
+          return;
+        }
+        function doResize() {
+          root.querySelectorAll(".js-plotly-plot").forEach(function (el) {
+            Plotly.Plots.resize(el);
+          });
+        }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(doResize);
+        });
+      }
+
+      function showPage(slug) {
+        panels.forEach(function (panel) {
+          panel.classList.toggle("is-active", panel.id === "panel-" + slug);
+        });
+        navLinks.forEach(function (link) {
+          link.classList.toggle("nav-active", link.getAttribute("href") === "#" + slug);
+        });
+        var active = document.getElementById("panel-" + slug);
+        resizeCharts(active);
+        if (slug && slug !== "overview") {
+          history.replaceState(null, "", "#" + slug);
+        } else {
+          history.replaceState(null, "", location.pathname);
+        }
+        window.scrollTo(0, 0);
+      }
+
+      function bindPageLinks(selector) {
+        document.querySelectorAll(selector).forEach(function (link) {
+          link.addEventListener("click", function (event) {
+            var slug = link.getAttribute("href").slice(1);
+            if (!slug || !document.getElementById("panel-" + slug)) {
+              return;
+            }
+            event.preventDefault();
+            showPage(slug);
+          });
+        });
+      }
+
+      navLinks.forEach(function (link) {
+        link.addEventListener("click", function (event) {
+          var slug = link.getAttribute("href").slice(1);
+          if (!slug) {
+            return;
+          }
+          event.preventDefault();
+          showPage(slug);
+        });
+      });
+      bindPageLinks(".guide-link[href^='#']");
+
+      window.addEventListener("hashchange", function () {
+        var slug = location.hash.slice(1) || "overview";
+        if (document.getElementById("panel-" + slug)) {
+          showPage(slug);
+        }
+      });
+
+      var initial = location.hash.slice(1) || "overview";
+      if (!document.getElementById("panel-" + initial)) {
+        initial = "overview";
+      }
+      showPage(initial);
+    })();
+  </script>"""
+
+
+def _single_page_shell(
+    tournament: str,
+    *,
+    bodies: dict[str, str],
+    source_accessed: str,
+    rows: list,
+    map_bundle: MapBundle | None,
+    pages_url: str | None = None,
+) -> str:
+    panel_blocks: list[str] = []
+    for page in DASHBOARD_PAGES:
+        active_cls = " is-active" if page.slug == "overview" else ""
+        intro = _page_intro(
+            page.slug,
+            tournament,
+            rows,
+            map_bundle=map_bundle if page.slug == "where" else None,
+        )
+        insights = "" if page.slug == "overview" else _page_insights(
+            page.slug,
+            rows,
+            map_bundle=map_bundle if page.slug == "where" else None,
+        )
+        roster_note = (
+            overview_intro_html(rows, tournament=tournament, source_accessed=source_accessed)
+            if page.slug == "overview"
+            else ""
+        )
+        panel_blocks.append(
+            f'  <div id="panel-{page.slug}" class="dashboard-panel{active_cls}">\n'
+            f"{intro}\n"
+            f"{insights}\n"
+            f"  {bodies[page.slug]}\n"
+            f"{roster_note}\n"
+            f"  </div>"
+        )
+
+    footer = _footer_html(source_accessed)
+    n_players = len(rows)
+    n_nations = len({r.nation for r in rows})
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{tournament} — squad dashboard</title>
+{_share_meta_html(tournament, n_players=n_players, n_nations=n_nations, pages_url=pages_url)}
+  {_plotly_cdn_script()}
+  <style>
+{_page_styles()}
+  </style>
+</head>
+<body class="dashboard-single">
+{_nav_html(tournament, "overview", single_file=True)}
+{"".join(panel_blocks)}
+{footer}
+{_single_page_script()}
+</body>
+</html>
+"""
+
+
+def _load_dashboard_context() -> tuple[str, list[Team], dict[str, dict], str, list]:
     squads = load_squads()
     clubs = load_clubs()
     tournament, teams = build_teams(strict=False)
     accessed = squads.get("source_accessed", "2026-06-05")
     rows = build_player_rows(teams, clubs)
+    return tournament, teams, clubs, accessed, rows
+
+
+def write_dashboard_single(
+    output_path: Path | None = None,
+    *,
+    tournament: str | None = None,
+    teams: list[Team] | None = None,
+    clubs: dict[str, dict] | None = None,
+    source_accessed: str | None = None,
+    rows: list | None = None,
+    bodies: dict[str, str] | None = None,
+    map_bundle: MapBundle | None = None,
+    pages_url: str | None = None,
+) -> Path:
+    """Build all dashboard pages into one shareable HTML file."""
+    out = output_path or SINGLE_OUTPUT
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    if tournament is None or teams is None or clubs is None or source_accessed is None or rows is None:
+        tournament, teams, clubs, source_accessed, rows = _load_dashboard_context()
+    if map_bundle is None:
+        map_bundle = prepare_map_bundle(tournament, teams, include_plotlyjs=False, embedded=True)
+    if bodies is None:
+        bodies = _build_page_bodies(
+            tournament,
+            teams,
+            clubs,
+            source_accessed=source_accessed,
+            map_bundle=map_bundle,
+            plotlyjs=False,
+            single_file=True,
+        )
+    html = _single_page_shell(
+        tournament,
+        bodies=bodies,
+        source_accessed=source_accessed,
+        rows=rows,
+        map_bundle=map_bundle,
+        pages_url=pages_url,
+    )
+    out.write_text(html, encoding="utf-8")
+    return out
+
+
+def write_dashboard_site(
+    output_dir: Path | None = None,
+    *,
+    pages_url: str | None = None,
+) -> list[Path]:
+    """Build the multi-page squad dashboard and write standalone HTML files."""
+    out = output_dir or OUTPUT_DIR
+    out.mkdir(parents=True, exist_ok=True)
+    share_image = _copy_share_image(out)
+
+    tournament, teams, clubs, accessed, rows = _load_dashboard_context()
     map_bundle = prepare_map_bundle(tournament, teams, include_plotlyjs="cdn", embedded=True)
 
     bodies = _build_page_bodies(
@@ -1176,9 +1474,34 @@ def write_dashboard_site(output_dir: Path | None = None) -> list[Path]:
             source_accessed=accessed,
             rows=rows,
             map_bundle=map_bundle if page.slug == "where" else None,
+            pages_url=pages_url,
         )
         path.write_text(html, encoding="utf-8")
         written.append(path)
+
+    single_map = prepare_map_bundle(tournament, teams, include_plotlyjs=False, embedded=True)
+    single_path = write_dashboard_single(
+        out / SINGLE_OUTPUT.name,
+        tournament=tournament,
+        teams=teams,
+        clubs=clubs,
+        source_accessed=accessed,
+        rows=rows,
+        bodies=_build_page_bodies(
+            tournament,
+            teams,
+            clubs,
+            source_accessed=accessed,
+            map_bundle=single_map,
+            plotlyjs=False,
+            single_file=True,
+        ),
+        map_bundle=single_map,
+        pages_url=pages_url,
+    )
+    written.append(single_path)
+    if share_image is not None:
+        written.append(share_image)
     return written
 
 
@@ -1193,14 +1516,33 @@ def write_dashboard(output_path: Path | None = None) -> Path:
 
 
 def main() -> None:
-    paths = write_dashboard_site()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Build the World Cup squad dashboard HTML.")
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=Path,
+        default=OUTPUT_DIR,
+        help=f"Output directory (default: {OUTPUT_DIR.relative_to(MAP_DIR.parent.parent)}).",
+    )
+    parser.add_argument(
+        "--pages-url",
+        metavar="URL",
+        help="Public base URL for GitHub Pages (absolute og:image / og:url).",
+    )
+    args = parser.parse_args()
+
+    paths = write_dashboard_site(args.output_dir, pages_url=args.pages_url)
     squads = load_squads()
     tournament = squads.get("tournament", "World Cup")
     n_teams = len(squads.get("teams", []))
     for path in paths:
         print(f"Wrote {path}")
-    print(f"{tournament}: dashboard for {n_teams} nations ({len(paths)} pages).")
-    print("Open output/world_cup_dashboard.html in a browser (nav links to other pages).")
+    print(f"{tournament}: dashboard for {n_teams} nations ({len(DASHBOARD_PAGES)} pages + single-file bundle).")
+    print("Open output/world_cup_dashboard.html — five pages linked from the nav.")
+    print("Share output/world_cup_dashboard_all.html — all pages in one file.")
+    print("Include output/share-map.png alongside the HTML for link-preview thumbnails.")
 
 
 if __name__ == "__main__":

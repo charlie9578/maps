@@ -2,6 +2,8 @@
 
 Short index of maps in this repo. Each folder under `maps/<name>/` is self-contained; see that map’s `README.md` for full run instructions.
 
+**Published demos:** [charlie9578.github.io/maps](https://charlie9578.github.io/maps/) · [World Cup dashboard](https://charlie9578.github.io/maps/world-cup-2026/)
+
 | Map | Type | Summary |
 |-----|------|---------|
 | [basic-world-map](maps/basic-world-map/) | Static PNG | Political world map (land, ocean, coastlines, borders) via Cartopy / Natural Earth. |
