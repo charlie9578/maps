@@ -280,6 +280,26 @@ VETERAN_CAPS = 100
 # Shared layout width for all dashboard pages (matches CSS --page-max-width).
 PAGE_MAX_WIDTH = 1400
 
+OFFICIAL_SQUAD_SIZE = 26
+NUM_FINALISTS = 48
+
+# Documented on Wikipedia squad-page prose (2026 FIFA World Cup squads).
+SQUAD_WITHDRAWAL_NOTES: dict[str, str] = {
+    "Argentina": (
+        "Leonardo Balerdi withdrew with a calf injury (6 Jun); replacement not yet named."
+    ),
+    "Austria": (
+        "Christoph Baumgartner withdrew with a thigh injury (2 Jun); "
+        "coach Ralf Rangnick chose not to call a replacement."
+    ),
+    "Canada": (
+        "Marcelo Flores withdrew with an ACL injury (31 May); replacement not yet named."
+    ),
+    "Jordan": (
+        "Ibrahim Sabra withdrew with an ankle ligament tear (5 Jun); replacement not yet named."
+    ),
+}
+
 TABLE_HEADER_BG = "#0f172a"
 TABLE_ROW_BG = PLOT_BG
 TABLE_ROW_ALT_BG = "#172033"
@@ -556,6 +576,34 @@ def birthday_table_html(birthdays: list[TournamentBirthday]) -> str:
 </div>"""
 
 
+def age_extreme_table_html(players: list[AgeExtreme], *, title: str, note: str) -> str:
+    """Scrollable HTML table for youngest or oldest squad members."""
+    if not players:
+        return f'<p class="table-note">{_esc(title)}: no age data.</p>'
+    rows_html = "\n".join(
+        "      <tr>"
+        f"<td>{_esc(p.name)}</td>"
+        f"<td>{_esc(p.nation)}</td>"
+        f"<td>{p.age if p.age is not None else '—'}</td>"
+        f"<td>{_esc(format_dob(p.dob))}</td>"
+        f"<td>{_esc(p.pos)}</td>"
+        f"<td>{_esc(p.club)}</td>"
+        "</tr>"
+        for p in players
+    )
+    return f"""<div class="table-wrap">
+  <p class="table-note"><strong>{_esc(title)}</strong> — {note}</p>
+  <table class="data-table">
+    <thead>
+      <tr><th>Player</th><th>Nation</th><th>Age</th><th>Born</th><th>Pos</th><th>Club</th></tr>
+    </thead>
+    <tbody>
+{rows_html}
+    </tbody>
+  </table>
+</div>"""
+
+
 def _esc(text: str) -> str:
     return (
         text.replace("&", "&amp;")
@@ -563,6 +611,42 @@ def _esc(text: str) -> str:
         .replace(">", "&gt;")
         .replace('"', "&quot;")
     )
+
+
+def squad_shortfall_nations(rows: list[PlayerRow]) -> list[tuple[str, int]]:
+    """Nations with fewer than ``OFFICIAL_SQUAD_SIZE`` players in the source data."""
+    counts = Counter(r.nation for r in rows)
+    return sorted(
+        (nation, count) for nation, count in counts.items() if count != OFFICIAL_SQUAD_SIZE
+    )
+
+
+def squad_roster_note_html(rows: list[PlayerRow]) -> str:
+    """Explain why total players may be below 48 × 26 (injury withdrawals on Wikipedia)."""
+    n_players = len(rows)
+    expected = NUM_FINALISTS * OFFICIAL_SQUAD_SIZE
+    if n_players >= expected:
+        return ""
+
+    shortfalls = squad_shortfall_nations(rows)
+    missing = expected - n_players
+    items = "\n".join(
+        f"      <li><strong>{_esc(nation)}</strong> ({count} listed) — "
+        f"{_esc(SQUAD_WITHDRAWAL_NOTES.get(nation, 'Fewer than 26 players in the source table.'))}</li>"
+        for nation, count in shortfalls
+    )
+    return f"""  <aside class="roster-note site-width">
+    <p class="roster-note-title">Why {n_players:,} players, not {expected:,}?</p>
+    <p>FIFA squads are capped at {OFFICIAL_SQUAD_SIZE} players per nation ({NUM_FINALISTS} × {OFFICIAL_SQUAD_SIZE} = {expected:,}).
+    This dataset lists <strong>{n_players:,}</strong> because <strong>{missing}</strong> squad {("slot is" if missing == 1 else "slots are")}
+    currently unfilled after injury withdrawals documented on
+    <a href="https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads">Wikipedia</a>:</p>
+    <ul class="roster-note-list">
+{items}
+    </ul>
+    <p class="roster-note-foot">Injured players may be replaced up to 24 hours before a team's opening match.
+    Austria's coach has already confirmed he will not add a replacement for Baumgartner.</p>
+  </aside>"""
 
 
 @dataclass(frozen=True)
@@ -809,9 +893,7 @@ def caps_leaderboard_table_html(
         + f'<th title="{veteran_min}+ caps">★</th>'
     )
     body = "\n".join(
-        "      <tr"
-        + (' class="row-highlight"' if (r.caps or 0) >= veteran_min else "")
-        + ">"
+        "      <tr>"
         + f'<td class="rank">{i}</td>'
         + "".join(f"<td>{cell(r, c)}</td>" for c in columns)
         + f'<td>{"★" if (r.caps or 0) >= veteran_min else "—"}</td>'

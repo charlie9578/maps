@@ -82,6 +82,7 @@
           "name": "Riyad Mahrez ( captain )",
           "pos": "FW",
           "club": "Al Ahli Saudi",
+          "captain": true,
           "club_wiki": "Al-Ahli Saudi FC",
           "no": 7,
           "dob": "1991-02-21",
@@ -400,6 +401,7 @@
           "name": "Lionel Messi ( captain )",
           "pos": "FW",
           "club": "Inter Miami",
+          "captain": true,
           "club_wiki": "Inter Miami CF",
           "no": 10,
           "dob": "1987-06-24",
@@ -597,6 +599,7 @@
           "name": "Mathew Ryan ( captain )",
           "pos": "GK",
           "club": "Levante",
+          "captain": true,
           "club_wiki": "Levante UD",
           "no": 1,
           "dob": "1992-04-08",
@@ -970,6 +973,7 @@
           "name": "David Alaba ( captain )",
           "pos": "DF",
           "club": "Real Madrid",
+          "captain": true,
           "club_wiki": "Real Madrid CF",
           "no": 8,
           "dob": "1992-06-24",
@@ -1255,6 +1259,7 @@
           "name": "Youri Tielemans ( captain )",
           "pos": "MF",
           "club": "Aston Villa",
+          "captain": true,
           "club_wiki": "Aston Villa F.C.",
           "no": 8,
           "dob": "1997-05-07",
@@ -1584,6 +1589,7 @@
           "name": "Edin Džeko ( captain )",
           "pos": "FW",
           "club": "Schalke 04",
+          "captain": true,
           "club_wiki": "FC Schalke 04",
           "no": 11,
           "dob": "1986-03-17",
@@ -1803,6 +1809,7 @@
           "name": "Marquinhos ( captain )",
           "pos": "DF",
           "club": "Paris Saint-Germain",
+          "captain": true,
           "club_wiki": "Paris Saint-Germain FC",
           "no": 4,
           "dob": "1994-05-14",
@@ -2217,6 +2224,17 @@
           "goals": 6
         },
         {
+          "name": "Moïse Bombito",
+          "pos": "DF",
+          "club": "Nice",
+          "club_wiki": "OGC Nice",
+          "no": 15,
+          "dob": "2000-03-30",
+          "age": 26,
+          "caps": 20,
+          "goals": 0
+        },
+        {
           "name": "Maxime Crépeau",
           "pos": "GK",
           "club": "Orlando City",
@@ -2253,6 +2271,7 @@
           "name": "Alphonso Davies ( captain )",
           "pos": "DF",
           "club": "Bayern Munich",
+          "captain": true,
           "club_wiki": "FC Bayern Munich",
           "no": 19,
           "dob": "2000-11-02",
@@ -2355,7 +2374,7 @@
           "no": 2,
           "dob": "1988-05-20",
           "age": 38,
-          "caps": 61,
+          "caps": 62,
           "goals": 4
         },
         {
@@ -2388,7 +2407,7 @@
           "no": 5,
           "dob": "2001-04-01",
           "age": 25,
-          "caps": 27,
+          "caps": 28,
           "goals": 0
         },
         {
@@ -2410,7 +2429,7 @@
           "no": 7,
           "dob": "1998-06-14",
           "age": 27,
-          "caps": 26,
+          "caps": 27,
           "goals": 2
         },
         {
@@ -2421,7 +2440,7 @@
           "no": 8,
           "dob": "1998-05-26",
           "age": 28,
-          "caps": 41,
+          "caps": 42,
           "goals": 1
         },
         {
@@ -2443,7 +2462,7 @@
           "no": 10,
           "dob": "1993-11-23",
           "age": 32,
-          "caps": 54,
+          "caps": 55,
           "goals": 5
         },
         {
@@ -2454,8 +2473,8 @@
           "no": 11,
           "dob": "1990-11-27",
           "age": 35,
-          "caps": 59,
-          "goals": 9
+          "caps": 60,
+          "goals": 10
         },
         {
           "name": "Márcio Rosa",
@@ -2465,7 +2484,7 @@
           "no": 12,
           "dob": "1997-02-23",
           "age": 29,
-          "caps": 10,
+          "caps": 11,
           "goals": 0
         },
         {
@@ -2520,8 +2539,8 @@
           "no": 17,
           "dob": "1994-04-27",
           "age": 32,
-          "caps": 37,
-          "goals": 2
+          "caps": 38,
+          "goals": 3
         },
         {
           "name": "Telmo Arcanjo",
@@ -2531,7 +2550,7 @@
           "no": 18,
           "dob": "2001-06-21",
           "age": 24,
-          "caps": 15,
+          "caps": 16,
           "goals": 1
         },
         {
@@ -2542,18 +2561,19 @@
           "no": 19,
           "dob": "2001-05-04",
           "age": 25,
-          "caps": 21,
+          "caps": 22,
           "goals": 7
         },
         {
           "name": "Ryan Mendes ( captain )",
           "pos": "FW",
           "club": "Iğdır",
+          "captain": true,
           "club_wiki": "Iğdır F.K.",
           "no": 20,
           "dob": "1990-01-08",
           "age": 36,
-          "caps": 97,
+          "caps": 98,
           "goals": 22
         },
         {
@@ -2564,8 +2584,8 @@
           "no": 21,
           "dob": "1991-02-10",
           "age": 35,
-          "caps": 8,
-          "goals": 1
+          "caps": 9,
+          "goals": 2
         },
         {
           "name": "Steven Moreira",
@@ -2575,7 +2595,7 @@
           "no": 22,
           "dob": "1994-08-13",
           "age": 31,
-          "caps": 19,
+          "caps": 20,
           "goals": 0
         },
         {
@@ -2651,7 +2671,7 @@
           "no": 2,
           "dob": "1996-05-26",
           "age": 30,
-          "caps": 45,
+          "caps": 46,
           "goals": 3
         },
         {
@@ -2662,7 +2682,7 @@
           "no": 3,
           "dob": "1998-06-26",
           "age": 27,
-          "caps": 36,
+          "caps": 37,
           "goals": 1
         },
         {
@@ -2673,7 +2693,7 @@
           "no": 4,
           "dob": "1992-01-13",
           "age": 34,
-          "caps": 67,
+          "caps": 68,
           "goals": 0
         },
         {
@@ -2695,7 +2715,7 @@
           "no": 6,
           "dob": "2000-06-02",
           "age": 26,
-          "caps": 31,
+          "caps": 32,
           "goals": 2
         },
         {
@@ -2706,7 +2726,7 @@
           "no": 7,
           "dob": "1997-01-13",
           "age": 29,
-          "caps": 73,
+          "caps": 74,
           "goals": 22
         },
         {
@@ -2717,7 +2737,7 @@
           "no": 8,
           "dob": "1998-05-25",
           "age": 28,
-          "caps": 23,
+          "caps": 24,
           "goals": 2
         },
         {
@@ -2735,11 +2755,12 @@
           "name": "James Rodríguez ( captain )",
           "pos": "MF",
           "club": "Minnesota United",
+          "captain": true,
           "club_wiki": "Minnesota United FC",
           "no": 10,
           "dob": "1991-07-12",
           "age": 34,
-          "caps": 125,
+          "caps": 126,
           "goals": 31
         },
         {
@@ -2750,8 +2771,8 @@
           "no": 11,
           "dob": "1997-09-21",
           "age": 28,
-          "caps": 37,
-          "goals": 4
+          "caps": 38,
+          "goals": 6
         },
         {
           "name": "Camilo Vargas",
@@ -2761,7 +2782,7 @@
           "no": 12,
           "dob": "1989-03-09",
           "age": 37,
-          "caps": 41,
+          "caps": 42,
           "goals": 0
         },
         {
@@ -2772,7 +2793,7 @@
           "no": 13,
           "dob": "1994-09-23",
           "age": 31,
-          "caps": 53,
+          "caps": 54,
           "goals": 8
         },
         {
@@ -2783,7 +2804,7 @@
           "no": 14,
           "dob": "2003-07-23",
           "age": 22,
-          "caps": 5,
+          "caps": 6,
           "goals": 1
         },
         {
@@ -2794,7 +2815,7 @@
           "no": 15,
           "dob": "1998-09-12",
           "age": 27,
-          "caps": 9,
+          "caps": 10,
           "goals": 0
         },
         {
@@ -2805,7 +2826,7 @@
           "no": 16,
           "dob": "1994-10-25",
           "age": 31,
-          "caps": 64,
+          "caps": 65,
           "goals": 5
         },
         {
@@ -2816,7 +2837,7 @@
           "no": 17,
           "dob": "1992-08-21",
           "age": 33,
-          "caps": 44,
+          "caps": 45,
           "goals": 1
         },
         {
@@ -2827,7 +2848,7 @@
           "no": 18,
           "dob": "1998-01-23",
           "age": 28,
-          "caps": 4,
+          "caps": 5,
           "goals": 0
         },
         {
@@ -2838,7 +2859,7 @@
           "no": 19,
           "dob": "1999-04-20",
           "age": 27,
-          "caps": 8,
+          "caps": 9,
           "goals": 2
         },
         {
@@ -2849,7 +2870,7 @@
           "no": 20,
           "dob": "1993-01-18",
           "age": 33,
-          "caps": 48,
+          "caps": 49,
           "goals": 6
         },
         {
@@ -2860,7 +2881,7 @@
           "no": 21,
           "dob": "2000-05-24",
           "age": 26,
-          "caps": 9,
+          "caps": 10,
           "goals": 1
         },
         {
@@ -2882,7 +2903,7 @@
           "no": 23,
           "dob": "1996-06-12",
           "age": 29,
-          "caps": 78,
+          "caps": 79,
           "goals": 4
         },
         {
@@ -2893,7 +2914,7 @@
           "no": 24,
           "dob": "1995-03-29",
           "age": 31,
-          "caps": 11,
+          "caps": 12,
           "goals": 0
         },
         {
@@ -2904,7 +2925,7 @@
           "no": 25,
           "dob": "1997-12-02",
           "age": 28,
-          "caps": 11,
+          "caps": 12,
           "goals": 5
         },
         {
@@ -2915,7 +2936,7 @@
           "no": 26,
           "dob": "2002-09-12",
           "age": 23,
-          "caps": 7,
+          "caps": 8,
           "goals": 2
         }
       ]
@@ -2936,7 +2957,7 @@
           "no": 1,
           "dob": "1995-01-09",
           "age": 31,
-          "caps": 74,
+          "caps": 75,
           "goals": 0
         },
         {
@@ -2947,7 +2968,7 @@
           "no": 2,
           "dob": "2000-04-02",
           "age": 26,
-          "caps": 30,
+          "caps": 31,
           "goals": 0
         },
         {
@@ -2958,7 +2979,7 @@
           "no": 3,
           "dob": "1997-09-11",
           "age": 28,
-          "caps": 19,
+          "caps": 20,
           "goals": 0
         },
         {
@@ -2969,7 +2990,7 @@
           "no": 4,
           "dob": "2002-01-23",
           "age": 24,
-          "caps": 47,
+          "caps": 48,
           "goals": 4
         },
         {
@@ -2991,7 +3012,7 @@
           "no": 6,
           "dob": "2000-02-28",
           "age": 26,
-          "caps": 32,
+          "caps": 33,
           "goals": 0
         },
         {
@@ -3013,7 +3034,7 @@
           "no": 8,
           "dob": "1994-05-06",
           "age": 32,
-          "caps": 112,
+          "caps": 113,
           "goals": 5
         },
         {
@@ -3024,19 +3045,20 @@
           "no": 9,
           "dob": "1991-06-19",
           "age": 34,
-          "caps": 115,
+          "caps": 116,
           "goals": 36
         },
         {
           "name": "Luka Modrić ( captain )",
           "pos": "MF",
           "club": "AC Milan",
+          "captain": true,
           "club_wiki": "AC Milan",
           "no": 10,
           "dob": "1985-09-09",
           "age": 40,
-          "caps": 197,
-          "goals": 28
+          "caps": 198,
+          "goals": 29
         },
         {
           "name": "Ante Budimir",
@@ -3046,7 +3068,7 @@
           "no": 11,
           "dob": "1991-07-22",
           "age": 34,
-          "caps": 37,
+          "caps": 38,
           "goals": 6
         },
         {
@@ -3068,7 +3090,7 @@
           "no": 13,
           "dob": "1997-10-04",
           "age": 28,
-          "caps": 62,
+          "caps": 63,
           "goals": 10
         },
         {
@@ -3079,7 +3101,7 @@
           "no": 14,
           "dob": "1989-02-02",
           "age": 37,
-          "caps": 153,
+          "caps": 154,
           "goals": 38
         },
         {
@@ -3090,8 +3112,8 @@
           "no": 15,
           "dob": "1995-02-09",
           "age": 31,
-          "caps": 84,
-          "goals": 11
+          "caps": 85,
+          "goals": 12
         },
         {
           "name": "Martin Baturina",
@@ -3101,7 +3123,7 @@
           "no": 16,
           "dob": "2003-02-16",
           "age": 23,
-          "caps": 18,
+          "caps": 19,
           "goals": 1
         },
         {
@@ -3112,7 +3134,7 @@
           "no": 17,
           "dob": "2003-10-25",
           "age": 22,
-          "caps": 16,
+          "caps": 17,
           "goals": 1
         },
         {
@@ -3145,7 +3167,7 @@
           "no": 20,
           "dob": "2003-03-31",
           "age": 23,
-          "caps": 8,
+          "caps": 9,
           "goals": 2
         },
         {
@@ -3156,7 +3178,7 @@
           "no": 21,
           "dob": "2002-09-08",
           "age": 23,
-          "caps": 20,
+          "caps": 21,
           "goals": 1
         },
         {
@@ -3189,7 +3211,7 @@
           "no": 24,
           "dob": "2000-09-14",
           "age": 25,
-          "caps": 14,
+          "caps": 15,
           "goals": 1
         },
         {
@@ -3200,7 +3222,7 @@
           "no": 25,
           "dob": "1998-01-24",
           "age": 28,
-          "caps": 12,
+          "caps": 13,
           "goals": 1
         },
         {
@@ -3327,6 +3349,7 @@
           "name": "Leandro Bacuna ( captain )",
           "pos": "MF",
           "club": "Iğdır",
+          "captain": true,
           "club_wiki": "Iğdır F.K.",
           "no": 10,
           "dob": "1991-08-21",
@@ -3590,6 +3613,7 @@
           "name": "Ladislav Krejčí ( captain )",
           "pos": "DF",
           "club": "Wolverhampton Wanderers",
+          "captain": true,
           "club_wiki": "Wolverhampton Wanderers F.C.",
           "no": 7,
           "dob": "1999-04-20",
@@ -4051,6 +4075,7 @@
           "name": "Chancel Mbemba ( captain )",
           "pos": "DF",
           "club": "Lille",
+          "captain": true,
           "club_wiki": "Lille OSC",
           "no": 22,
           "dob": "1994-08-08",
@@ -4120,7 +4145,7 @@
           "no": 1,
           "dob": "1987-03-30",
           "age": 39,
-          "caps": 34,
+          "caps": 35,
           "goals": 0
         },
         {
@@ -4131,7 +4156,7 @@
           "no": 2,
           "dob": "1997-01-11",
           "age": 29,
-          "caps": 48,
+          "caps": 49,
           "goals": 5
         },
         {
@@ -4142,7 +4167,7 @@
           "no": 3,
           "dob": "2002-01-09",
           "age": 24,
-          "caps": 51,
+          "caps": 52,
           "goals": 3
         },
         {
@@ -4153,7 +4178,7 @@
           "no": 4,
           "dob": "2004-04-21",
           "age": 22,
-          "caps": 16,
+          "caps": 17,
           "goals": 0
         },
         {
@@ -4164,7 +4189,7 @@
           "no": 5,
           "dob": "1999-08-05",
           "age": 26,
-          "caps": 10,
+          "caps": 11,
           "goals": 1
         },
         {
@@ -4186,8 +4211,8 @@
           "no": 7,
           "dob": "1998-01-21",
           "age": 28,
-          "caps": 53,
-          "goals": 4
+          "caps": 54,
+          "goals": 5
         },
         {
           "name": "Anthony Valencia",
@@ -4197,7 +4222,7 @@
           "no": 8,
           "dob": "2003-07-21",
           "age": 22,
-          "caps": 2,
+          "caps": 3,
           "goals": 1
         },
         {
@@ -4208,7 +4233,7 @@
           "no": 9,
           "dob": "2000-06-23",
           "age": 25,
-          "caps": 22,
+          "caps": 23,
           "goals": 3
         },
         {
@@ -4219,7 +4244,7 @@
           "no": 10,
           "dob": "2007-05-04",
           "age": 19,
-          "caps": 25,
+          "caps": 26,
           "goals": 2
         },
         {
@@ -4248,6 +4273,7 @@
           "name": "Enner Valencia ( captain )",
           "pos": "FW",
           "club": "Pachuca",
+          "captain": true,
           "club_wiki": "C.F. Pachuca",
           "no": 13,
           "dob": "1989-11-04",
@@ -4263,7 +4289,7 @@
           "no": 14,
           "dob": "2003-05-14",
           "age": 23,
-          "caps": 19,
+          "caps": 20,
           "goals": 2
         },
         {
@@ -4274,7 +4300,7 @@
           "no": 15,
           "dob": "2002-03-09",
           "age": 24,
-          "caps": 16,
+          "caps": 17,
           "goals": 1
         },
         {
@@ -4285,8 +4311,8 @@
           "no": 16,
           "dob": "1997-11-18",
           "age": 28,
-          "caps": 19,
-          "goals": 3
+          "caps": 20,
+          "goals": 4
         },
         {
           "name": "Ángelo Preciado",
@@ -4296,7 +4322,7 @@
           "no": 17,
           "dob": "1998-02-18",
           "age": 28,
-          "caps": 54,
+          "caps": 55,
           "goals": 0
         },
         {
@@ -4318,7 +4344,7 @@
           "no": 19,
           "dob": "2000-11-01",
           "age": 25,
-          "caps": 49,
+          "caps": 50,
           "goals": 8
         },
         {
@@ -4329,8 +4355,8 @@
           "no": 20,
           "dob": "2003-06-19",
           "age": 22,
-          "caps": 13,
-          "goals": 1
+          "caps": 14,
+          "goals": 2
         },
         {
           "name": "Alan Franco",
@@ -4340,7 +4366,7 @@
           "no": 21,
           "dob": "1998-08-21",
           "age": 27,
-          "caps": 57,
+          "caps": 58,
           "goals": 1
         },
         {
@@ -4351,7 +4377,7 @@
           "no": 22,
           "dob": "1996-02-28",
           "age": 30,
-          "caps": 3,
+          "caps": 4,
           "goals": 0
         },
         {
@@ -4362,7 +4388,7 @@
           "no": 23,
           "dob": "2001-11-02",
           "age": 24,
-          "caps": 60,
+          "caps": 61,
           "goals": 3
         },
         {
@@ -4373,7 +4399,7 @@
           "no": 24,
           "dob": "2005-03-19",
           "age": 21,
-          "caps": 3,
+          "caps": 4,
           "goals": 0
         },
         {
@@ -4384,7 +4410,7 @@
           "no": 25,
           "dob": "2000-08-04",
           "age": 25,
-          "caps": 9,
+          "caps": 10,
           "goals": 1
         },
         {
@@ -4395,7 +4421,7 @@
           "no": 26,
           "dob": "2004-11-05",
           "age": 21,
-          "caps": 5,
+          "caps": 6,
           "goals": 0
         }
       ]
@@ -4511,6 +4537,7 @@
           "name": "Mohamed Salah ( captain )",
           "pos": "FW",
           "club": "Liverpool",
+          "captain": true,
           "club_wiki": "Liverpool F.C.",
           "no": 10,
           "dob": "1992-06-15",
@@ -4796,6 +4823,7 @@
           "name": "Harry Kane ( captain )",
           "pos": "FW",
           "club": "Bayern Munich",
+          "captain": true,
           "club_wiki": "FC Bayern Munich",
           "no": 9,
           "dob": "1993-07-28",
@@ -5103,6 +5131,7 @@
           "name": "Kylian Mbappé ( captain )",
           "pos": "FW",
           "club": "Real Madrid",
+          "captain": true,
           "club_wiki": "Real Madrid CF",
           "no": 10,
           "dob": "1998-12-20",
@@ -5355,6 +5384,7 @@
           "name": "Joshua Kimmich ( captain )",
           "pos": "DF",
           "club": "Bayern Munich",
+          "captain": true,
           "club_wiki": "FC Bayern Munich",
           "no": 6,
           "dob": "1995-02-08",
@@ -5684,6 +5714,7 @@
           "name": "Jordan Ayew ( captain )",
           "pos": "FW",
           "club": "Leicester City",
+          "captain": true,
           "club_wiki": "Leicester City F.C.",
           "no": 9,
           "dob": "1991-09-11",
@@ -5892,6 +5923,7 @@
           "name": "Johny Placide ( captain )",
           "pos": "GK",
           "club": "Bastia",
+          "captain": true,
           "club_wiki": "SC Bastia",
           "no": 1,
           "dob": "1988-01-29",
@@ -6210,6 +6242,7 @@
           "name": "Ehsan Hajsafi ( captain )",
           "pos": "DF",
           "club": "Sepahan",
+          "captain": true,
           "club_wiki": "Sepahan S.C.",
           "no": 3,
           "dob": "1990-02-25",
@@ -6605,6 +6638,7 @@
           "name": "Jalal Hassan ( captain )",
           "pos": "GK",
           "club": "Al-Zawraa",
+          "captain": true,
           "club_wiki": "Al-Zawraa SC",
           "no": 12,
           "dob": "1991-05-18",
@@ -6857,6 +6891,7 @@
           "name": "Franck Kessié ( captain )",
           "pos": "MF",
           "club": "Al Ahli Saudi",
+          "captain": true,
           "club_wiki": "Al-Ahli Saudi FC",
           "no": 8,
           "dob": "1996-12-19",
@@ -7131,6 +7166,7 @@
           "name": "Wataru Endo ( captain )",
           "pos": "MF",
           "club": "Liverpool",
+          "captain": true,
           "club_wiki": "Liverpool F.C.",
           "no": 6,
           "dob": "1993-02-09",
@@ -7376,7 +7412,7 @@
           "no": 1,
           "dob": "1993-01-08",
           "age": 33,
-          "caps": 75,
+          "caps": 76,
           "goals": 0
         },
         {
@@ -7387,7 +7423,7 @@
           "no": 2,
           "dob": "1995-05-09",
           "age": 31,
-          "caps": 55,
+          "caps": 56,
           "goals": 1
         },
         {
@@ -7398,7 +7434,7 @@
           "no": 3,
           "dob": "1994-02-25",
           "age": 32,
-          "caps": 64,
+          "caps": 65,
           "goals": 3
         },
         {
@@ -7409,7 +7445,7 @@
           "no": 4,
           "dob": "2000-05-13",
           "age": 26,
-          "caps": 17,
+          "caps": 18,
           "goals": 0
         },
         {
@@ -7420,7 +7456,7 @@
           "no": 5,
           "dob": "1996-01-31",
           "age": 30,
-          "caps": 79,
+          "caps": 80,
           "goals": 3
         },
         {
@@ -7431,7 +7467,7 @@
           "no": 6,
           "dob": "2002-07-03",
           "age": 23,
-          "caps": 18,
+          "caps": 19,
           "goals": 1
         },
         {
@@ -7442,7 +7478,7 @@
           "no": 7,
           "dob": "1997-12-30",
           "age": 28,
-          "caps": 40,
+          "caps": 41,
           "goals": 5
         },
         {
@@ -7453,7 +7489,7 @@
           "no": 8,
           "dob": "1997-02-24",
           "age": 29,
-          "caps": 67,
+          "caps": 68,
           "goals": 3
         },
         {
@@ -7464,7 +7500,7 @@
           "no": 9,
           "dob": "2000-03-26",
           "age": 26,
-          "caps": 65,
+          "caps": 66,
           "goals": 29
         },
         {
@@ -7475,7 +7511,7 @@
           "no": 10,
           "dob": "1997-06-10",
           "age": 29,
-          "caps": 91,
+          "caps": 92,
           "goals": 24
         },
         {
@@ -7486,7 +7522,7 @@
           "no": 11,
           "dob": "2005-11-22",
           "age": 20,
-          "caps": 9,
+          "caps": 10,
           "goals": 1
         },
         {
@@ -7497,7 +7533,7 @@
           "no": 12,
           "dob": "1993-01-25",
           "age": 33,
-          "caps": 4,
+          "caps": 5,
           "goals": 0
         },
         {
@@ -7508,7 +7544,7 @@
           "no": 13,
           "dob": "1993-10-06",
           "age": 32,
-          "caps": 88,
+          "caps": 89,
           "goals": 9
         },
         {
@@ -7530,7 +7566,7 @@
           "no": 15,
           "dob": "2000-04-27",
           "age": 26,
-          "caps": 56,
+          "caps": 57,
           "goals": 3
         },
         {
@@ -7541,7 +7577,7 @@
           "no": 16,
           "dob": "2001-02-08",
           "age": 25,
-          "caps": 17,
+          "caps": 18,
           "goals": 0
         },
         {
@@ -7552,7 +7588,7 @@
           "no": 17,
           "dob": "1992-01-17",
           "age": 34,
-          "caps": 10,
+          "caps": 11,
           "goals": 0
         },
         {
@@ -7563,7 +7599,7 @@
           "no": 19,
           "dob": "1997-02-01",
           "age": 29,
-          "caps": 20,
+          "caps": 21,
           "goals": 2
         },
         {
@@ -7574,7 +7610,7 @@
           "no": 20,
           "dob": "2003-02-02",
           "age": 23,
-          "caps": 28,
+          "caps": 29,
           "goals": 1
         },
         {
@@ -7585,7 +7621,7 @@
           "no": 21,
           "dob": "1999-03-23",
           "age": 27,
-          "caps": 46,
+          "caps": 47,
           "goals": 4
         },
         {
@@ -7603,11 +7639,12 @@
           "name": "Ihsan Haddad ( captain )",
           "pos": "DF",
           "club": "Al-Hussein",
+          "captain": true,
           "club_wiki": "Al-Hussein SC (Irbid)",
           "no": 23,
           "dob": "1994-02-05",
           "age": 32,
-          "caps": 91,
+          "caps": 92,
           "goals": 2
         },
         {
@@ -7618,7 +7655,7 @@
           "no": 24,
           "dob": "2004-04-13",
           "age": 22,
-          "caps": 3,
+          "caps": 4,
           "goals": 0
         },
         {
@@ -7629,7 +7666,7 @@
           "no": 25,
           "dob": "1992-04-12",
           "age": 34,
-          "caps": 12,
+          "caps": 13,
           "goals": 1
         },
         {
@@ -7690,6 +7727,7 @@
           "name": "Edson Álvarez ( captain )",
           "pos": "DF",
           "club": "Fenerbahce",
+          "captain": true,
           "club_wiki": "Fenerbahçe S.K. (football)",
           "no": 4,
           "dob": "1997-10-24",
@@ -7887,7 +7925,7 @@
         {
           "name": "Guillermo Martínez",
           "pos": "FW",
-          "club": "Pumas",
+          "club": "Pumas UNAM",
           "club_wiki": "Pumas UNAM",
           "no": 22,
           "dob": "1995-03-15",
@@ -7957,18 +7995,19 @@
           "no": 1,
           "dob": "1991-04-05",
           "age": 35,
-          "caps": 89,
+          "caps": 90,
           "goals": 0
         },
         {
           "name": "Achraf Hakimi ( captain )",
           "pos": "DF",
           "club": "Paris Saint-Germain",
+          "captain": true,
           "club_wiki": "Paris Saint-Germain FC",
           "no": 2,
           "dob": "1998-11-04",
           "age": 27,
-          "caps": 95,
+          "caps": 96,
           "goals": 11
         },
         {
@@ -7979,7 +8018,7 @@
           "no": 3,
           "dob": "1997-11-14",
           "age": 28,
-          "caps": 44,
+          "caps": 45,
           "goals": 2
         },
         {
@@ -7990,7 +8029,7 @@
           "no": 4,
           "dob": "1996-08-21",
           "age": 29,
-          "caps": 74,
+          "caps": 75,
           "goals": 0
         },
         {
@@ -8012,7 +8051,7 @@
           "no": 6,
           "dob": "2007-10-02",
           "age": 18,
-          "caps": 3,
+          "caps": 4,
           "goals": 0
         },
         {
@@ -8034,7 +8073,7 @@
           "no": 8,
           "dob": "2000-04-19",
           "age": 26,
-          "caps": 48,
+          "caps": 49,
           "goals": 9
         },
         {
@@ -8045,7 +8084,7 @@
           "no": 9,
           "dob": "1996-06-02",
           "age": 30,
-          "caps": 36,
+          "caps": 37,
           "goals": 12
         },
         {
@@ -8056,8 +8095,8 @@
           "no": 10,
           "dob": "1999-08-03",
           "age": 26,
-          "caps": 25,
-          "goals": 13
+          "caps": 26,
+          "goals": 14
         },
         {
           "name": "Ismael Saibari",
@@ -8067,7 +8106,7 @@
           "no": 11,
           "dob": "2001-01-28",
           "age": 25,
-          "caps": 30,
+          "caps": 31,
           "goals": 9
         },
         {
@@ -8089,7 +8128,7 @@
           "no": 13,
           "dob": "2001-12-31",
           "age": 24,
-          "caps": 2,
+          "caps": 3,
           "goals": 0
         },
         {
@@ -8100,7 +8139,7 @@
           "no": 14,
           "dob": "1997-01-09",
           "age": 29,
-          "caps": 3,
+          "caps": 4,
           "goals": 0
         },
         {
@@ -8111,7 +8150,7 @@
           "no": 15,
           "dob": "2005-10-06",
           "age": 20,
-          "caps": 3,
+          "caps": 4,
           "goals": 0
         },
         {
@@ -8133,7 +8172,7 @@
           "no": 17,
           "dob": "2001-12-17",
           "age": 24,
-          "caps": 36,
+          "caps": 37,
           "goals": 2
         },
         {
@@ -8144,7 +8183,7 @@
           "no": 18,
           "dob": "2003-06-17",
           "age": 22,
-          "caps": 5,
+          "caps": 6,
           "goals": 1
         },
         {
@@ -8155,7 +8194,7 @@
           "no": 19,
           "dob": "1998-09-20",
           "age": 27,
-          "caps": 18,
+          "caps": 19,
           "goals": 0
         },
         {
@@ -8167,7 +8206,7 @@
           "dob": "1993-06-25",
           "age": 32,
           "caps": 71,
-          "goals": 37
+          "goals": 35
         },
         {
           "name": "Ayoube Amaimouni",
@@ -8177,7 +8216,7 @@
           "no": 21,
           "dob": "2004-11-30",
           "age": 21,
-          "caps": 1,
+          "caps": 2,
           "goals": 0
         },
         {
@@ -8199,7 +8238,7 @@
           "no": 23,
           "dob": "2004-05-10",
           "age": 22,
-          "caps": 36,
+          "caps": 37,
           "goals": 3
         },
         {
@@ -8210,7 +8249,7 @@
           "no": 24,
           "dob": "2001-07-02",
           "age": 24,
-          "caps": 15,
+          "caps": 16,
           "goals": 2
         },
         {
@@ -8221,7 +8260,7 @@
           "no": 25,
           "dob": "2003-03-05",
           "age": 23,
-          "caps": 2,
+          "caps": 3,
           "goals": 0
         },
         {
@@ -8282,6 +8321,7 @@
           "name": "Virgil van Dijk ( captain )",
           "pos": "DF",
           "club": "Liverpool",
+          "captain": true,
           "club_wiki": "Liverpool F.C.",
           "no": 4,
           "dob": "1991-07-08",
@@ -8633,6 +8673,7 @@
           "name": "Chris Wood ( captain )",
           "pos": "FW",
           "club": "Nottingham Forest",
+          "captain": true,
           "club_wiki": "Nottingham Forest F.C.",
           "no": 9,
           "dob": "1991-12-07",
@@ -8845,7 +8886,7 @@
           "no": 1,
           "dob": "1990-09-10",
           "age": 35,
-          "caps": 70,
+          "caps": 71,
           "goals": 0
         },
         {
@@ -8867,7 +8908,7 @@
           "no": 3,
           "dob": "1998-04-17",
           "age": 28,
-          "caps": 51,
+          "caps": 52,
           "goals": 2
         },
         {
@@ -8878,7 +8919,7 @@
           "no": 4,
           "dob": "1999-11-28",
           "age": 26,
-          "caps": 37,
+          "caps": 38,
           "goals": 1
         },
         {
@@ -8889,7 +8930,7 @@
           "no": 5,
           "dob": "2002-04-23",
           "age": 24,
-          "caps": 21,
+          "caps": 22,
           "goals": 1
         },
         {
@@ -8900,7 +8941,7 @@
           "no": 6,
           "dob": "1997-11-24",
           "age": 28,
-          "caps": 42,
+          "caps": 43,
           "goals": 0
         },
         {
@@ -8911,7 +8952,7 @@
           "no": 7,
           "dob": "1995-12-05",
           "age": 30,
-          "caps": 71,
+          "caps": 72,
           "goals": 26
         },
         {
@@ -8922,7 +8963,7 @@
           "no": 8,
           "dob": "1998-02-14",
           "age": 28,
-          "caps": 65,
+          "caps": 66,
           "goals": 1
         },
         {
@@ -8933,19 +8974,20 @@
           "no": 9,
           "dob": "2000-07-21",
           "age": 25,
-          "caps": 49,
+          "caps": 50,
           "goals": 55
         },
         {
           "name": "Martin Ødegaard ( captain )",
           "pos": "MF",
           "club": "Arsenal",
+          "captain": true,
           "club_wiki": "Arsenal F.C.",
           "no": 10,
           "dob": "1998-12-17",
           "age": 27,
-          "caps": 67,
-          "goals": 4
+          "caps": 68,
+          "goals": 5
         },
         {
           "name": "Jørgen Strand Larsen",
@@ -8955,7 +8997,7 @@
           "no": 11,
           "dob": "2000-02-06",
           "age": 26,
-          "caps": 27,
+          "caps": 28,
           "goals": 6
         },
         {
@@ -8977,7 +9019,7 @@
           "no": 13,
           "dob": "1997-07-30",
           "age": 28,
-          "caps": 6,
+          "caps": 7,
           "goals": 0
         },
         {
@@ -8988,7 +9030,7 @@
           "no": 14,
           "dob": "1995-12-10",
           "age": 30,
-          "caps": 21,
+          "caps": 22,
           "goals": 1
         },
         {
@@ -8999,7 +9041,7 @@
           "no": 15,
           "dob": "1998-08-21",
           "age": 27,
-          "caps": 20,
+          "caps": 21,
           "goals": 1
         },
         {
@@ -9021,7 +9063,7 @@
           "no": 17,
           "dob": "1999-01-12",
           "age": 27,
-          "caps": 14,
+          "caps": 15,
           "goals": 0
         },
         {
@@ -9032,7 +9074,7 @@
           "no": 18,
           "dob": "1999-03-13",
           "age": 27,
-          "caps": 36,
+          "caps": 37,
           "goals": 4
         },
         {
@@ -9043,7 +9085,7 @@
           "no": 19,
           "dob": "2002-05-02",
           "age": 24,
-          "caps": 7,
+          "caps": 8,
           "goals": 5
         },
         {
@@ -9054,7 +9096,7 @@
           "no": 20,
           "dob": "2005-04-17",
           "age": 21,
-          "caps": 23,
+          "caps": 24,
           "goals": 8
         },
         {
@@ -9065,7 +9107,7 @@
           "no": 21,
           "dob": "2004-06-01",
           "age": 22,
-          "caps": 11,
+          "caps": 12,
           "goals": 1
         },
         {
@@ -9076,7 +9118,7 @@
           "no": 22,
           "dob": "2003-07-12",
           "age": 22,
-          "caps": 19,
+          "caps": 20,
           "goals": 2
         },
         {
@@ -9120,7 +9162,7 @@
           "no": 26,
           "dob": "1997-11-17",
           "age": 28,
-          "caps": 42,
+          "caps": 43,
           "goals": 1
         }
       ]
@@ -9346,6 +9388,7 @@
           "name": "Aníbal Godoy ( captain )",
           "pos": "MF",
           "club": "San Diego FC",
+          "captain": true,
           "club_wiki": "San Diego FC",
           "no": 20,
           "dob": "1990-02-10",
@@ -9587,6 +9630,7 @@
           "name": "Gustavo Gómez ( captain )",
           "pos": "DF",
           "club": "Palmeiras",
+          "captain": true,
           "club_wiki": "SE Palmeiras",
           "no": 15,
           "dob": "1993-05-06",
@@ -9795,6 +9839,7 @@
           "name": "Cristiano Ronaldo ( captain )",
           "pos": "FW",
           "club": "Al Nassr",
+          "captain": true,
           "club_wiki": "Al-Nassr FC",
           "no": 7,
           "dob": "1985-02-05",
@@ -10124,6 +10169,7 @@
           "name": "Hassan Al-Haydos ( captain )",
           "pos": "FW",
           "club": "Al Sadd",
+          "captain": true,
           "club_wiki": "Al Sadd SC",
           "no": 10,
           "dob": "1990-12-11",
@@ -10420,6 +10466,7 @@
           "name": "Salem Al-Dawsari ( captain )",
           "pos": "FW",
           "club": "Al Hilal",
+          "captain": true,
           "club_wiki": "Al Hilal SFC",
           "no": 10,
           "dob": "1991-08-19",
@@ -10639,6 +10686,7 @@
           "name": "Andy Robertson ( captain )",
           "pos": "DF",
           "club": "Liverpool",
+          "captain": true,
           "club_wiki": "Liverpool F.C.",
           "no": 3,
           "dob": "1994-03-11",
@@ -10935,6 +10983,7 @@
           "name": "Kalidou Koulibaly ( captain )",
           "pos": "DF",
           "club": "Al Hilal",
+          "captain": true,
           "club_wiki": "Al Hilal SFC",
           "no": 3,
           "dob": "1991-06-20",
@@ -11209,6 +11258,7 @@
           "name": "Ronwen Williams ( captain )",
           "pos": "GK",
           "club": "Mamelodi Sundowns",
+          "captain": true,
           "club_wiki": "Mamelodi Sundowns F.C.",
           "no": 1,
           "dob": "1992-01-21",
@@ -11571,6 +11621,7 @@
           "name": "Son Heung-min ( captain )",
           "pos": "FW",
           "club": "Los Angeles FC",
+          "captain": true,
           "club_wiki": "Los Angeles FC",
           "no": 7,
           "dob": "1992-07-08",
@@ -11966,6 +12017,7 @@
           "name": "Rodri ( captain )",
           "pos": "MF",
           "club": "Manchester City",
+          "captain": true,
           "club_wiki": "Manchester City F.C.",
           "no": 16,
           "dob": "1996-06-22",
@@ -12119,6 +12171,7 @@
           "name": "Victor Lindelöf ( captain )",
           "pos": "DF",
           "club": "Aston Villa",
+          "captain": true,
           "club_wiki": "Aston Villa F.C.",
           "no": 3,
           "dob": "1994-07-17",
@@ -12492,6 +12545,7 @@
           "name": "Granit Xhaka ( captain )",
           "pos": "MF",
           "club": "Sunderland",
+          "captain": true,
           "club_wiki": "Sunderland A.F.C.",
           "no": 10,
           "dob": "1992-09-27",
@@ -12865,6 +12919,7 @@
           "name": "Ellyes Skhiri ( captain )",
           "pos": "MF",
           "club": "Eintracht Frankfurt",
+          "captain": true,
           "club_wiki": "Eintracht Frankfurt",
           "no": 17,
           "dob": "1995-05-10",
@@ -13084,6 +13139,7 @@
           "name": "Hakan Çalhanoğlu ( captain )",
           "pos": "MF",
           "club": "Inter Milan",
+          "captain": true,
           "club_wiki": "Inter Milan",
           "no": 10,
           "dob": "1994-02-08",
@@ -13413,6 +13469,7 @@
           "name": "Tim Ream ( captain )",
           "pos": "DF",
           "club": "Charlotte FC",
+          "captain": true,
           "club_wiki": "Charlotte FC",
           "no": 13,
           "dob": "1987-10-05",
@@ -13465,7 +13522,7 @@
           "goals": 3
         },
         {
-          "name": "Maximilian Arfsten",
+          "name": "Max Arfsten",
           "pos": "DF",
           "club": "Columbus Crew",
           "club_wiki": "Columbus Crew",
@@ -13588,6 +13645,7 @@
           "name": "José Giménez ( captain )",
           "pos": "DF",
           "club": "Atletico Madrid",
+          "captain": true,
           "club_wiki": "Atlético Madrid",
           "no": 2,
           "dob": "1995-01-20",
@@ -13872,7 +13930,7 @@
         {
           "name": "Utkir Yusupov",
           "pos": "GK",
-          "club": "Navbahor",
+          "club": "Navbahor Namangan",
           "club_wiki": "PFC Navbahor Namangan",
           "no": 1,
           "dob": "1991-01-04",
@@ -14016,6 +14074,7 @@
           "name": "Eldor Shomurodov ( captain )",
           "pos": "FW",
           "club": "İstanbul Başakşehir",
+          "captain": true,
           "club_wiki": "İstanbul Başakşehir F.K.",
           "no": 14,
           "dob": "1995-06-29",

@@ -512,6 +512,13 @@
       "lat": 41.3809,
       "lon": 2.1228
     },
+    "Barcelona B": {
+      "stadium": "Estadi Johan Cruyff",
+      "city": "Barcelona",
+      "country": "Spain",
+      "lat": 41.3811,
+      "lon": 2.1058
+    },
     "Barcelona SC": {
       "stadium": "Estadio Monumental",
       "city": "Guayaquil",

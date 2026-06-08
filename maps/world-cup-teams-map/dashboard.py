@@ -11,8 +11,10 @@ import plotly.graph_objects as go
 
 from dashboard_data import (
     DASH_BG,
+    OFFICIAL_SQUAD_SIZE,
     PAGE_MAX_WIDTH,
     abroad_nations_table_html,
+    age_extreme_table_html,
     age_extremes,
     birthday_table_html,
     build_player_rows,
@@ -23,14 +25,15 @@ from dashboard_data import (
     debutants_table_html,
     caps_leaderboard_table_html,
     leaderboard_table_html,
+    squad_roster_note_html,
     top_players,
     tournament_birthdays,
     veterans,
+    youngest_oldest,
 )
 from dashboard_viz import (
     build_abroad_by_confed_panel,
     build_age_bands_panel,
-    build_age_by_confed_panel,
     build_age_milestones_panel,
     build_captains_panel,
     build_caps_by_confed_panel,
@@ -248,26 +251,11 @@ def _page_styles() -> str:
       letter-spacing: -0.035em;
     }}
     .page-intro p {{
-      margin: 0 0 12px;
+      margin: 0;
       color: #94a3b8;
       font-size: 15px;
       line-height: 1.6;
-      max-width: 82ch;
     }}
-    .stat-pills {{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }}
-    .stat-pill {{
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: rgba(51, 65, 85, 0.55);
-      border: 1px solid #475569;
-      font-size: 13px;
-      color: #cbd5e1;
-    }}
-    .stat-pill strong {{ color: #f8fafc; }}
     .insight-grid {{
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -327,6 +315,30 @@ def _page_styles() -> str:
       line-height: 1.6;
     }}
     .page-footer a {{ color: #93c5fd; }}
+    .roster-note {{
+      margin: 0 auto 20px;
+      padding: 16px 18px;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.72);
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.55;
+    }}
+    .roster-note-title {{
+      margin: 0 0 8px;
+      color: #cbd5e1;
+      font-size: 15px;
+      font-weight: 600;
+    }}
+    .roster-note p {{ margin: 0 0 10px; }}
+    .roster-note-foot {{ margin: 10px 0 0; font-size: 13px; color: #64748b; }}
+    .roster-note-list {{
+      margin: 0;
+      padding-left: 1.25rem;
+    }}
+    .roster-note-list li {{ margin: 6px 0; }}
+    .roster-note a {{ color: #93c5fd; }}
     """
 
 
@@ -358,91 +370,46 @@ def _footer_html(source_accessed: str) -> str:
 
 
 def _page_intro(slug: str, tournament: str, rows: list) -> str:
-    """Per-page headline, blurb, and quick stats."""
+    """Per-page headline and blurb."""
     n_players = len(rows)
-    abroad_n = sum(1 for r in rows if not r.domestic)
-    abroad_pct = round(100 * abroad_n / max(1, n_players))
-    youngest, oldest = age_extremes(rows)
-    yng = youngest[0] if youngest else None
-    old = oldest[0] if oldest else None
-    top_g = top_players(rows, "goals", limit=1)
-    top_c = top_players(rows, "caps", limit=1)
-    ts = top_g[0] if top_g else None
-    tc = top_c[0] if top_c else None
+    abroad_pct = round(100 * sum(1 for r in rows if not r.domestic) / max(1, n_players))
     bdays = tournament_birthdays(rows)
-    caps = captain_profiles(rows)
-    most_capped_caps = sum(1 for p in caps if p.most_capped_on_team)
     top_club_country = club_country_counts(rows).most_common(1)
     top_cc_name, top_cc_n = top_club_country[0] if top_club_country else ("—", 0)
-    ages = [r.age for r in rows if r.age is not None]
-    median_age = round(sorted(ages)[len(ages) // 2], 1) if ages else None
+    n_nations = len({r.nation for r in rows})
 
-    intros: dict[str, tuple[str, str, list[str]]] = {
+    intros: dict[str, tuple[str, str]] = {
         "overview": (
             "Overview",
-            f"A guided read of all {n_players:,} squad players across 48 nations: where they play "
+            f"A guided read of all {n_players:,} squad players across {n_nations} nations: where they play "
             "club football, how squads are balanced by position, and how national federations connect to club confederations. "
             f"{abroad_pct}% play outside their home federation.",
-            [
-                f"<strong>{n_players:,}</strong> players",
-                f"<strong>{abroad_pct}%</strong> abroad ({abroad_n:,})",
-                f"median age <strong>{median_age}</strong>" if median_age else "",
-                f"youngest <strong>{yng.age}</strong> ({yng.nation})" if yng else "",
-            ],
         ),
         "records": (
             "Records & leaderboards",
             "Pre-tournament international goals and caps, with the headline record holders pulled forward "
             "and the long tail left to the scrollable leaderboards.",
-            [
-                f"top scorer <strong>{ts.name}</strong> ({ts.goals} goals)" if ts else "",
-                f"most caps <strong>{tc.name}</strong> ({tc.caps})" if tc else "",
-                f"<strong>{len(veterans(rows))}</strong> centurions (100+ caps)",
-                f"<strong>{len(debutants(rows))}</strong> uncapped debutants",
-            ],
         ),
         "captains": (
             "Captains",
             "Each nation's armband holder compared with the rest of the squad: seniority, scoring burden, "
             "age gap, and how often leadership comes from outside the domestic game.",
-            [
-                f"<strong>{len(caps)}</strong> captains",
-                f"<strong>{most_capped_caps}</strong> are squad's most-capped",
-                f"<strong>{sum(1 for p in caps if p.plays_abroad)}</strong> captains abroad",
-            ],
         ),
         "age": (
             "Age & birthdays",
             f"Squad ages as of 11 June 2026, from teenage selections to late-career veterans. "
             f"{len(bdays)} players celebrate a birthday during the tournament window.",
-            [
-                f"<strong>{len(bdays)}</strong> tournament birthdays",
-                f"youngest <strong>{yng.name}</strong> ({yng.age})" if yng else "",
-                f"oldest <strong>{old.name}</strong> ({old.age})" if old else "",
-                f"median <strong>{median_age}</strong>" if median_age else "",
-            ],
         ),
         "geography": (
             "Geography & clubs",
             "Club host countries, capital-to-stadium distances, and which national squads depend most "
             f"on overseas club football. {top_cc_name} alone hosts {top_cc_n} squad members.",
-            [
-                f"<strong>{abroad_pct}%</strong> play abroad",
-                f"top host <strong>{top_cc_name}</strong> ({top_cc_n})",
-                f"<strong>{len({r.club_country for r in rows if r.club_country != 'Unknown'})}</strong> club countries",
-            ],
         ),
     }
-    title, blurb, pills = intros.get(slug, (slug.title(), "", []))
-    pill_html = "\n    ".join(
-        f'<span class="stat-pill">{p}</span>' for p in pills if p
-    )
+    title, blurb = intros.get(slug, (slug.title(), ""))
     return f"""  <header class="page-intro">
     <h1>{tournament} — {title}</h1>
     <p>{blurb}</p>
-    <div class="stat-pills">
-    {pill_html}
-    </div>
   </header>"""
 
 
@@ -463,6 +430,9 @@ def _page_insights(slug: str, rows: list) -> str:
     top_caps = top_players(rows, "caps", limit=1)
     top_club = Counter(r.club for r in rows).most_common(1)
     top_host = club_country_counts(rows).most_common(1)
+    n_nations = len({r.nation for r in rows})
+    n_clubs = len({r.club for r in rows})
+    n_club_countries = len({r.club_country for r in rows if r.club_country != "Unknown"})
     ages = [r.age for r in rows if r.age is not None]
     distances = [r.distance_km for r in rows if r.distance_km is not None]
     youngest, oldest = age_extremes(rows)
@@ -472,24 +442,26 @@ def _page_insights(slug: str, rows: list) -> str:
     cards_by_slug: dict[str, list[tuple[str, str, str]]] = {
         "overview": [
             (
-                "Club hub",
-                f"{top_club[0][0]}" if top_club else "No club data",
-                f"Supplies {top_club[0][1]} players, the largest single-club contribution." if top_club else "",
+                "All squads",
+                f"{n_players:,} players",
+                f"{n_nations} nations · {OFFICIAL_SQUAD_SIZE}-player squads at the expanded World Cup.",
             ),
             (
-                "Abroad",
-                f"{abroad_pct}% of players",
+                "Playing abroad",
+                f"{abroad_pct}%",
                 f"{abroad_n:,} of {n_players:,} squad members play outside their home federation.",
             ),
             (
-                "Top scorer",
-                f"{top_goals[0].name}" if top_goals else "No goals data",
-                f"{top_goals[0].nation} · {top_goals[0].goals} international goals." if top_goals else "",
+                "Club countries",
+                f"{n_club_countries} countries",
+                f"Squad members are based in {n_club_countries} different countries"
+                + (f"; {top_host[0][0]} hosts the most ({top_host[0][1]})." if top_host else "."),
             ),
             (
-                "Most capped",
-                f"{top_caps[0].name}" if top_caps else "No caps data",
-                f"{top_caps[0].nation} · {top_caps[0].caps} international appearances." if top_caps else "",
+                "Distinct clubs",
+                f"{n_clubs:,} clubs",
+                f"Named employers across all squads"
+                + (f"; {top_club[0][0]} supplies the most ({top_club[0][1]})." if top_club else "."),
             ),
         ],
         "records": [
@@ -507,7 +479,7 @@ def _page_insights(slug: str, rows: list) -> str:
             ("Uncapped", f"{len(debutants(rows))}", "Players entering with zero senior international caps."),
         ],
         "captains": [
-            ("Captains tracked", f"{len(caps)}", "One armband holder per nation where marked in the source data."),
+            ("Captains", f"{len(caps)}", "One armband holder per nation in the source data."),
             (
                 "Most-capped leaders",
                 f"{sum(1 for p in caps if p.most_capped_on_team)}",
@@ -527,41 +499,45 @@ def _page_insights(slug: str, rows: list) -> str:
         "age": [
             (
                 "Median age",
-                f"{statistics.median(ages):.1f}" if ages else "No age data",
-                "Age in years on opening day, 11 June 2026.",
+                f"{statistics.median(ages):.1f} years" if ages else "No age data",
+                "Squad age on opening day, 11 June 2026.",
             ),
             (
                 "Youngest",
-                f"{youngest[0].age}" if youngest else "No age data",
+                f"{youngest[0].age} years" if youngest else "No age data",
                 f"{youngest[0].name} ({youngest[0].nation})." if youngest else "",
             ),
             (
                 "Oldest",
-                f"{oldest[0].age}" if oldest else "No age data",
+                f"{oldest[0].age} years" if oldest else "No age data",
                 f"{oldest[0].name} ({oldest[0].nation})." if oldest else "",
             ),
-            ("Birthdays", f"{len(bdays)}", "Players turning a year older during the tournament."),
+            (
+                "Tournament birthdays",
+                f"{len(bdays)} players",
+                "Turn a year older between the opening match and the final.",
+            ),
         ],
         "geography": [
             (
-                "Top host",
+                "Playing abroad",
+                f"{abroad_pct}%",
+                f"{abroad_n:,} players are based outside their home federation.",
+            ),
+            (
+                "Top host country",
                 f"{top_host[0][0]}" if top_host else "No club data",
                 f"{top_host[0][1]} squad members play club football there." if top_host else "",
             ),
             (
                 "Club countries",
-                f"{len({r.club_country for r in rows if r.club_country != 'Unknown'})}",
+                f"{n_club_countries}",
                 "Different countries represented by player club locations.",
             ),
             (
                 "Median route",
                 f"{statistics.median(distances):,.0f} km" if distances else "No distance data",
                 "Capital-to-club great-circle distance across all players.",
-            ),
-            (
-                "Playing abroad",
-                f"{abroad_pct}%",
-                f"{abroad_n:,} players are based outside their home federation.",
             ),
         ],
     }
@@ -585,6 +561,7 @@ def _page_shell(
 ) -> str:
     intro = _page_intro(active_slug, tournament, rows)
     insights = _page_insights(active_slug, rows)
+    roster_note = squad_roster_note_html(rows) if active_slug == "overview" else ""
     footer = _footer_html(source_accessed)
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -600,6 +577,7 @@ def _page_shell(
 {_nav_html(tournament, active_slug)}
 {intro}
 {insights}
+{roster_note}
   {body}
 {footer}
 </body>
@@ -686,7 +664,6 @@ def _build_page_bodies(
     caps_confed_fig = build_caps_by_confed_panel(tournament, rows)
     captains_fig = build_captains_panel(tournament, rows)
     age_milestones_fig = build_age_milestones_panel(tournament, rows)
-    age_confed_fig = build_age_by_confed_panel(tournament, rows)
     age_bands_fig = build_age_bands_panel(tournament, rows)
     treemap_fig = build_club_countries_treemap(tournament, rows)
     geography_fig = build_geography_panel(tournament, rows)
@@ -755,25 +732,31 @@ def _build_page_bodies(
         ]
     )
 
+    youngest, oldest = youngest_oldest(rows, n=6)
+    age_extremes_html = (
+        f'<div class="table-grid">'
+        f"{age_extreme_table_html(youngest, title='Six youngest', note='Ages on 11 Jun 2026.')}"
+        f"{age_extreme_table_html(oldest, title='Six oldest', note='Ages on 11 Jun 2026.')}"
+        f"</div>"
+    )
+
     age = "\n".join(
         [
             _render_figure_section(
                 "Squad age profile",
                 age_milestones_fig,
-                lead="Histogram with median age; table lists youngest and oldest players.",
+                lead="One bar per squad age on 11 Jun 2026, with median and min/max markers.",
                 include_plotlyjs="cdn",
             ),
-            _render_chart_row(
-                _render_chart_column(
-                    "Age by confederation",
-                    age_confed_fig,
-                    lead="Violin and box plots of squad ages by national confederation.",
-                ),
-                _render_chart_column(
-                    "Age bands by confederation",
-                    age_bands_fig,
-                    lead="Share of each squad in five-year age bands (100% stacked).",
-                ),
+            _render_table_section(
+                "Youngest & oldest",
+                age_extremes_html,
+                lead="Six youngest and six oldest squad selections, including ties at the cutoff.",
+            ),
+            _render_figure_section(
+                "Age bands by confederation",
+                age_bands_fig,
+                lead="Share of each squad in five-year age bands (100% stacked).",
             ),
             _render_table_section(
                 "Tournament birthdays",

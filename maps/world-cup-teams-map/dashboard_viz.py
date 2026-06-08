@@ -29,8 +29,6 @@ from dashboard_data import (
     club_country_counts,
     confed_color,
     dark_layout,
-    format_dob,
-    make_plotly_table,
     style_subplot_titles,
     youngest_oldest,
 )
@@ -182,56 +180,24 @@ def build_dashboard(
     style_subplot_titles(fig, font_size=12)
 
     if pos_values:
+        pie_trace = next((t for t in fig.data if t.type == "pie"), None)
+        if pie_trace is not None and pie_trace.domain is not None:
+            x0, x1 = pie_trace.domain.x
+            y0, y1 = pie_trace.domain.y
+            cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        else:
+            cx, cy = 0.815, 0.82
         fig.add_annotation(
             text=f"<b>{sum(pos_values):,}</b><br>players",
-            x=0.79,
-            y=0.93,
+            x=cx,
+            y=cy,
             xref="paper",
             yref="paper",
             showarrow=False,
             font={"size": 14, "color": TEXT},
             xanchor="center",
+            yanchor="middle",
         )
-
-    if top_clubs:
-        club, count = top_clubs[0]
-        country = clubs.get(club, {}).get("country", "Unknown")
-        # Sits in the open lower-right of the horizontal bar panel (clear of the bars).
-        fig.add_annotation(
-            text=f"Top supplier<br><b>{club}</b><br>"
-            f"<span style='font-size:11px;color:#94a3b8'>{count} players · {country}</span>",
-            x=0.30,
-            y=0.80,
-            xref="paper",
-            yref="paper",
-            showarrow=False,
-            font={"size": 13, "color": TEXT},
-            xanchor="left",
-            yanchor="top",
-            align="left",
-            bgcolor="rgba(15,23,42,0.86)",
-            bordercolor="#334155",
-            borderwidth=1,
-            borderpad=6,
-        )
-
-    fig.add_annotation(
-        text=f"<b>{abroad_pct}%</b> play abroad<br><span style='font-size:11px;color:#94a3b8'>"
-        f"{abroad_n:,} of {len(rows):,} players</span>",
-        x=0.005,
-        y=0.46,
-        xref="paper",
-        yref="paper",
-        showarrow=False,
-        font={"size": 13, "color": TEXT},
-        xanchor="left",
-        yanchor="middle",
-        align="left",
-        bgcolor="rgba(15,23,42,0.9)",
-        bordercolor="#334155",
-        borderwidth=1,
-        borderpad=6,
-    )
 
     return fig
 
@@ -497,34 +463,23 @@ def build_extra_figures(
 
 
 def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
-    """Squad age histogram and youngest/oldest player table."""
+    """Squad age histogram with median, min, and max markers."""
     youngest, oldest = youngest_oldest(rows, n=6)
     ages = [r.age for r in rows if r.age is not None]
 
-    fig = make_subplots(
-        rows=1,
-        cols=2,
-        column_widths=[0.46, 0.54],
-        specs=[[{"type": "xy"}, {"type": "table"}]],
-        subplot_titles=(
-            "Squad age distribution",
-            "Six youngest (▼) & six oldest (▲), ages on 11 Jun 2026",
-        ),
-        horizontal_spacing=0.10,
-    )
+    fig = go.Figure()
 
     if ages:
         median_age = statistics.median(ages)
+        age_counts = Counter(ages)
+        age_vals = sorted(age_counts)
         fig.add_trace(
-            go.Histogram(
-                x=ages,
-                nbinsx=20,
+            go.Bar(
+                x=age_vals,
+                y=[age_counts[a] for a in age_vals],
                 marker={"color": "#64748b", "line": {"color": "#475569", "width": 0.5}},
-                opacity=0.9,
                 hovertemplate="age %{x}<br>%{y} players<extra></extra>",
-            ),
-            row=1,
-            col=1,
+            )
         )
         fig.add_vline(
             x=median_age,
@@ -532,8 +487,6 @@ def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Fig
             annotation_text=f"Median {median_age:.1f}",
             annotation_position="top right",
             annotation_font={"color": "#c4b5fd", "size": 11},
-            row=1,
-            col=1,
         )
         if youngest:
             fig.add_vline(
@@ -542,8 +495,6 @@ def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Fig
                 annotation_text=f"Min {youngest[0].age}",
                 annotation_position="top left",
                 annotation_font={"color": "#7dd3fc", "size": 11},
-                row=1,
-                col=1,
             )
         if oldest:
             fig.add_vline(
@@ -552,47 +503,14 @@ def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Fig
                 annotation_text=f"Max {oldest[0].age}",
                 annotation_position="bottom right",
                 annotation_font={"color": "#fda4af", "size": 11},
-                row=1,
-                col=1,
             )
-
-    def table_row(tag: str, p) -> tuple[str, ...]:
-        return (
-            tag,
-            f"{p.name}",
-            p.nation,
-            str(p.age) if p.age is not None else "—",
-            format_dob(p.dob),
-            p.pos,
-            p.club,
-        )
-
-    extreme_rows = [table_row("▼", p) for p in youngest] + [
-        table_row("▲", p) for p in oldest
-    ]
-    n_rows = len(extreme_rows)
-    tag_colors = ["#7dd3fc"] * len(youngest) + ["#fda4af"] * len(oldest)
-    column_font_colors = (
-        [tag_colors] + [[TEXT] * n_rows] * 6 if extreme_rows else None
-    )
-    fig.add_trace(
-        make_plotly_table(
-            ["", "Player", "Nation", "Age", "Born", "Pos", "Club"],
-            extreme_rows or [("—", "—", "—", "—", "—", "—", "—")],
-            columnwidth=[0.4, 2.4, 1.6, 0.7, 1.6, 0.7, 2.2],
-            column_font_colors=column_font_colors,
-        ),
-        row=1,
-        col=2,
-    )
 
     dark_layout(
         fig,
         f"{tournament} — squad age profile",
-        height=460,
+        height=380,
         showlegend=False,
     )
-    fig.update_xaxes(title_text="Age (years)", row=1, col=1)
-    fig.update_yaxes(title_text="Players", row=1, col=1)
-    style_subplot_titles(fig)
+    fig.update_xaxes(title_text="Age (years)", dtick=1)
+    fig.update_yaxes(title_text="Players")
     return fig
