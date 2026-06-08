@@ -9,13 +9,16 @@ from dashboard_data import (
     DASH_BG,
     GRID,
     MUTED,
+    NationCapsSummary,
     PLOT_BG,
     POS_COLORS,
     POS_ORDER,
     TEXT,
     PlayerRow,
     add_violin_box,
+    confed_color,
     dark_layout,
+    nation_caps_summaries,
     player_chart_label,
     position_summaries,
     top_players,
@@ -188,7 +191,7 @@ def build_goals_caps_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         rows=1,
         cols=2,
         subplot_titles=(
-            "International goals vs caps (colour = position)",
+            "International goals vs caps (colour = position, size ≈ age)",
             "Average age & caps by position",
         ),
         horizontal_spacing=0.1,
@@ -205,9 +208,18 @@ def build_goals_caps_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
                 y=[r.goals for r in group],
                 mode="markers",
                 name=pos,
-                marker={"size": 8, "color": POS_COLORS[pos], "opacity": 0.75},
+                marker={
+                    "size": [8 + (r.age or 20) * 0.15 for r in group],
+                    "color": POS_COLORS[pos],
+                    "opacity": 0.78,
+                    "line": {"width": 0.5, "color": "#0f172a"},
+                },
                 text=[player_chart_label(r) for r in group],
-                hovertemplate="%{text}<br>%{y} goals · %{x} caps<extra></extra>",
+                customdata=[[r.age, r.club] for r in group],
+                hovertemplate=(
+                    "%{text}<br>%{y} goals · %{x} caps · age %{customdata[0]}"
+                    "<br>%{customdata[1]}<extra></extra>"
+                ),
             ),
             row=1,
             col=1,
@@ -246,4 +258,94 @@ def build_goals_caps_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
     fig.update_xaxes(title_text="Position", row=1, col=2)
     fig.update_yaxes(title_text="Average", row=1, col=2)
     fig.update_layout(legend={"orientation": "h", "y": 1.12, "x": 0}, barmode="group")
+    return fig
+
+
+def _nation_experience_bar(
+    fig: go.Figure,
+    nations: list[NationCapsSummary],
+    *,
+    row: int,
+    col: int,
+) -> None:
+    ordered = list(reversed(nations))
+    fig.add_trace(
+        go.Bar(
+            y=[n.nation for n in ordered],
+            x=[n.avg_caps for n in ordered],
+            orientation="h",
+            marker={"color": [confed_color(n.nation_confed) for n in ordered], "line": {"width": 0}},
+            text=[f"{n.avg_caps:.1f}" for n in ordered],
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate=(
+                "%{y}<br>"
+                "avg %{x:.1f} caps · median %{customdata[0]:.0f}<br>"
+                "total %{customdata[1]:,} · most capped: %{customdata[2]} (%{customdata[3]})"
+                "<extra></extra>"
+            ),
+            customdata=[
+                (n.median_caps, n.total_caps, n.most_capped, n.most_capped_value) for n in ordered
+            ],
+            showlegend=False,
+        ),
+        row=row,
+        col=col,
+    )
+
+
+def build_nation_experience_panel(
+    tournament: str,
+    rows: list[PlayerRow],
+    *,
+    limit: int = 10,
+) -> go.Figure:
+    """Top and bottom nations by average squad caps (international experience)."""
+    summaries = nation_caps_summaries(rows)
+    if not summaries:
+        fig = go.Figure()
+        dark_layout(fig, f"{tournament} — squad experience by nation", height=420)
+        return fig
+
+    n = min(limit, len(summaries))
+    most = summaries[:n]
+    least = list(reversed(summaries[-n:]))
+
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=(
+            f"Most experienced squads (top {n} by avg caps)",
+            f"Least experienced squads (bottom {n} by avg caps)",
+        ),
+        horizontal_spacing=0.12,
+        specs=[[{"type": "bar"}, {"type": "bar"}]],
+    )
+
+    _nation_experience_bar(fig, most, row=1, col=1)
+    _nation_experience_bar(fig, least, row=1, col=2)
+
+    top = most[0]
+    bottom = least[0]
+    subtitle = (
+        f" · highest <b>{top.nation}</b> ({top.avg_caps:.1f} avg)"
+        f" · lowest <b>{bottom.nation}</b> ({bottom.avg_caps:.1f} avg)"
+    )
+    dark_layout(
+        fig,
+        f"{tournament} — squad experience by nation{subtitle}",
+        height=max(420, 36 * n + 120),
+        showlegend=False,
+    )
+    fig.update_xaxes(title_text="Average caps per player", row=1, col=1, gridcolor=GRID)
+    fig.update_xaxes(title_text="Average caps per player", row=1, col=2, gridcolor=GRID)
+    fig.update_yaxes(automargin=True, row=1, col=1)
+    fig.update_yaxes(automargin=True, row=1, col=2)
+
+    for ann in fig.layout.annotations:
+        if ann.text:
+            ann.font = {"size": 12, "color": TEXT}
+            ann.xanchor = "left"
+            ann.x = 0.01
+
     return fig

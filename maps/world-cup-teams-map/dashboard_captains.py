@@ -60,12 +60,12 @@ def build_captains_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         cols=2,
         row_heights=[0.28, 0.36, 0.36],
         specs=[
-            [{"type": "bar"}, {"type": "bar"}],
+            [{"type": "table"}, {"type": "bar"}],
             [{"type": "xy"}, {"type": "xy"}],
             [{"type": "bar"}, {"type": "bar"}],
         ],
         subplot_titles=(
-            "Average age, caps & goals",
+            "Squad averages (captains vs mates)",
             "Share playing abroad",
             "Age: captains vs squad mates",
             "Caps: captains vs squad mates",
@@ -76,37 +76,38 @@ def build_captains_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         horizontal_spacing=0.1,
     )
 
-    metrics = ["Avg age", "Avg caps", "Avg goals"]
-    fig.add_trace(
-        go.Bar(
-            name=CAPTAIN_LABEL,
-            x=metrics,
-            y=[cap_avg_age or 0, cap_avg_caps or 0, cap_avg_goals or 0],
-            marker={"color": "#fbbf24"},
-            text=[
-                f"{cap_avg_age:.1f}" if cap_avg_age else "—",
-                f"{cap_avg_caps:.0f}" if cap_avg_caps else "—",
-                f"{cap_avg_goals:.1f}" if cap_avg_goals else "—",
-            ],
-            textposition="outside",
-            hovertemplate="Captains<br>%{x}: %{y:.1f}<extra></extra>",
+    summary_rows = [
+        (
+            "Age (years)",
+            f"{cap_avg_age:.1f}" if cap_avg_age else "—",
+            f"{mate_avg_age:.1f}" if mate_avg_age else "—",
         ),
-        row=1,
-        col=1,
-    )
+        (
+            "Caps",
+            f"{cap_avg_caps:.0f}" if cap_avg_caps else "—",
+            f"{mate_avg_caps:.0f}" if mate_avg_caps else "—",
+        ),
+        (
+            "Goals",
+            f"{cap_avg_goals:.1f}" if cap_avg_goals else "—",
+            f"{mate_avg_goals:.1f}" if mate_avg_goals else "—",
+        ),
+    ]
     fig.add_trace(
-        go.Bar(
-            name=MATE_LABEL,
-            x=metrics,
-            y=[mate_avg_age or 0, mate_avg_caps or 0, mate_avg_goals or 0],
-            marker={"color": "#64748b"},
-            text=[
-                f"{mate_avg_age:.1f}" if mate_avg_age else "—",
-                f"{mate_avg_caps:.0f}" if mate_avg_caps else "—",
-                f"{mate_avg_goals:.1f}" if mate_avg_goals else "—",
-            ],
-            textposition="outside",
-            hovertemplate="Squad mates<br>%{x}: %{y:.1f}<extra></extra>",
+        go.Table(
+            header={
+                "values": ["Metric", CAPTAIN_LABEL, MATE_LABEL],
+                "fill_color": PLOT_BG,
+                "font": {"color": TEXT, "size": 12},
+                "align": "left",
+            },
+            cells={
+                "values": list(zip(*summary_rows, strict=True)),
+                "fill_color": DASH_BG,
+                "font": {"color": TEXT, "size": 12},
+                "align": "left",
+                "height": 32,
+            },
         ),
         row=1,
         col=1,
@@ -202,7 +203,6 @@ def build_captains_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         showlegend=True,
     )
     fig.update_layout(barmode="group", legend={"orientation": "h", "y": 1.04, "x": 0})
-    fig.update_yaxes(title_text="Average", row=1, col=1, gridcolor=GRID)
     fig.update_yaxes(title_text="% abroad", range=[0, max(cap_abroad, mate_abroad) + 15], row=1, col=2)
     fig.update_yaxes(title_text="Age", range=[16, 44], row=2, col=1)
     fig.update_yaxes(title_text="Caps", row=2, col=2)

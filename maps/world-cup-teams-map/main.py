@@ -306,7 +306,7 @@ def main() -> None:
     parser.add_argument(
         "--dashboard",
         action="store_true",
-        help="Also build output/world_cup_dashboard.html (squad statistics).",
+        help="Also build output/world_cup_dashboard*.html (multi-page squad statistics).",
     )
     parser.add_argument(
         "--dashboard-only",
@@ -316,10 +316,11 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.dashboard_only:
-        from dashboard import write_dashboard
+        from dashboard import write_dashboard_site
 
-        write_dashboard(OUTPUT_DASHBOARD)
-        print(f"Wrote {OUTPUT_DASHBOARD}")
+        paths = write_dashboard_site(OUTPUT_DIR)
+        for path in paths:
+            print(f"Wrote {path}")
         return
 
     tournament, teams = build_teams(strict=False)
@@ -334,10 +335,10 @@ def main() -> None:
     )
 
     if args.dashboard:
-        from dashboard import write_dashboard
+        from dashboard import write_dashboard_site
 
-        dash_path = write_dashboard(OUTPUT_DASHBOARD)
-        print(f"Wrote {dash_path}")
+        for dash_path in write_dashboard_site(OUTPUT_DIR):
+            print(f"Wrote {dash_path}")
 
 
 if __name__ == "__main__":

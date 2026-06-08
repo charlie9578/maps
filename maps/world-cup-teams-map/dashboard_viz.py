@@ -35,7 +35,11 @@ from dashboard_data import (
     top_players,
 )
 from dashboard_captains import build_captains_panel
-from dashboard_records import build_goals_caps_panel, build_records_panel
+from dashboard_records import (
+    build_goals_caps_panel,
+    build_nation_experience_panel,
+    build_records_panel,
+)
 from data_processing import Team
 from viz import DEFAULT_COLOR
 
@@ -136,24 +140,37 @@ def build_dashboard(
     )
 
     top_clubs = club_counts.most_common(25)
+    club_vals = [n for _, n in reversed(top_clubs)]
+    max_club = max(club_vals) if club_vals else 1
     fig.add_trace(
         go.Bar(
             y=[c for c, _ in reversed(top_clubs)],
-            x=[n for _, n in reversed(top_clubs)],
+            x=club_vals,
             orientation="h",
-            marker={"color": "#64748b", "line": {"width": 0}},
+            marker={
+                "color": club_vals,
+                "colorscale": [[0, "#334155"], [0.5, "#64748b"], [1, "#38bdf8"]],
+                "cmin": 0,
+                "cmax": max_club,
+                "line": {"width": 0},
+            },
+            text=club_vals,
+            textposition="outside",
+            cliponaxis=False,
             hovertemplate="%{y}<br>%{x} players<extra></extra>",
         ),
         row=1,
         col=1,
     )
 
+    pos_labels = [p for p in POS_ORDER if pos_counts[p]]
+    pos_values = [pos_counts[p] for p in pos_labels]
     fig.add_trace(
         go.Pie(
-            labels=[p for p in POS_ORDER if pos_counts[p]],
-            values=[pos_counts[p] for p in POS_ORDER if pos_counts[p]],
-            marker={"colors": [POS_COLORS[p] for p in POS_ORDER if pos_counts[p]]},
-            hole=0.45,
+            labels=pos_labels,
+            values=pos_values,
+            marker={"colors": [POS_COLORS[p] for p in pos_labels]},
+            hole=0.48,
             textinfo="label+percent",
             textfont={"size": 11},
             hovertemplate="%{label}: %{value} players (%{percent})<extra></extra>",
@@ -171,12 +188,15 @@ def build_dashboard(
     node_colors = [confed_color(c) for c in left_nodes] + [confed_color(c) for c in right_nodes]
     left_idx = {c: i for i, c in enumerate(left_nodes)}
     right_idx = {c: i + len(left_nodes) for i, c in enumerate(right_nodes)}
-    sources, targets, values = [], [], []
+    sources, targets, values, link_colors = [], [], [], []
     for (src, tgt), val in sorted(flow.items(), key=lambda x: -x[1]):
         if src in left_idx and tgt in right_idx:
             sources.append(left_idx[src])
             targets.append(right_idx[tgt])
             values.append(val)
+            hex_c = confed_color(src)
+            r, g, b = int(hex_c[1:3], 16), int(hex_c[3:5], 16), int(hex_c[5:7], 16)
+            link_colors.append(f"rgba({r},{g},{b},0.42)")
 
     fig.add_trace(
         go.Sankey(
@@ -192,7 +212,7 @@ def build_dashboard(
                 "source": sources,
                 "target": targets,
                 "value": values,
-                "color": "rgba(148, 163, 184, 0.35)",
+                "color": link_colors,
             },
         ),
         row=2,
@@ -236,6 +256,18 @@ def build_dashboard(
             ann.font = {"size": 13, "color": TEXT}
             ann.xanchor = "left"
             ann.x = 0.01
+
+    if pos_values:
+        fig.add_annotation(
+            text=f"<b>{sum(pos_values):,}</b><br>players",
+            x=0.79,
+            y=0.86,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font={"size": 14, "color": TEXT},
+            xanchor="center",
+        )
 
     return fig
 
@@ -402,9 +434,9 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         cols=2,
         subplot_titles=(
             "Capital-to-club distance (violin + box)",
-            "Share playing abroad by nation",
+            "Highest % playing abroad (top 15 nations)",
             "Cumulative player count by distance (area)",
-            "Domestic vs abroad split by confederation",
+            "Lowest % playing abroad (bottom 15 nations)",
         ),
         vertical_spacing=0.14,
         horizontal_spacing=0.08,
@@ -425,15 +457,37 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         abroad = sum(1 for p in players if not p.domestic)
         abroad_pct.append((nation, 100 * abroad / len(players), players[0].nation_confed))
     abroad_pct.sort(key=lambda x: x[1], reverse=True)
+    top_abroad = abroad_pct[:15]
+    bottom_abroad = list(reversed(abroad_pct[-15:]))
 
     fig.add_trace(
         go.Bar(
-            x=[n for n, _, _ in abroad_pct],
-            y=[p for _, p, _ in abroad_pct],
-            marker={"color": [confed_color(c) for _, _, c in abroad_pct]},
-            hovertemplate="%{x}<br>%{y:.0f}% abroad<extra></extra>",
+            y=[n for n, _, _ in reversed(top_abroad)],
+            x=[p for _, p, _ in reversed(top_abroad)],
+            orientation="h",
+            marker={"color": [confed_color(c) for _, _, c in reversed(top_abroad)]},
+            text=[f"{p:.0f}%" for _, p, _ in reversed(top_abroad)],
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate="%{y}<br>%{x:.0f}% abroad<extra></extra>",
+            showlegend=False,
         ),
         row=1,
+        col=2,
+    )
+    fig.add_trace(
+        go.Bar(
+            y=[n for n, _, _ in reversed(bottom_abroad)],
+            x=[p for _, p, _ in reversed(bottom_abroad)],
+            orientation="h",
+            marker={"color": [confed_color(c) for _, _, c in reversed(bottom_abroad)]},
+            text=[f"{p:.0f}%" for _, p, _ in reversed(bottom_abroad)],
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate="%{y}<br>%{x:.0f}% abroad<extra></extra>",
+            showlegend=False,
+        ),
+        row=2,
         col=2,
     )
 
@@ -453,43 +507,14 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
             col=1,
         )
 
-    confed_domestic: dict[str, tuple[int, int]] = {}
-    for confed in confeds:
-        subset = [r for r in rows if r.nation_confed == confed]
-        dom = sum(1 for r in subset if r.domestic)
-        confed_domestic[confed] = (dom, len(subset) - dom)
-
-    fig.add_trace(
-        go.Bar(
-            x=list(confed_domestic.keys()),
-            y=[v[0] for v in confed_domestic.values()],
-            name="Domestic",
-            marker={"color": "#34d399"},
-            hovertemplate="%{x}<br>%{y} domestic<extra></extra>",
-        ),
-        row=2,
-        col=2,
-    )
-    fig.add_trace(
-        go.Bar(
-            x=list(confed_domestic.keys()),
-            y=[v[1] for v in confed_domestic.values()],
-            name="Abroad",
-            marker={"color": "#fb7185"},
-            hovertemplate="%{x}<br>%{y} abroad<extra></extra>",
-        ),
-        row=2,
-        col=2,
-    )
-
-    dark_layout(fig, f"{tournament} — geography & club location", height=820, showlegend=True)
+    dark_layout(fig, f"{tournament} — geography & club location", height=820, showlegend=False)
     fig.update_yaxes(title_text="Distance (km)", row=1, col=1)
-    fig.update_xaxes(tickangle=-45, row=1, col=2)
-    fig.update_yaxes(title_text="% abroad", range=[0, 105], row=1, col=2)
+    fig.update_xaxes(title_text="% abroad", range=[0, 108], row=1, col=2)
+    fig.update_yaxes(automargin=True, row=1, col=2)
     fig.update_xaxes(title_text="Distance (km)", row=2, col=1)
     fig.update_yaxes(title_text="Players (cumulative)", row=2, col=1)
-    fig.update_yaxes(title_text="Players", row=2, col=2)
-    fig.update_layout(barmode="stack", legend={"orientation": "h", "y": 1.04, "x": 0})
+    fig.update_xaxes(title_text="% abroad", range=[0, 108], row=2, col=2)
+    fig.update_yaxes(automargin=True, row=2, col=2)
     return fig
 
 
@@ -536,14 +561,23 @@ def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Fig
     )
 
     if ages:
+        median_age = statistics.median(ages)
         fig.add_trace(
             go.Histogram(
                 x=ages,
                 nbinsx=20,
-                marker={"color": "#64748b"},
+                marker={"color": "#64748b", "line": {"color": "#475569", "width": 0.5}},
                 opacity=0.9,
                 hovertemplate="age %{x}<br>%{y} players<extra></extra>",
             ),
+            row=1,
+            col=1,
+        )
+        fig.add_vline(
+            x=median_age,
+            line={"color": "#a78bfa", "width": 2, "dash": "dot"},
+            annotation_text=f"Median ({median_age:.1f})",
+            annotation_position="top",
             row=1,
             col=1,
         )

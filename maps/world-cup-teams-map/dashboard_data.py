@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import statistics
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date
 
@@ -331,6 +331,57 @@ def add_violin_box(
     fig.update_yaxes(title_text=y_title, row=row, col=col)
 
 
+def abroad_nations_table_html(rows: list[PlayerRow]) -> str:
+    """Scrollable table of every nation ranked by share of squad playing abroad."""
+    by_nation: dict[str, list[PlayerRow]] = defaultdict(list)
+    for r in rows:
+        by_nation[r.nation].append(r)
+
+    ranked: list[tuple[str, float, int, int, str]] = []
+    for nation, players in by_nation.items():
+        abroad = sum(1 for p in players if not p.domestic)
+        ranked.append(
+            (nation, 100 * abroad / len(players), abroad, len(players), players[0].nation_confed)
+        )
+    ranked.sort(key=lambda x: (-x[1], x[0]))
+
+    rows_html = "\n".join(
+        "      <tr>"
+        f"<td class=\"rank\">{i}</td>"
+        f"<td>{_esc(nation)}</td>"
+        f"<td>{pct:.0f}%</td>"
+        f"<td>{abroad}/{total}</td>"
+        f"<td>{_esc(confed)}</td>"
+        "</tr>"
+        for i, (nation, pct, abroad, total, confed) in enumerate(ranked, start=1)
+    )
+    all_abroad = sum(x[2] for x in ranked)
+    all_players = sum(x[3] for x in ranked)
+    overall = 100 * all_abroad / max(1, all_players)
+    return f"""<div class="table-wrap">
+  <p class="table-note">{len(ranked)} nations · <strong>{overall:.0f}%</strong> of all squad players
+  play club football outside their national federation.</p>
+  <table class="data-table">
+    <thead>
+      <tr><th>#</th><th>Nation</th><th>% abroad</th><th>Abroad / squad</th><th>Confed</th></tr>
+    </thead>
+    <tbody>
+{rows_html}
+    </tbody>
+  </table>
+</div>"""
+
+
+def debutants_table_html(players: list[PlayerRow]) -> str:
+    """Table of players with zero international caps before the tournament."""
+    return leaderboard_table_html(
+        players,
+        title="International debutants (0 caps)",
+        metric="caps",
+        columns=("Player", "Nation", "Pos", "Age", "Club"),
+    )
+
+
 def birthday_table_html(birthdays: list[TournamentBirthday]) -> str:
     """Scrollable HTML table of players with birthdays during the tournament."""
     if not birthdays:
@@ -338,8 +389,11 @@ def birthday_table_html(birthdays: list[TournamentBirthday]) -> str:
             '<p class="table-note">No squad player has a birthday between '
             f"{WC_OPENING_DAY.strftime('%d %b')} and {WC_FINAL_DAY.strftime('%d %b %Y')}.</p>"
         )
+    opening = WC_OPENING_DAY.strftime("%d %b")
     rows_html = "\n".join(
-        "      <tr>"
+        "      <tr"
+        + (' class="row-opening"' if b.birthday == WC_OPENING_DAY else "")
+        + ">"
         f"<td>{b.birthday.strftime('%a %d %b')}</td>"
         f"<td>{_esc(b.name)}</td>"
         f"<td>{_esc(b.nation)}</td>"
@@ -351,7 +405,8 @@ def birthday_table_html(birthdays: list[TournamentBirthday]) -> str:
     )
     return f"""<div class="table-wrap">
   <p class="table-note">{len(birthdays)} players have a birthday during the tournament
-  (11 Jun – 19 Jul 2026). Ages are as of opening day; <em>Turns</em> is their age on their birthday.</p>
+  (11 Jun – 19 Jul 2026). Rows on <strong>{opening}</strong> share opening day.
+  <em>Turns</em> is their age on their birthday.</p>
   <table class="data-table">
     <thead>
       <tr><th>Date</th><th>Player</th><th>Nation</th><th>Pos</th><th>Turns</th><th>Club</th></tr>
@@ -437,6 +492,45 @@ def position_summaries(rows: list[PlayerRow]) -> list[PositionSummary]:
     return out
 
 
+@dataclass(frozen=True)
+class NationCapsSummary:
+    nation: str
+    nation_confed: str
+    squad_size: int
+    avg_caps: float
+    median_caps: float
+    total_caps: int
+    most_capped: str
+    most_capped_value: int
+
+
+def nation_caps_summaries(rows: list[PlayerRow]) -> list[NationCapsSummary]:
+    """Per-nation squad experience from international caps (mean, median, total)."""
+    by_nation: dict[str, list[PlayerRow]] = {}
+    for row in rows:
+        by_nation.setdefault(row.nation, []).append(row)
+
+    out: list[NationCapsSummary] = []
+    for nation, squad in by_nation.items():
+        caps = [r.caps for r in squad if r.caps is not None]
+        if not caps:
+            continue
+        leader = max(squad, key=lambda r: r.caps or 0)
+        out.append(
+            NationCapsSummary(
+                nation=nation,
+                nation_confed=squad[0].nation_confed,
+                squad_size=len(squad),
+                avg_caps=statistics.mean(caps),
+                median_caps=statistics.median(caps),
+                total_caps=sum(caps),
+                most_capped=leader.name,
+                most_capped_value=leader.caps or 0,
+            )
+        )
+    return sorted(out, key=lambda s: (-s.avg_caps, s.nation))
+
+
 def veterans(rows: list[PlayerRow], min_caps: int = 100) -> list[PlayerRow]:
     return sorted(
         [r for r in rows if (r.caps or 0) >= min_caps],
@@ -504,17 +598,24 @@ def captains_table_html(profiles: list[CaptainProfile]) -> str:
         sign = "+" if val > 0 else ""
         return f"{sign}{val:.{digits}f}"
 
+    def delta_class(val: float | None) -> str:
+        if val is None or val == 0:
+            return ""
+        return "delta-pos" if val > 0 else "delta-neg"
+
     rows_html = "\n".join(
-        "      <tr>"
+        "      <tr"
+        + (" class=\"row-highlight\"" if p.most_capped_on_team or p.top_scorer_on_team else "")
+        + ">"
         f"<td>{_esc(p.name)}</td>"
         f"<td>{_esc(p.nation)}</td>"
         f"<td>{_esc(p.pos)}</td>"
         f"<td>{p.age if p.age is not None else '—'}</td>"
-        f"<td>{fmt_delta(p.age_vs_squad)}</td>"
+        f'<td class="{delta_class(p.age_vs_squad)}">{fmt_delta(p.age_vs_squad)}</td>'
         f"<td>{p.caps if p.caps is not None else '—'}</td>"
-        f"<td>{fmt_delta(p.caps_vs_squad, digits=0)}</td>"
+        f'<td class="{delta_class(p.caps_vs_squad)}">{fmt_delta(p.caps_vs_squad, digits=0)}</td>'
         f"<td>{p.goals if p.goals is not None else '—'}</td>"
-        f"<td>{'Yes' if p.most_capped_on_team else 'No'}</td>"
+        f"<td>{'★' if p.most_capped_on_team else '—'}</td>"
         f"<td>{'Yes' if p.plays_abroad else 'No'}</td>"
         f"<td>{_esc(p.club)}</td>"
         "</tr>"
@@ -522,13 +623,13 @@ def captains_table_html(profiles: list[CaptainProfile]) -> str:
     )
     most_capped_n = sum(1 for p in profiles if p.most_capped_on_team)
     return f"""<div class="table-wrap">
-  <p class="table-note">{len(profiles)} captains · {most_capped_n} are their team's most-capped player
-  · Δ age / Δ caps vs squad average (excluding captain).</p>
+  <p class="table-note">{len(profiles)} captains · {most_capped_n} are their team's most-capped player (★)
+  · Δ age / Δ caps vs squad average (excluding captain). Highlighted rows: most-capped or top scorer on team.</p>
   <table class="data-table">
     <thead>
       <tr>
         <th>Captain</th><th>Nation</th><th>Pos</th><th>Age</th><th>Δ age</th>
-        <th>Caps</th><th>Δ caps</th><th>Goals</th><th>Most caps?</th><th>Abroad?</th><th>Club</th>
+        <th>Caps</th><th>Δ caps</th><th>Goals</th><th>★</th><th>Abroad?</th><th>Club</th>
       </tr>
     </thead>
     <tbody>
@@ -561,10 +662,13 @@ def leaderboard_table_html(
         }
         return _esc(mapping[col])
 
-    header = "".join(f"<th>{_esc(c)}</th>" for c in columns)
+    header = "<th class=\"rank\">#</th>" + "".join(f"<th>{_esc(c)}</th>" for c in columns)
     body = "\n".join(
-        "      <tr>" + "".join(f"<td>{cell(r, c)}</td>" for c in columns) + "</tr>"
-        for r in players
+        "      <tr>"
+        + f'<td class="rank">{i}</td>'
+        + "".join(f"<td>{cell(r, c)}</td>" for c in columns)
+        + "</tr>"
+        for i, r in enumerate(players, start=1)
     )
     metric_note = "international goals" if metric == "goals" else "international caps"
     return f"""<div class="table-wrap">

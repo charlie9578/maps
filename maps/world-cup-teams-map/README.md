@@ -33,7 +33,7 @@ python maps/world-cup-teams-map/main.py
 
 python maps/world-cup-teams-map/dashboard.py
 # or: python maps/world-cup-teams-map/main.py --dashboard
-# open output/world_cup_dashboard.html — squad stats, Sankey, age plots
+# open output/world_cup_dashboard.html — multi-page squad stats (Overview, Records, …)
 ```
 
 This writes self-contained HTML under `output/` (Plotly via CDN). The map toolbar
@@ -111,11 +111,11 @@ Basemap geometry is Plotly's built-in Natural Earth layer.
 ## Outputs
 
 - `output/world_cup_teams_map.html` — interactive flight-path map (gitignored).
-- `output/world_cup_dashboard.html` — squad statistics dashboard: top clubs,
-  confederation Sankey, violin/box age plots, **named top scorers & cap leaders**,
-  **position breakdowns** (age, caps, goals), 100% stacked area (age bands),
-  treemap & sunburst (proportional area), **captains vs squad mates**,
-  youngest/oldest stats, scrollable birthday and leaderboard tables (gitignored).
+- `output/world_cup_dashboard.html` — squad dashboard **overview** (top clubs,
+  confederation Sankey, violin/box age plots). Additional pages (linked in the
+  header): `world_cup_dashboard_records.html`, `_captains.html`, `_age.html`,
+  `_geography.html` — leaderboards, captains, birthdays, proportional area &
+  geography tables (gitignored).
 
 Open either file in a modern browser.
 
