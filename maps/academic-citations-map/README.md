@@ -56,6 +56,13 @@ Loaded via `lib.env` (see `.env.example`). Document rate limits on the [OpenAlex
 
 No local CSV cache; the script calls the API on each run.
 
+**GitHub Pages:** CI builds from the committed snapshot
+`data/penmanshiel_demo.json` (no live API). Refresh it after changing the demo:
+
+```bash
+python maps/academic-citations-map/main.py --work-id W4393687471 --depth 1 --save-json
+```
+
 ## Outputs
 
 `output/citation_network.html` (gitignored) — Plotly network diagram; seed node in red.

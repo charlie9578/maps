@@ -1,0 +1,822 @@
+{
+  "seed_id": "W4393687471",
+  "nodes": [
+    {
+      "id": "W4393687471",
+      "display_name": "Penmanshiel wind farm data",
+      "publication_year": 2022,
+      "cited_by_count": 19,
+      "doi": "10.5281/zenodo.8253010"
+    },
+    {
+      "id": "W4363652212",
+      "display_name": "An online transfer learning model for wind turbine power prediction based on spatial feature construction and system-wide update",
+      "publication_year": 2023,
+      "cited_by_count": 37,
+      "doi": "10.1016/j.apenergy.2023.121049"
+    },
+    {
+      "id": "W4401533814",
+      "display_name": "Short-term wind speed forecast based on dynamic spatio-temporal directed graph attention network",
+      "publication_year": 2024,
+      "cited_by_count": 23,
+      "doi": "10.1016/j.apenergy.2024.124124"
+    },
+    {
+      "id": "W4391040901",
+      "display_name": "Wind power curve modeling: A probabilistic Beta regression approach",
+      "publication_year": 2024,
+      "cited_by_count": 22,
+      "doi": "10.1016/j.renene.2024.119970"
+    },
+    {
+      "id": "W4411048601",
+      "display_name": "A cross-dataset benchmark for neural network-based wind power forecasting",
+      "publication_year": 2025,
+      "cited_by_count": 11,
+      "doi": "10.1016/j.renene.2025.123463"
+    },
+    {
+      "id": "W4403931065",
+      "display_name": "Probability density function based adaptive ensemble learning with global convergence for wind power prediction",
+      "publication_year": 2024,
+      "cited_by_count": 9,
+      "doi": "10.1016/j.energy.2024.133573"
+    },
+    {
+      "id": "W4400421473",
+      "display_name": "Advancing predictive maintenance: a deep learning approach to sensor and event-log data fusion",
+      "publication_year": 2024,
+      "cited_by_count": 7,
+      "doi": "10.1108/sr-03-2024-0183"
+    },
+    {
+      "id": "W4414677666",
+      "display_name": "A Digital Twin model for predicting wind turbine performance using federated learning",
+      "publication_year": 2025,
+      "cited_by_count": 5,
+      "doi": "10.1016/j.energy.2025.138644"
+    },
+    {
+      "id": "W4385626964",
+      "display_name": "A New Co-Optimized Hybrid Model Based on Multi-Objective Optimization for Probabilistic Wind Power Forecasting in a Spatio\u2013Temporal Framework",
+      "publication_year": 2023,
+      "cited_by_count": 8,
+      "doi": "10.1109/access.2023.3302701"
+    },
+    {
+      "id": "W4402035893",
+      "display_name": "Improving the forecast accuracy of wind power by leveraging multiple hierarchical structure",
+      "publication_year": 2024,
+      "cited_by_count": 6,
+      "doi": "10.1016/j.segan.2024.101517"
+    },
+    {
+      "id": "W4411009307",
+      "display_name": "Correlation based deep neuro-fuzzy Hammerstein type wind power forecasting model considering asymmetric error characteristics",
+      "publication_year": 2025,
+      "cited_by_count": 5,
+      "doi": "10.1016/j.engappai.2025.111200"
+    },
+    {
+      "id": "W4410599341",
+      "display_name": "Improving cross-temporal forecasts reconciliation accuracy and utility in energy market",
+      "publication_year": 2025,
+      "cited_by_count": 4,
+      "doi": "10.1016/j.apenergy.2025.126053"
+    },
+    {
+      "id": "W4400269191",
+      "display_name": "Collaborative monitoring of wind turbine performance based on probabilistic power curve comparison",
+      "publication_year": 2024,
+      "cited_by_count": 4,
+      "doi": "10.1016/j.renene.2024.120919"
+    },
+    {
+      "id": "W4388478053",
+      "display_name": "An Efficient Computational Analysis and Modelling of Transferred Aerodynamic Loading on Direct-Drive System of 5MW Wind Turbine and Results Driven Optimisation for a Sustainable Generator Structure",
+      "publication_year": 2023,
+      "cited_by_count": 1,
+      "doi": "10.20944/preprints202311.0356.v1"
+    },
+    {
+      "id": "W4396613171",
+      "display_name": "Improving data sharing in practice \u2013 power curve benchmarking case study",
+      "publication_year": 2024,
+      "cited_by_count": 0,
+      "doi": "10.1088/1742-6596/2745/1/012002"
+    },
+    {
+      "id": "W4399621151",
+      "display_name": "Combination of Metaheuristic Algorithm and Artificial Neural Networks Model to Forecast Wind Energy",
+      "publication_year": 2024,
+      "cited_by_count": 0,
+      "doi": "10.1109/iraset60544.2024.10548540"
+    },
+    {
+      "id": "W4400464686",
+      "display_name": "A Novel Wind Power Curve Modeling Method: Natural Nearest Neighbors Weighted Polynomial Regression",
+      "publication_year": 2024,
+      "cited_by_count": 0,
+      "doi": "10.2139/ssrn.4889367"
+    },
+    {
+      "id": "W4411346328",
+      "display_name": "e-SparX: A Graph-Based Artifact Exchange Platform to Accelerate Machine Learning Research in the Energy Systems Community",
+      "publication_year": 2025,
+      "cited_by_count": 0,
+      "doi": "10.1145/3679240.3734617"
+    },
+    {
+      "id": "W4414697638",
+      "display_name": "Temperature measurement uncertainty quantification in condition monitoring of critical infrastructure using complex timeseries dependency modeling",
+      "publication_year": 2025,
+      "cited_by_count": 0,
+      "doi": "10.1016/j.meaene.2025.100068"
+    },
+    {
+      "id": "W3110472972",
+      "display_name": "The Temporal Overfitting Problem with Applications in Wind Power Curve Modeling",
+      "publication_year": 2022,
+      "cited_by_count": 19,
+      "doi": "10.1080/00401706.2022.2069158"
+    },
+    {
+      "id": "W2064675550",
+      "display_name": "Long Short-Term Memory",
+      "publication_year": 1997,
+      "cited_by_count": 97444,
+      "doi": "10.1162/neco.1997.9.8.1735"
+    },
+    {
+      "id": "W1984061847",
+      "display_name": "Day-ahead wind speed forecasting using f-ARIMA models",
+      "publication_year": 2008,
+      "cited_by_count": 940,
+      "doi": "10.1016/j.renene.2008.09.006"
+    },
+    {
+      "id": "W3195017936",
+      "display_name": "Power prediction of a wind farm cluster based on spatiotemporal correlations",
+      "publication_year": 2021,
+      "cited_by_count": 107,
+      "doi": "10.1016/j.apenergy.2021.117568"
+    },
+    {
+      "id": "W2044963328",
+      "display_name": "A comprehensive review on wind turbine power curve modeling techniques",
+      "publication_year": 2013,
+      "cited_by_count": 520,
+      "doi": "10.1016/j.rser.2013.10.030"
+    },
+    {
+      "id": "W2981208062",
+      "display_name": "Approaches to wind power curve modeling: A review and discussion",
+      "publication_year": 2019,
+      "cited_by_count": 268,
+      "doi": "10.1016/j.rser.2019.109422"
+    },
+    {
+      "id": "W2075672667",
+      "display_name": "Monitoring Wind Farms With Performance Curves",
+      "publication_year": 2012,
+      "cited_by_count": 165,
+      "doi": "10.1109/tste.2012.2212470"
+    },
+    {
+      "id": "W2948425946",
+      "display_name": "Wind Power Curve Modeling With Asymmetric Error Distribution",
+      "publication_year": 2019,
+      "cited_by_count": 36,
+      "doi": "10.1109/tste.2019.2920386"
+    },
+    {
+      "id": "W2768348081",
+      "display_name": "LightGBM: A Highly Efficient Gradient Boosting Decision Tree",
+      "publication_year": 2017,
+      "cited_by_count": 9487,
+      "doi": null
+    },
+    {
+      "id": "W4206173445",
+      "display_name": "M5 accuracy competition: Results, findings, and conclusions",
+      "publication_year": 2022,
+      "cited_by_count": 446,
+      "doi": "10.1016/j.ijforecast.2021.11.013"
+    },
+    {
+      "id": "W2073210389",
+      "display_name": "Optimal combination forecasts for hierarchical time series",
+      "publication_year": 2011,
+      "cited_by_count": 435,
+      "doi": "10.1016/j.csda.2011.03.006"
+    },
+    {
+      "id": "W2790781641",
+      "display_name": "Optimal Forecast Reconciliation for Hierarchical and Grouped Time Series Through Trace Minimization",
+      "publication_year": 2018,
+      "cited_by_count": 302,
+      "doi": "10.1080/01621459.2018.1448825"
+    },
+    {
+      "id": "W2254535312",
+      "display_name": "Linear and non-linear autoregressive models for short-term wind speed forecasting",
+      "publication_year": 2016,
+      "cited_by_count": 279,
+      "doi": "10.1016/j.enconman.2016.01.007"
+    },
+    {
+      "id": "W2177978941",
+      "display_name": "Forecasting with temporal hierarchies",
+      "publication_year": 2017,
+      "cited_by_count": 261,
+      "doi": "10.1016/j.ejor.2017.02.046"
+    },
+    {
+      "id": "W3121826667",
+      "display_name": "Ultra\u2010short\u2010term multi\u2010step wind power forecasting based on CNN\u2010LSTM",
+      "publication_year": 2021,
+      "cited_by_count": 222,
+      "doi": "10.1049/rpg2.12085"
+    },
+    {
+      "id": "W2918056337",
+      "display_name": "Cross-temporal coherent forecasts for Australian tourism",
+      "publication_year": 2019,
+      "cited_by_count": 90,
+      "doi": "10.1016/j.annals.2019.02.001"
+    },
+    {
+      "id": "W2964444695",
+      "display_name": "Temporal hierarchies with autocorrelation for load forecasting",
+      "publication_year": 2019,
+      "cited_by_count": 82,
+      "doi": "10.1016/j.ejor.2019.07.061"
+    },
+    {
+      "id": "W4390399130",
+      "display_name": "Forecast reconciliation: A review",
+      "publication_year": 2023,
+      "cited_by_count": 59,
+      "doi": "10.1016/j.ijforecast.2023.10.010"
+    },
+    {
+      "id": "W4416568834",
+      "display_name": "Cross-temporal forecast reconciliation: insights on sequential, iterative, and optimal approaches",
+      "publication_year": 2025,
+      "cited_by_count": 0,
+      "doi": "10.1007/s10260-025-00822-z"
+    },
+    {
+      "id": "W7155043709",
+      "display_name": "Datasets for wind energy forecasting applications: A comprehensive review and benchmarking perspective",
+      "publication_year": 2026,
+      "cited_by_count": 0,
+      "doi": "10.1016/j.rser.2026.116941"
+    },
+    {
+      "id": "W2025720061",
+      "display_name": "Strictly Proper Scoring Rules, Prediction, and Estimation",
+      "publication_year": 2007,
+      "cited_by_count": 5444,
+      "doi": "10.1198/016214506000001437"
+    },
+    {
+      "id": "W3120488504",
+      "display_name": "Review of Deterministic and Probabilistic Wind Power Forecasting: Models, Methods, and Future Research",
+      "publication_year": 2021,
+      "cited_by_count": 123,
+      "doi": "10.3390/electricity2010002"
+    },
+    {
+      "id": "W3135538970",
+      "display_name": "Augmented Convolutional Network for Wind Power Prediction: A New Recurrent Architecture Design With Spatial-Temporal Image Inputs",
+      "publication_year": 2021,
+      "cited_by_count": 57,
+      "doi": "10.1109/tii.2021.3063530"
+    },
+    {
+      "id": "W2118020555",
+      "display_name": "On Estimation of a Probability Density Function and Mode",
+      "publication_year": 1962,
+      "cited_by_count": 10479,
+      "doi": "10.1214/aoms/1177704472"
+    },
+    {
+      "id": "W2958872067",
+      "display_name": "Multivariate Variational Mode Decomposition",
+      "publication_year": 2019,
+      "cited_by_count": 598,
+      "doi": "10.1109/tsp.2019.2951223"
+    },
+    {
+      "id": "W4389259745",
+      "display_name": "Advanced hyperparameter optimization of deep learning models for wind power prediction",
+      "publication_year": 2023,
+      "cited_by_count": 196,
+      "doi": "10.1016/j.renene.2023.119700"
+    },
+    {
+      "id": "W4391839495",
+      "display_name": "A hybrid model with combined feature selection based on optimized VMD and improved multi-objective coati optimization algorithm for short-term wind power prediction",
+      "publication_year": 2024,
+      "cited_by_count": 61,
+      "doi": "10.1016/j.energy.2024.130684"
+    },
+    {
+      "id": "W4390933551",
+      "display_name": "A multi-step wind power group forecasting seq2seq architecture with spatial\u2013temporal feature fusion and numerical weather prediction correction",
+      "publication_year": 2024,
+      "cited_by_count": 47,
+      "doi": "10.1016/j.energy.2024.130352"
+    },
+    {
+      "id": "W4414441372",
+      "display_name": "Short-term wind power prediction based on a new hybrid model",
+      "publication_year": 2025,
+      "cited_by_count": 1,
+      "doi": "10.1016/j.egyr.2025.08.051"
+    },
+    {
+      "id": "W2811507150",
+      "display_name": "Forecasting: principles and practice",
+      "publication_year": 2013,
+      "cited_by_count": 4215,
+      "doi": null
+    },
+    {
+      "id": "W3200304500",
+      "display_name": "A review of wind speed and wind power forecasting with deep neural networks",
+      "publication_year": 2021,
+      "cited_by_count": 897,
+      "doi": "10.1016/j.apenergy.2021.117766"
+    },
+    {
+      "id": "W4386968812",
+      "display_name": "Short-term wind power forecasting model based on temporal convolutional network and Informer",
+      "publication_year": 2023,
+      "cited_by_count": 129,
+      "doi": "10.1016/j.energy.2023.129171"
+    },
+    {
+      "id": "W4417066108",
+      "display_name": "Unbiased forecasting of seasonal wind power generation based on a novel seasonal multivariable grey model",
+      "publication_year": 2025,
+      "cited_by_count": 5,
+      "doi": "10.1016/j.renene.2025.124952"
+    },
+    {
+      "id": "W4389247989",
+      "display_name": "Ultra-short-term wind power forecasting based on personalized robust federated learning with spatial collaboration",
+      "publication_year": 2023,
+      "cited_by_count": 44,
+      "doi": "10.1016/j.energy.2023.129847"
+    },
+    {
+      "id": "W2794466895",
+      "display_name": "Wind Power Curve Modeling and Wind Power Forecasting With Inconsistent Data",
+      "publication_year": 2018,
+      "cited_by_count": 154,
+      "doi": "10.1109/tste.2018.2820198"
+    },
+    {
+      "id": "W1985255373",
+      "display_name": "On-line monitoring of power curves",
+      "publication_year": 2008,
+      "cited_by_count": 232,
+      "doi": "10.1016/j.renene.2008.10.022"
+    },
+    {
+      "id": "W2719445145",
+      "display_name": "Data-Driven Correction Approach to Refine Power Curve of Wind Farm Under Wind Curtailment",
+      "publication_year": 2017,
+      "cited_by_count": 169,
+      "doi": "10.1109/tste.2017.2717021"
+    },
+    {
+      "id": "W2767619639",
+      "display_name": "Comparison of logistic functions for modeling wind turbine power curves",
+      "publication_year": 2017,
+      "cited_by_count": 77,
+      "doi": "10.1016/j.epsr.2017.10.028"
+    }
+  ],
+  "edges": [
+    [
+      "W4363652212",
+      "W4393687471"
+    ],
+    [
+      "W4401533814",
+      "W4393687471"
+    ],
+    [
+      "W4391040901",
+      "W4393687471"
+    ],
+    [
+      "W4411048601",
+      "W4393687471"
+    ],
+    [
+      "W4403931065",
+      "W4393687471"
+    ],
+    [
+      "W4400421473",
+      "W4393687471"
+    ],
+    [
+      "W4414677666",
+      "W4393687471"
+    ],
+    [
+      "W4385626964",
+      "W4393687471"
+    ],
+    [
+      "W4402035893",
+      "W4393687471"
+    ],
+    [
+      "W4411009307",
+      "W4393687471"
+    ],
+    [
+      "W4410599341",
+      "W4393687471"
+    ],
+    [
+      "W4400269191",
+      "W4393687471"
+    ],
+    [
+      "W4388478053",
+      "W4393687471"
+    ],
+    [
+      "W4396613171",
+      "W4393687471"
+    ],
+    [
+      "W4399621151",
+      "W4393687471"
+    ],
+    [
+      "W4400464686",
+      "W4393687471"
+    ],
+    [
+      "W4411346328",
+      "W4393687471"
+    ],
+    [
+      "W4414697638",
+      "W4393687471"
+    ],
+    [
+      "W4396613171",
+      "W3110472972"
+    ],
+    [
+      "W4401533814",
+      "W2064675550"
+    ],
+    [
+      "W4401533814",
+      "W1984061847"
+    ],
+    [
+      "W4401533814",
+      "W3195017936"
+    ],
+    [
+      "W4400269191",
+      "W2044963328"
+    ],
+    [
+      "W4400269191",
+      "W2981208062"
+    ],
+    [
+      "W4400269191",
+      "W2075672667"
+    ],
+    [
+      "W4400269191",
+      "W2948425946"
+    ],
+    [
+      "W4410599341",
+      "W2768348081"
+    ],
+    [
+      "W4410599341",
+      "W4206173445"
+    ],
+    [
+      "W4410599341",
+      "W2073210389"
+    ],
+    [
+      "W4410599341",
+      "W2790781641"
+    ],
+    [
+      "W4410599341",
+      "W2254535312"
+    ],
+    [
+      "W4410599341",
+      "W2177978941"
+    ],
+    [
+      "W4410599341",
+      "W3121826667"
+    ],
+    [
+      "W4410599341",
+      "W2918056337"
+    ],
+    [
+      "W4410599341",
+      "W2964444695"
+    ],
+    [
+      "W4410599341",
+      "W4390399130"
+    ],
+    [
+      "W4416568834",
+      "W4410599341"
+    ],
+    [
+      "W7155043709",
+      "W4410599341"
+    ],
+    [
+      "W4385626964",
+      "W2025720061"
+    ],
+    [
+      "W4385626964",
+      "W3120488504"
+    ],
+    [
+      "W4385626964",
+      "W3135538970"
+    ],
+    [
+      "W7155043709",
+      "W4385626964"
+    ],
+    [
+      "W4411009307",
+      "W2118020555"
+    ],
+    [
+      "W4411009307",
+      "W2958872067"
+    ],
+    [
+      "W4411009307",
+      "W2981208062"
+    ],
+    [
+      "W4411009307",
+      "W4389259745"
+    ],
+    [
+      "W4411009307",
+      "W4391839495"
+    ],
+    [
+      "W4411009307",
+      "W4390933551"
+    ],
+    [
+      "W4411009307",
+      "W4403931065"
+    ],
+    [
+      "W4414441372",
+      "W4411009307"
+    ],
+    [
+      "W4411048601",
+      "W2811507150"
+    ],
+    [
+      "W4411048601",
+      "W1984061847"
+    ],
+    [
+      "W4411048601",
+      "W3200304500"
+    ],
+    [
+      "W4411048601",
+      "W4386968812"
+    ],
+    [
+      "W4411048601",
+      "W3120488504"
+    ],
+    [
+      "W4417066108",
+      "W4411048601"
+    ],
+    [
+      "W4414441372",
+      "W4411048601"
+    ],
+    [
+      "W7155043709",
+      "W4411048601"
+    ],
+    [
+      "W4414677666",
+      "W4389247989"
+    ],
+    [
+      "W4363652212",
+      "W3200304500"
+    ],
+    [
+      "W4363652212",
+      "W2794466895"
+    ],
+    [
+      "W4363652212",
+      "W3195017936"
+    ],
+    [
+      "W4363652212",
+      "W3135538970"
+    ],
+    [
+      "W4391040901",
+      "W2044963328"
+    ],
+    [
+      "W4391040901",
+      "W2981208062"
+    ],
+    [
+      "W4391040901",
+      "W1985255373"
+    ],
+    [
+      "W4391040901",
+      "W2719445145"
+    ],
+    [
+      "W4391040901",
+      "W2794466895"
+    ],
+    [
+      "W4391040901",
+      "W2767619639"
+    ],
+    [
+      "W4391040901",
+      "W2948425946"
+    ],
+    [
+      "W4403931065",
+      "W4391040901"
+    ],
+    [
+      "W4417066108",
+      "W4391040901"
+    ],
+    [
+      "W7155043709",
+      "W4391040901"
+    ],
+    [
+      "W4400421473",
+      "W2064675550"
+    ],
+    [
+      "W4400464686",
+      "W2044963328"
+    ],
+    [
+      "W4400464686",
+      "W1985255373"
+    ],
+    [
+      "W4400464686",
+      "W2719445145"
+    ],
+    [
+      "W4400464686",
+      "W2075672667"
+    ],
+    [
+      "W4400464686",
+      "W2767619639"
+    ],
+    [
+      "W4400464686",
+      "W3110472972"
+    ],
+    [
+      "W4411346328",
+      "W2064675550"
+    ],
+    [
+      "W4403931065",
+      "W2118020555"
+    ],
+    [
+      "W4403931065",
+      "W2958872067"
+    ],
+    [
+      "W4403931065",
+      "W4389259745"
+    ],
+    [
+      "W4403931065",
+      "W4386968812"
+    ],
+    [
+      "W4403931065",
+      "W4391839495"
+    ],
+    [
+      "W4403931065",
+      "W4390933551"
+    ],
+    [
+      "W4403931065",
+      "W4389247989"
+    ],
+    [
+      "W4414697638",
+      "W2025720061"
+    ],
+    [
+      "W4414697638",
+      "W2811507150"
+    ],
+    [
+      "W4402035893",
+      "W2768348081"
+    ],
+    [
+      "W4402035893",
+      "W2811507150"
+    ],
+    [
+      "W4402035893",
+      "W3200304500"
+    ],
+    [
+      "W4402035893",
+      "W4206173445"
+    ],
+    [
+      "W4402035893",
+      "W2073210389"
+    ],
+    [
+      "W4402035893",
+      "W2790781641"
+    ],
+    [
+      "W4402035893",
+      "W2254535312"
+    ],
+    [
+      "W4402035893",
+      "W2177978941"
+    ],
+    [
+      "W4402035893",
+      "W3121826667"
+    ],
+    [
+      "W4402035893",
+      "W2918056337"
+    ],
+    [
+      "W4402035893",
+      "W2964444695"
+    ],
+    [
+      "W4402035893",
+      "W4390399130"
+    ],
+    [
+      "W4416568834",
+      "W4402035893"
+    ],
+    [
+      "W7155043709",
+      "W4402035893"
+    ]
+  ]
+}

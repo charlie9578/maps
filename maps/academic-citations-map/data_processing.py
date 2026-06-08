@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import math
 import re
 import time
 from collections import deque
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 TrimMode = Literal["smart", "simple", "connections"]
@@ -851,4 +853,39 @@ def expand_citation_network(
     if trim_after_each_hop and max_works is not None:
         cap_network_by_connections(network, max_works, report=network.trim_report)
 
+    return network
+
+
+MAP_DIR = Path(__file__).resolve().parent
+DEMO_NETWORK_JSON = MAP_DIR / "data" / "penmanshiel_demo.json"
+
+
+def save_citation_network(network: CitationNetwork, path: Path) -> None:
+    """Write nodes and edges to JSON for offline static builds (e.g. GitHub Pages CI)."""
+    payload = {
+        "seed_id": network.seed_id,
+        "nodes": [
+            {
+                "id": work.id,
+                "display_name": work.display_name,
+                "publication_year": work.publication_year,
+                "cited_by_count": work.cited_by_count,
+                "doi": work.doi,
+            }
+            for work in network.nodes.values()
+        ],
+        "edges": [[source, target] for source, target in network.edges],
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def load_citation_network(path: Path) -> CitationNetwork:
+    """Load a network snapshot written by :func:`save_citation_network`."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    network = CitationNetwork(seed_id=payload["seed_id"])
+    for row in payload["nodes"]:
+        network.upsert_node(WorkSummary(**row))
+    for source, target in payload["edges"]:
+        network.add_edge(source, target)
     return network

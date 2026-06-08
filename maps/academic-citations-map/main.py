@@ -11,10 +11,13 @@ import sys
 from pathlib import Path
 
 from data_processing import (
+    DEMO_NETWORK_JSON,
     SmartTrimConfig,
     expand_citation_network,
+    load_citation_network,
     normalize_openalex_id,
     pick_work,
+    save_citation_network,
     search_works,
 )
 from viz import build_network_figure
@@ -112,6 +115,20 @@ def _parse_args() -> argparse.Namespace:
         default=OUTPUT_HTML,
         help=f"Output HTML path (default: {OUTPUT_HTML.relative_to(MAP_DIR.parent.parent)}).",
     )
+    parser.add_argument(
+        "--from-json",
+        type=Path,
+        metavar="PATH",
+        help="Build from a saved network snapshot (no OpenAlex API calls).",
+    )
+    parser.add_argument(
+        "--save-json",
+        type=Path,
+        metavar="PATH",
+        nargs="?",
+        const=DEMO_NETWORK_JSON,
+        help="After building via API, save network JSON (default: data/penmanshiel_demo.json).",
+    )
     return parser.parse_args()
 
 
@@ -144,43 +161,53 @@ def main() -> None:
         sys.exit(1)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    seed_id = _resolve_seed(args)
 
-    trim = not args.no_trim
-    max_works = None if not trim or args.max_works <= 0 else args.max_works
-    trim_desc = (
-        f", trim={args.trim_mode}, max_works={max_works}"
-        if trim
-        else ", no trim"
-    )
-    print(
-        f"Expanding network (depth={args.depth}, max_per_direction={args.max_per_direction}"
-        f"{trim_desc})…"
-    )
-    smart_trim = (
-        SmartTrimConfig(min_cited_for_low_degree=args.min_cited_trim)
-        if trim and args.trim_mode == "smart"
-        else None
-    )
-    network = expand_citation_network(
-        seed_id,
-        depth=args.depth,
-        max_per_direction=args.max_per_direction,
-        trim_after_each_hop=trim,
-        trim_mode=args.trim_mode,
-        min_connections=args.min_connections,
-        smart_trim=smart_trim,
-        max_works=max_works,
-        dedupe=not args.no_dedupe,
-    )
-    print(f"Nodes: {len(network.nodes)}, edges: {len(network.edges)}")
-    for step in network.trim_report.steps:
-        print(f"  trim: {step}")
-    if network.dedupe_report.merge_count:
-        print(f"Merged {network.dedupe_report.merge_count} duplicate OpenAlex record(s):")
-        for canonical, aliases in network.dedupe_report.groups().items():
-            alias_str = ", ".join(aliases)
-            print(f"  {canonical} <- {alias_str}")
+    if args.from_json:
+        json_path = args.from_json if args.from_json.is_absolute() else MAP_DIR / args.from_json
+        network = load_citation_network(json_path)
+        print(f"Loaded network from {json_path} ({len(network.nodes)} nodes, {len(network.edges)} edges)")
+    else:
+        seed_id = _resolve_seed(args)
+
+        trim = not args.no_trim
+        max_works = None if not trim or args.max_works <= 0 else args.max_works
+        trim_desc = (
+            f", trim={args.trim_mode}, max_works={max_works}"
+            if trim
+            else ", no trim"
+        )
+        print(
+            f"Expanding network (depth={args.depth}, max_per_direction={args.max_per_direction}"
+            f"{trim_desc})…"
+        )
+        smart_trim = (
+            SmartTrimConfig(min_cited_for_low_degree=args.min_cited_trim)
+            if trim and args.trim_mode == "smart"
+            else None
+        )
+        network = expand_citation_network(
+            seed_id,
+            depth=args.depth,
+            max_per_direction=args.max_per_direction,
+            trim_after_each_hop=trim,
+            trim_mode=args.trim_mode,
+            min_connections=args.min_connections,
+            smart_trim=smart_trim,
+            max_works=max_works,
+            dedupe=not args.no_dedupe,
+        )
+        print(f"Nodes: {len(network.nodes)}, edges: {len(network.edges)}")
+        for step in network.trim_report.steps:
+            print(f"  trim: {step}")
+        if network.dedupe_report.merge_count:
+            print(f"Merged {network.dedupe_report.merge_count} duplicate OpenAlex record(s):")
+            for canonical, aliases in network.dedupe_report.groups().items():
+                alias_str = ", ".join(aliases)
+                print(f"  {canonical} <- {alias_str}")
+        if args.save_json is not None:
+            save_path = args.save_json if args.save_json.is_absolute() else MAP_DIR / args.save_json
+            save_citation_network(network, save_path)
+            print(f"Saved network snapshot to {save_path}")
 
     fig = build_network_figure(network)
     out_path = args.output if args.output.is_absolute() else MAP_DIR / args.output

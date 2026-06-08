@@ -177,15 +177,14 @@ def publish_osm_solar(site_dir: Path, _site_url: str) -> None:
 
 
 def publish_citations(site_dir: Path, _site_url: str) -> None:
+    demo_json = MAPS_DIR / "academic-citations-map" / "data" / "penmanshiel_demo.json"
     spec = ScriptMapSpec(
         map_name="academic-citations-map",
         script="main.py",
         built_output="citation_network.html",
         script_args=(
-            "--search",
-            "Penmanshiel wind farm data",
-            "--depth",
-            "1",
+            "--from-json",
+            str(demo_json),
         ),
     )
     staging = _run_script_map(spec)
