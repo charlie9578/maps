@@ -126,32 +126,110 @@ Maps must not import from other map folders.
 
 ## Publishing (GitHub Pages)
 
-Static HTML maps can be published from this repo to GitHub Pages. The workflow
-builds a `site/` tree and deploys it on every push to `main`.
+Static HTML maps are published from this repo via a **GitHub Actions** workflow (not
+“deploy from a branch”). The workflow runs `scripts/build_pages_site.py`, which builds
+the dashboard and writes a `site/` folder in CI — that folder is **gitignored** locally
+and never committed to `main`.
 
-**Live site:** [charlie9578.github.io/maps](https://charlie9578.github.io/maps/) (after Pages is enabled — see below)
+**Live site (after setup):** [charlie9578.github.io/maps](https://charlie9578.github.io/maps/)
 
 | Path | Content |
 |------|---------|
 | `/` | Landing page listing published maps |
 | `/world-cup-2026/` | 2026 World Cup squad dashboard |
 
-### One-time setup
+### Why “Deploy from a branch” does not work
 
-1. Repo **Settings → Pages → Build and deployment → Source:** GitHub Actions.
-2. Push to `main` (or run the **Deploy GitHub Pages** workflow manually).
+If **Settings → Pages → Build and deployment → Source** is set to **Branch** (e.g.
+“built from the `main` branch”), GitHub serves files **directly from your repo**. This
+repo’s `main` branch has Python source and map data, not the built HTML — and `site/` is
+gitignored. You would get a blank page, a directory listing, or unrelated files — not the
+dashboard.
 
-### Local preview
+You need **Source: GitHub Actions** so the **Deploy GitHub Pages** workflow can build
+the site and upload it.
+
+### Step-by-step setup
+
+#### 1. Push the workflow to GitHub
+
+Commit and push everything on `main`, including:
+
+- `.github/workflows/deploy-pages.yml`
+- `scripts/build_pages_site.py`
+- `maps/world-cup-teams-map/assets/share-map.png`
+
+#### 2. Switch Pages source to GitHub Actions
+
+1. Open the **maps** repo on GitHub (not charlie9578.github.io).
+2. **Settings** → **Pages** (left sidebar).
+3. Under **Build and deployment**, find **Source**.
+4. Change the dropdown from **Deploy from a branch** to **GitHub Actions**.
+
+You should no longer see “Branch: main” as the publisher. Instead GitHub will list
+workflows that can deploy Pages (including **Deploy GitHub Pages**).
+
+Ignore “Learn how to add a Jekyll theme” — this site is plain static HTML, not Jekyll.
+
+#### 3. Run the deploy workflow
+
+Either:
+
+- **Automatic:** push any commit to `main` (the workflow runs on every push), or
+- **Manual:** **Actions** tab → **Deploy GitHub Pages** → **Run workflow** → **Run workflow**
+
+#### 4. Approve the environment (first time only)
+
+The first deploy may pause for approval:
+
+1. **Actions** → click the running **Deploy GitHub Pages** workflow.
+2. If you see **Waiting for review** on the **deploy** job, click it and **Review deployments** → **Approve**.
+
+#### 5. Confirm it worked
+
+1. **Actions** → latest **Deploy GitHub Pages** run → both **build** and **deploy** jobs should be green.
+2. **Settings → Pages** should show: “Your site is live at **https://charlie9578.github.io/maps/**”
+   (exact URL depends on repo name — see below).
+3. Open:
+   - https://charlie9578.github.io/maps/
+   - https://charlie9578.github.io/maps/world-cup-2026/
+
+Deploy can take 1–3 minutes after the workflow finishes.
+
+### URL depends on repo name
+
+For a **project** repo named `maps` under user `charlie9578`:
+
+`https://charlie9578.github.io/maps/`
+
+If your repo has a different name, replace `maps` in the path. The workflow sets this
+automatically from `github.repository`.
+
+Your personal site ([charlie9578.github.io](https://charlie9578.github.io/)) is a **separate**
+repo — add a link there pointing to `https://charlie9578.github.io/maps/world-cup-2026/`.
+
+### Local preview (before pushing)
 
 ```bash
 python scripts/build_pages_site.py --site-url https://charlie9578.github.io/maps
-# open site/index.html in a browser (or serve site/ with any static server)
+# open site/index.html in a browser
 ```
 
-### Adding a map to the site
+### Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| Pages still says “built from `main` branch” | Change **Source** to **GitHub Actions** (step 2). |
+| Workflow not listed under Actions | Push `.github/workflows/deploy-pages.yml` to `main`. |
+| **build** job fails | Open the job log — usually a missing Python dependency; check `requirements.txt`. |
+| **deploy** job fails / 404 | Ensure Pages source is **GitHub Actions**, not Branch. Re-run workflow. |
+| Old README shows instead of maps | You were on Branch mode; switch to Actions and redeploy. |
+| Link preview image missing | `share-map.png` must deploy alongside `index.html` (workflow handles this). |
+
+### Adding more maps later
 
 1. Ensure the map writes self-contained HTML (Plotly/Folium via CDN is fine).
-2. Add a build step in `scripts/build_pages_site.py` (`PUBLISHED_MAPS` + publish function).
-3. Push to `main` — CI rebuilds and deploys.
+2. Add an entry to `PUBLISHED_MAPS` and a publish function in `scripts/build_pages_site.py`.
+3. Push to `main`.
 
 Dash dashboards (live server + API) are not suited to static Pages; host those elsewhere or export snapshots.
