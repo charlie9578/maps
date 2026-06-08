@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import statistics
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -21,83 +23,42 @@ from dashboard_data import (
     nation_caps_summaries,
     player_chart_label,
     position_summaries,
-    top_players,
+    style_subplot_titles,
 )
 
 
-def _leaderboard_bar(
-    fig: go.Figure,
-    players: list[PlayerRow],
-    metric: str,
-    *,
-    row: int,
-    col: int,
-    color_key,
-) -> None:
-    ordered = list(reversed(players))
-    fig.add_trace(
-        go.Bar(
-            y=[player_chart_label(r) for r in ordered],
-            x=[getattr(r, metric) or 0 for r in ordered],
-            orientation="h",
-            marker={"color": [color_key(r) for r in ordered], "line": {"width": 0}},
-            text=[str(getattr(r, metric) or 0) for r in ordered],
-            textposition="outside",
-            cliponaxis=False,
-            hovertemplate="%{y}<br>%{x} " + metric + "<br>%{customdata}<extra></extra>",
-            customdata=[f"{r.pos} · age {r.age} · {r.club}" for r in ordered],
-        ),
-        row=row,
-        col=col,
-    )
-
-
 def build_records_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
-    """Top scorers/caps, position breakdowns, and per-position leaders."""
-    scorers = top_players(rows, "goals", limit=15)
-    cap_leaders = top_players(rows, "caps", limit=15)
+    """Position breakdowns: age, caps, goals, and summary table."""
     pos_stats = position_summaries(rows)
     pos_active = [p.pos for p in pos_stats]
 
     fig = make_subplots(
-        rows=3,
+        rows=2,
         cols=2,
-        row_heights=[0.34, 0.33, 0.33],
+        row_heights=[0.55, 0.45],
         specs=[
-            [{"type": "bar"}, {"type": "bar"}],
             [{"type": "xy"}, {"type": "xy"}],
             [{"type": "bar"}, {"type": "table"}],
         ],
         subplot_titles=(
-            "Top international goal scorers",
-            "Most international caps",
-            "Age by position (violin + box)",
-            "Caps by position (violin + box)",
-            "Total international goals by position",
-            "Position summary (avg age, caps, leading players)",
+            "Age by position",
+            "Caps by position",
+            "Total goals by position",
+            "Position summary",
         ),
-        vertical_spacing=0.1,
-        horizontal_spacing=0.1,
-    )
-
-    _leaderboard_bar(
-        fig, scorers, "goals", row=1, col=1,
-        color_key=lambda r: POS_COLORS.get(r.pos, "#64748b"),
-    )
-    _leaderboard_bar(
-        fig, cap_leaders, "caps", row=1, col=2,
-        color_key=lambda r: POS_COLORS.get(r.pos, "#64748b"),
+        vertical_spacing=0.14,
+        horizontal_spacing=0.12,
     )
 
     add_violin_box(
         fig, rows,
         category_key=lambda r: r.pos, categories=pos_active, y_key=lambda r: r.age,
-        colors=POS_COLORS, row=2, col=1, y_title="Age",
+        colors=POS_COLORS, row=1, col=1, y_title="Age",
     )
     add_violin_box(
         fig, rows,
         category_key=lambda r: r.pos, categories=pos_active, y_key=lambda r: r.caps,
-        colors=POS_COLORS, row=2, col=2, y_title="Caps",
+        colors=POS_COLORS, row=1, col=2, y_title="Caps",
     )
 
     fig.add_trace(
@@ -113,7 +74,7 @@ def build_records_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
             ),
             customdata=[f"{p.top_scorer} ({p.top_scorer_goals})" for p in pos_stats],
         ),
-        row=3,
+        row=2,
         col=1,
     )
 
@@ -145,58 +106,34 @@ def build_records_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
                 "height": 28,
             },
         ),
-        row=3,
+        row=2,
         col=2,
     )
 
-    top_g = scorers[0] if scorers else None
-    top_c = cap_leaders[0] if cap_leaders else None
-    subtitle = ""
-    if top_g and top_c:
-        subtitle = (
-            f" · top scorer <b>{top_g.name}</b> ({top_g.goals} goals)"
-            f" · most caps <b>{top_c.name}</b> ({top_c.caps})"
-        )
-
     dark_layout(
         fig,
-        f"{tournament} — records & position breakdown{subtitle}",
-        height=1180,
+        f"{tournament} — position breakdown",
+        height=780,
         showlegend=False,
     )
-    fig.update_xaxes(title_text="International goals", row=1, col=1, gridcolor=GRID)
-    fig.update_xaxes(title_text="International caps", row=1, col=2, gridcolor=GRID)
-    fig.update_yaxes(automargin=True, row=1, col=1)
-    fig.update_yaxes(automargin=True, row=1, col=2)
-    fig.update_yaxes(title_text="Age", range=[16, 44], row=2, col=1)
-    fig.update_yaxes(title_text="Caps", row=2, col=2)
-    fig.update_xaxes(title_text="Position", row=3, col=1, gridcolor=GRID)
-    fig.update_yaxes(title_text="Total goals in squads", row=3, col=1, gridcolor=GRID)
+    fig.update_yaxes(title_text="Age", range=[16, 44], row=1, col=1)
+    fig.update_yaxes(title_text="Caps", row=1, col=2)
+    fig.update_xaxes(title_text="Position", row=2, col=1, gridcolor=GRID)
+    fig.update_yaxes(title_text="Total goals in squads", row=2, col=1, gridcolor=GRID)
 
-    for ann in fig.layout.annotations:
-        if ann.text:
-            ann.font = {"size": 12, "color": TEXT}
-            ann.xanchor = "left"
-            ann.x = 0.01
+    style_subplot_titles(fig)
 
     return fig
 
 
-def build_goals_caps_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
-    """Goals vs caps scatter and average age/caps bars by position."""
-    pos_stats = position_summaries(rows)
+def build_goals_caps_scatter(tournament: str, rows: list[PlayerRow]) -> go.Figure:
+    """Goals vs caps scatter — colour by position, marker size by age."""
     scatter = [r for r in rows if r.caps is not None and r.goals is not None]
-
-    fig = make_subplots(
-        rows=1,
-        cols=2,
-        subplot_titles=(
-            "International goals vs caps (colour = position, size ≈ age)",
-            "Average age & caps by position",
-        ),
-        horizontal_spacing=0.1,
-        specs=[[{"type": "xy"}, {"type": "xy"}]],
-    )
+    caps_vals = [r.caps for r in scatter]
+    goals_vals = [r.goals for r in scatter]
+    median_caps = statistics.median(caps_vals) if caps_vals else 0
+    median_goals = statistics.median(goals_vals) if goals_vals else 0
+    fig = go.Figure()
 
     for pos in POS_ORDER:
         group = [r for r in scatter if r.pos == pos]
@@ -221,43 +158,31 @@ def build_goals_caps_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
                     "<br>%{customdata[1]}<extra></extra>"
                 ),
             ),
-            row=1,
-            col=1,
         )
 
-    fig.add_trace(
-        go.Bar(
-            x=[p.pos for p in pos_stats],
-            y=[p.avg_age or 0 for p in pos_stats],
-            name="Avg age",
-            marker={"color": "#38bdf8"},
-            text=[f"{p.avg_age:.1f}" if p.avg_age else "—" for p in pos_stats],
-            textposition="outside",
-            offsetgroup="age",
-        ),
-        row=1,
-        col=2,
-    )
-    fig.add_trace(
-        go.Bar(
-            x=[p.pos for p in pos_stats],
-            y=[p.avg_caps or 0 for p in pos_stats],
-            name="Avg caps",
-            marker={"color": "#a78bfa"},
-            text=[f"{p.avg_caps:.0f}" if p.avg_caps else "—" for p in pos_stats],
-            textposition="outside",
-            offsetgroup="caps",
-        ),
-        row=1,
-        col=2,
-    )
+    if caps_vals:
+        fig.add_vline(
+            x=median_caps,
+            line={"color": "#475569", "width": 1, "dash": "dot"},
+            annotation_text=f"Median caps ({median_caps:.0f})",
+            annotation_position="top left",
+        )
+        fig.add_hline(
+            y=median_goals,
+            line={"color": "#475569", "width": 1, "dash": "dot"},
+            annotation_text=f"Median goals ({median_goals:.0f})",
+            annotation_position="bottom right",
+        )
 
-    dark_layout(fig, f"{tournament} — goals, caps & position averages", height=460, showlegend=True)
-    fig.update_xaxes(title_text="Caps", row=1, col=1)
-    fig.update_yaxes(title_text="Goals", row=1, col=1)
-    fig.update_xaxes(title_text="Position", row=1, col=2)
-    fig.update_yaxes(title_text="Average", row=1, col=2)
-    fig.update_layout(legend={"orientation": "h", "y": 1.12, "x": 0}, barmode="group")
+    dark_layout(
+        fig,
+        f"{tournament} — goals vs caps",
+        height=480,
+        showlegend=True,
+        legend_below=True,
+    )
+    fig.update_xaxes(title_text="International caps")
+    fig.update_yaxes(title_text="International goals")
     return fig
 
 
@@ -315,10 +240,10 @@ def build_nation_experience_panel(
         rows=1,
         cols=2,
         subplot_titles=(
-            f"Most experienced squads (top {n} by avg caps)",
-            f"Least experienced squads (bottom {n} by avg caps)",
+            f"Most experienced (top {n})",
+            f"Least experienced (bottom {n})",
         ),
-        horizontal_spacing=0.12,
+        horizontal_spacing=0.14,
         specs=[[{"type": "bar"}, {"type": "bar"}]],
     )
 
@@ -327,13 +252,10 @@ def build_nation_experience_panel(
 
     top = most[0]
     bottom = least[0]
-    subtitle = (
-        f" · highest <b>{top.nation}</b> ({top.avg_caps:.1f} avg)"
-        f" · lowest <b>{bottom.nation}</b> ({bottom.avg_caps:.1f} avg)"
-    )
     dark_layout(
         fig,
-        f"{tournament} — squad experience by nation{subtitle}",
+        f"{tournament} — squad experience ({top.nation} {top.avg_caps:.1f} avg · "
+        f"{bottom.nation} {bottom.avg_caps:.1f} avg)",
         height=max(420, 36 * n + 120),
         showlegend=False,
     )
@@ -342,10 +264,6 @@ def build_nation_experience_panel(
     fig.update_yaxes(automargin=True, row=1, col=1)
     fig.update_yaxes(automargin=True, row=1, col=2)
 
-    for ann in fig.layout.annotations:
-        if ann.text:
-            ann.font = {"size": 12, "color": TEXT}
-            ann.xanchor = "left"
-            ann.x = 0.01
+    style_subplot_titles(fig)
 
     return fig

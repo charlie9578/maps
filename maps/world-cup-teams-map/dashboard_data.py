@@ -257,19 +257,45 @@ def band_color(index: int, *, alpha: float = 1.0) -> str:
     return f"rgba({r},{g},{b},{alpha})"
 
 
-def dark_layout(fig: go.Figure, title: str, *, height: int = 420, showlegend: bool = False) -> None:
-    fig.update_layout(
-        title={"text": title, "x": 0.01, "xanchor": "left", "font": {"size": 15, "color": TEXT}},
-        template="plotly_dark",
-        paper_bgcolor=DASH_BG,
-        plot_bgcolor=PLOT_BG,
-        font={"color": TEXT, "family": "system-ui, Segoe UI, Roboto, sans-serif", "size": 12},
-        height=height,
-        margin={"l": 48, "r": 24, "t": 56, "b": 48},
-        showlegend=showlegend,
-    )
+VETERAN_CAPS = 100
+
+# Horizontal legend below the plot area (avoids clashing with subplot titles).
+LEGEND_BELOW = {"orientation": "h", "yanchor": "top", "y": -0.12, "x": 0, "xanchor": "left"}
+
+
+def dark_layout(
+    fig: go.Figure,
+    title: str,
+    *,
+    height: int = 420,
+    showlegend: bool = False,
+    legend_below: bool = False,
+) -> None:
+    top = 72 if "<" in title else 60
+    bottom = 72 if legend_below else 48
+    layout: dict = {
+        "title": {"text": title, "x": 0.01, "xanchor": "left", "font": {"size": 15, "color": TEXT}},
+        "template": "plotly_dark",
+        "paper_bgcolor": DASH_BG,
+        "plot_bgcolor": PLOT_BG,
+        "font": {"color": TEXT, "family": "system-ui, Segoe UI, Roboto, sans-serif", "size": 12},
+        "height": height,
+        "margin": {"l": 48, "r": 24, "t": top, "b": bottom},
+        "showlegend": showlegend,
+    }
+    if legend_below and showlegend:
+        layout["legend"] = LEGEND_BELOW
+    fig.update_layout(**layout)
     fig.update_xaxes(gridcolor=GRID, zerolinecolor=GRID)
     fig.update_yaxes(gridcolor=GRID, zerolinecolor=GRID)
+
+
+def style_subplot_titles(fig: go.Figure, *, font_size: int = 12) -> None:
+    """Style make_subplots titles without moving them (resetting x causes side-by-side overlap)."""
+    for ann in fig.layout.annotations or []:
+        if ann.text and not ann.showarrow:
+            ann.font = {"size": font_size, "color": TEXT}
+            ann.xanchor = "left"
 
 
 def add_violin_box(
@@ -374,12 +400,13 @@ def abroad_nations_table_html(rows: list[PlayerRow]) -> str:
 
 def debutants_table_html(players: list[PlayerRow]) -> str:
     """Table of players with zero international caps before the tournament."""
-    return leaderboard_table_html(
+    html = leaderboard_table_html(
         players,
         title="International debutants (0 caps)",
         metric="caps",
         columns=("Player", "Nation", "Pos", "Age", "Club"),
     )
+    return html.replace('class="table-wrap"', 'class="table-wrap table-wide"', 1)
 
 
 def birthday_table_html(birthdays: list[TournamentBirthday]) -> str:
@@ -634,6 +661,65 @@ def captains_table_html(profiles: list[CaptainProfile]) -> str:
     </thead>
     <tbody>
 {rows_html}
+    </tbody>
+  </table>
+</div>"""
+
+
+def caps_leaderboard_table_html(
+    rows: list[PlayerRow],
+    *,
+    limit: int = 40,
+    veteran_min: int = VETERAN_CAPS,
+) -> str:
+    """Caps leaders with 100+ cap veterans highlighted in one table."""
+    leaders = top_players(rows, "caps", limit=limit)
+    vet_total = len(veterans(rows, min_caps=veteran_min))
+    if not leaders:
+        return '<p class="table-note">No caps data.</p>'
+
+    columns = ("Player", "Nation", "Pos", "Caps", "Goals", "Age", "Club")
+
+    def cell(row: PlayerRow, col: str) -> str:
+        mapping = {
+            "Player": row.name,
+            "Nation": row.nation,
+            "Pos": row.pos,
+            "Caps": str(row.caps if row.caps is not None else "—"),
+            "Goals": str(row.goals if row.goals is not None else "—"),
+            "Age": str(row.age if row.age is not None else "—"),
+            "Club": row.club,
+        }
+        return _esc(mapping[col])
+
+    header = (
+        '<th class="rank">#</th>'
+        + "".join(f"<th>{_esc(c)}</th>" for c in columns)
+        + f'<th title="{veteran_min}+ caps">★</th>'
+    )
+    body = "\n".join(
+        "      <tr"
+        + (' class="row-highlight"' if (r.caps or 0) >= veteran_min else "")
+        + ">"
+        + f'<td class="rank">{i}</td>'
+        + "".join(f"<td>{cell(r, c)}</td>" for c in columns)
+        + f'<td>{"★" if (r.caps or 0) >= veteran_min else "—"}</td>'
+        + "</tr>"
+        for i, r in enumerate(leaders, start=1)
+    )
+    below = max(0, vet_total - sum(1 for r in leaders if (r.caps or 0) >= veteran_min))
+    extra = (
+        f" · {below} more with {veteran_min}+ caps below rank {len(leaders)}"
+        if below
+        else ""
+    )
+    return f"""<div class="table-wrap">
+  <p class="table-note">Top {len(leaders)} by international caps · {vet_total} players have
+  {veteran_min}+ caps (★){extra}.</p>
+  <table class="data-table">
+    <thead><tr>{header}</tr></thead>
+    <tbody>
+{body}
     </tbody>
   </table>
 </div>"""

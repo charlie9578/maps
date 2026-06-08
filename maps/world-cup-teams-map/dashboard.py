@@ -15,24 +15,29 @@ from dashboard_data import (
     build_player_rows,
     captain_profiles,
     captains_table_html,
+    club_country_counts,
     debutants,
     debutants_table_html,
+    caps_leaderboard_table_html,
     leaderboard_table_html,
     top_players,
     tournament_birthdays,
     veterans,
 )
 from dashboard_viz import (
-    build_age_experience_panel,
+    build_abroad_by_confed_panel,
+    build_age_bands_panel,
+    build_age_by_confed_panel,
     build_age_milestones_panel,
     build_captains_panel,
+    build_caps_by_confed_panel,
+    build_club_countries_treemap,
     build_dashboard,
     build_geography_panel,
-    build_goals_caps_panel,
     build_nation_experience_panel,
-    build_proportional_panel,
     build_records_panel,
 )
+from dashboard_records import build_goals_caps_scatter
 from data_processing import Team, build_teams, load_clubs, load_squads
 
 MAP_DIR = Path(__file__).resolve().parent
@@ -63,11 +68,14 @@ DASHBOARD_PAGES: tuple[DashboardPage, ...] = (
     ),
 )
 
+PLOTLY_CONFIG = {"displayModeBar": False, "responsive": True}
+
+
 def _figure_to_div(fig: go.Figure, *, include_plotlyjs: bool | str = False) -> str:
     return fig.to_html(
         full_html=False,
         include_plotlyjs=include_plotlyjs,
-        config={"displayModeBar": True, "responsive": True},
+        config=PLOTLY_CONFIG,
     )
 
 
@@ -112,17 +120,46 @@ def _page_styles() -> str:
       color: #475569;
       user-select: none;
     }}
-    .section-title {{
+    .section-head {{
       max-width: 1400px;
-      margin: 24px auto 4px;
-      padding: 0 8px;
+      margin: 28px auto 6px;
+      padding: 0 16px;
+    }}
+    .section-title {{
+      margin: 0;
       font-size: 15px;
       font-weight: 600;
       color: #cbd5e1;
       letter-spacing: 0.02em;
       text-transform: uppercase;
     }}
-    .chart-block {{ margin: 0 auto 8px; max-width: 1400px; }}
+    .section-lead {{
+      margin: 6px 0 0;
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.55;
+      max-width: 72ch;
+    }}
+    .chart-block {{ margin: 0 auto 12px; max-width: 1400px; padding: 0 8px; }}
+    .chart-row {{
+      display: grid;
+      gap: 12px;
+      max-width: 1400px;
+      margin: 0 auto 12px;
+      padding: 0 8px;
+    }}
+    @media (min-width: 1024px) {{
+      .chart-row {{ grid-template-columns: 1fr 1fr; }}
+    }}
+    .chart-column .section-head {{
+      margin: 0 0 6px;
+      padding: 0 8px;
+    }}
+    .chart-row .chart-column .chart-block {{
+      margin: 0;
+      max-width: none;
+      padding: 0;
+    }}
     .chart-block .plotly-graph-div {{ margin: 0 auto; }}
     .table-section {{ max-width: 1400px; margin: 0 auto 24px; padding: 0 8px; }}
     .table-note {{ color: #94a3b8; font-size: 13px; margin: 0 0 10px; }}
@@ -133,8 +170,8 @@ def _page_styles() -> str:
     }}
     @media (min-width: 1100px) {{
       .table-grid {{ grid-template-columns: 1fr 1fr; }}
-      .table-grid .table-wrap:last-child {{ grid-column: 1 / -1; }}
     }}
+    .table-grid .table-wrap.table-wide {{ grid-column: 1 / -1; }}
     .table-wrap {{
       max-height: 420px;
       overflow: auto;
@@ -218,6 +255,7 @@ def _page_styles() -> str:
       border-radius: 8px;
       overflow: hidden;
     }}
+    .js-plotly-plot .modebar {{ display: none !important; }}
     .page-footer {{
       max-width: 1400px;
       margin: 32px auto 24px;
@@ -259,7 +297,8 @@ def _footer_html(source_accessed: str) -> str:
 def _page_intro(slug: str, tournament: str, rows: list) -> str:
     """Per-page headline, blurb, and quick stats."""
     n_players = len(rows)
-    abroad_pct = round(100 * sum(1 for r in rows if not r.domestic) / max(1, n_players))
+    abroad_n = sum(1 for r in rows if not r.domestic)
+    abroad_pct = round(100 * abroad_n / max(1, n_players))
     youngest, oldest = age_extremes(rows)
     yng = youngest[0] if youngest else None
     old = oldest[0] if oldest else None
@@ -270,57 +309,63 @@ def _page_intro(slug: str, tournament: str, rows: list) -> str:
     bdays = tournament_birthdays(rows)
     caps = captain_profiles(rows)
     most_capped_caps = sum(1 for p in caps if p.most_capped_on_team)
+    top_club_country = club_country_counts(rows).most_common(1)
+    top_cc_name, top_cc_n = top_club_country[0] if top_club_country else ("—", 0)
+    ages = [r.age for r in rows if r.age is not None]
+    median_age = round(sorted(ages)[len(ages) // 2], 1) if ages else None
 
     intros: dict[str, tuple[str, str, list[str]]] = {
         "overview": (
             "Overview",
-            "A high-level picture of all 48 squads: which clubs supply the most players, "
-            "how positions break down, where players play relative to their federation, "
-            "and age spread by confederation.",
+            f"All {n_players:,} squad players across 48 nations — where they play club football, "
+            "how they line up by position, and how national federations connect to club confederations. "
+            f"{abroad_pct}% play outside their home federation.",
             [
                 f"<strong>{n_players:,}</strong> players",
-                f"<strong>{abroad_pct}%</strong> abroad",
+                f"<strong>{abroad_pct}%</strong> abroad ({abroad_n:,})",
+                f"median age <strong>{median_age}</strong>" if median_age else "",
                 f"youngest <strong>{yng.age}</strong> ({yng.nation})" if yng else "",
-                f"oldest <strong>{old.age}</strong> ({old.nation})" if old else "",
             ],
         ),
         "records": (
             "Records & leaderboards",
-            "International goal and cap leaders, position breakdowns, and squad experience "
-            "ranked by nation. Marker size in the scatter plot reflects player age.",
+            "International goals and caps before the opening match — scatter plot, position "
+            "breakdowns, squad experience by nation, and sortable leaderboards.",
             [
-                f"top scorer <strong>{ts.name}</strong> ({ts.goals})" if ts else "",
+                f"top scorer <strong>{ts.name}</strong> ({ts.goals} goals)" if ts else "",
                 f"most caps <strong>{tc.name}</strong> ({tc.caps})" if tc else "",
-                f"<strong>{len(veterans(rows))}</strong> with 100+ caps",
-                f"<strong>{len(debutants(rows))}</strong> debutants (0 caps)",
+                f"<strong>{len(veterans(rows))}</strong> centurions (100+ caps)",
+                f"<strong>{len(debutants(rows))}</strong> uncapped debutants",
             ],
         ),
         "captains": (
             "Captains",
-            "How the 48 designated captains compare with their squad mates on age, caps, "
-            "goals, position mix, and whether they play abroad.",
+            "Each nation's armband holder compared with the rest of the squad — age, caps, "
+            "goals, and how often they play abroad.",
             [
                 f"<strong>{len(caps)}</strong> captains",
-                f"<strong>{most_capped_caps}</strong> are most-capped on team",
-                f"<strong>{abroad_pct}%</strong> of all players abroad",
+                f"<strong>{most_capped_caps}</strong> are squad's most-capped",
+                f"<strong>{sum(1 for p in caps if p.plays_abroad)}</strong> captains abroad",
             ],
         ),
         "age": (
             "Age & birthdays",
-            "Squad age profiles, youngest and oldest players, and anyone celebrating a "
-            "birthday between opening day (11 Jun) and the final (19 Jul 2026).",
+            f"Squad ages as of 11 June 2026. {len(bdays)} players celebrate a birthday during "
+            "the tournament (11 Jun – 19 Jul).",
             [
                 f"<strong>{len(bdays)}</strong> tournament birthdays",
                 f"youngest <strong>{yng.name}</strong> ({yng.age})" if yng else "",
                 f"oldest <strong>{old.name}</strong> ({old.age})" if old else "",
+                f"median <strong>{median_age}</strong>" if median_age else "",
             ],
         ),
         "geography": (
             "Geography & clubs",
-            "Great-circle distances from national capitals to club cities, which nations "
-            "export the most players abroad, and proportional views of club host countries.",
+            f"Club host countries, flight distances from capital to stadium, and which nations "
+            f"export the most players. England alone hosts {top_cc_n} squad members.",
             [
                 f"<strong>{abroad_pct}%</strong> play abroad",
+                f"top host <strong>{top_cc_name}</strong> ({top_cc_n})",
                 f"<strong>{len({r.club_country for r in rows if r.club_country != 'Unknown'})}</strong> club countries",
             ],
         ),
@@ -369,10 +414,18 @@ def _page_shell(
 """
 
 
+def _section_head(title: str, lead: str = "") -> str:
+    if not title:
+        return ""
+    lead_html = f'\n    <p class="section-lead">{lead}</p>' if lead else ""
+    return f'<div class="section-head">\n    <h2 class="section-title">{title}</h2>{lead_html}\n  </div>'
+
+
 def _render_figure_section(
     title: str,
     fig: go.Figure,
     *,
+    lead: str = "",
     include_plotlyjs: bool | str = False,
     overview: bool = False,
     card: bool = True,
@@ -383,19 +436,43 @@ def _render_figure_section(
         block_cls = "chart-block chart-card"
     else:
         block_cls = "chart-block"
-    title_html = f'<h2 class="section-title">{title}</h2>\n    ' if title else ""
+    head = _section_head(title, lead)
     return (
+        f"{head}\n"
         f'<section class="{block_cls}">\n'
-        f"    {title_html}"
         f"{_figure_to_div(fig, include_plotlyjs=include_plotlyjs)}\n"
         f"</section>"
     )
 
 
-def _render_table_section(title: str, table_html: str) -> str:
+def _render_chart_column(
+    title: str,
+    fig: go.Figure,
+    *,
+    lead: str = "",
+    include_plotlyjs: bool | str = False,
+) -> str:
+    """Side-by-side chart cell: section head + figure card."""
+    head = _section_head(title, lead)
     return (
+        f'<div class="chart-column">\n'
+        f"{head}\n"
+        f'<section class="chart-block chart-card">\n'
+        f"{_figure_to_div(fig, include_plotlyjs=include_plotlyjs)}\n"
+        f"</section>\n"
+        f"</div>"
+    )
+
+
+def _render_chart_row(*columns: str) -> str:
+    return f'<div class="chart-row">\n{"".join(columns)}\n</div>'
+
+
+def _render_table_section(title: str, table_html: str, *, lead: str = "") -> str:
+    head = _section_head(title, lead)
+    return (
+        f"{head}\n"
         f'<section class="chart-block table-section">\n'
-        f'    <h2 class="section-title">{title}</h2>\n'
         f"    {table_html}\n"
         f"</section>"
     )
@@ -411,31 +488,61 @@ def _build_page_bodies(
     rows = build_player_rows(teams, clubs)
     main_fig = build_dashboard(tournament, teams, clubs, source_accessed=source_accessed)
     records_fig = build_records_panel(tournament, rows)
-    goals_caps_fig = build_goals_caps_panel(tournament, rows)
+    scatter_fig = build_goals_caps_scatter(tournament, rows)
     nation_experience_fig = build_nation_experience_panel(tournament, rows)
+    caps_confed_fig = build_caps_by_confed_panel(tournament, rows)
     captains_fig = build_captains_panel(tournament, rows)
     age_milestones_fig = build_age_milestones_panel(tournament, rows)
-    age_confed_fig = build_age_experience_panel(tournament, rows)
-    proportional_fig = build_proportional_panel(tournament, rows)
+    age_confed_fig = build_age_by_confed_panel(tournament, rows)
+    age_bands_fig = build_age_bands_panel(tournament, rows)
+    treemap_fig = build_club_countries_treemap(tournament, rows)
     geography_fig = build_geography_panel(tournament, rows)
+    abroad_confed_fig = build_abroad_by_confed_panel(tournament, rows)
 
     leaderboards_html = (
         f'<div class="table-grid">'
         f"{leaderboard_table_html(top_players(rows, 'goals', limit=30), title='Top international goal scorers', metric='goals')}"
-        f"{leaderboard_table_html(top_players(rows, 'caps', limit=30), title='Most international caps', metric='caps')}"
-        f"{leaderboard_table_html(veterans(rows), title='100+ cap veterans', metric='caps')}"
+        f"{caps_leaderboard_table_html(rows)}"
         f"{debutants_table_html(debutants(rows))}"
         f"</div>"
     )
 
-    overview = _render_figure_section("", main_fig, include_plotlyjs="cdn", overview=True)
+    overview = _render_figure_section(
+        "Squad snapshot",
+        main_fig,
+        lead="Top supplying clubs, position mix, and national-to-club confederation flows.",
+        include_plotlyjs="cdn",
+        overview=True,
+    )
 
     records = "\n".join(
         [
-            _render_figure_section("Records & positions", records_fig, include_plotlyjs="cdn"),
-            _render_figure_section("Goals & caps", goals_caps_fig),
-            _render_figure_section("Squad experience by nation", nation_experience_fig),
-            _render_table_section("Full leaderboards", leaderboards_html),
+            _render_figure_section(
+                "Goals vs caps",
+                scatter_fig,
+                lead="Every player plotted by pre-tournament international record. Marker size reflects age; colour is position.",
+                include_plotlyjs="cdn",
+            ),
+            _render_figure_section(
+                "Squad experience by nation",
+                nation_experience_fig,
+                lead="Average international caps per squad member — most and least experienced nations.",
+            ),
+            _render_figure_section(
+                "Breakdown by position",
+                records_fig,
+                lead="Age and caps distributions by GK/DF/MF/FW, plus total goals and position leaders.",
+            ),
+            _render_figure_section(
+                "Caps by confederation",
+                caps_confed_fig,
+                lead="Spread of international caps within each national confederation.",
+            ),
+            _render_table_section(
+                "Leaderboards",
+                leaderboards_html,
+                lead="Top scorers, cap leaders (★ = 100+ caps), and uncapped debutants.",
+            ),
         ]
     )
 
@@ -444,11 +551,13 @@ def _build_page_bodies(
             _render_figure_section(
                 "Captains vs squad mates",
                 captains_fig,
+                lead="Group averages, distributions, and per-nation age/caps gaps versus the rest of the squad.",
                 include_plotlyjs="cdn",
             ),
             _render_table_section(
-                "All 48 captains",
+                "Captain profiles",
                 captains_table_html(captain_profiles(rows)),
+                lead="Δ age and Δ caps exclude the captain when computing squad averages.",
             ),
         ]
     )
@@ -456,22 +565,55 @@ def _build_page_bodies(
     age = "\n".join(
         [
             _render_figure_section(
-                "Youngest, oldest & birthdays",
+                "Squad age profile",
                 age_milestones_fig,
+                lead="Histogram with median age; table lists youngest and oldest players.",
                 include_plotlyjs="cdn",
             ),
-            _render_table_section("Birthday list", birthday_table_html(tournament_birthdays(rows))),
-            _render_figure_section("Age by confederation", age_confed_fig),
+            _render_chart_row(
+                _render_chart_column(
+                    "Age by confederation",
+                    age_confed_fig,
+                    lead="Violin and box plots of squad ages by national confederation.",
+                ),
+                _render_chart_column(
+                    "Age bands by confederation",
+                    age_bands_fig,
+                    lead="Share of each squad in five-year age bands (100% stacked).",
+                ),
+            ),
+            _render_table_section(
+                "Tournament birthdays",
+                birthday_table_html(tournament_birthdays(rows)),
+                lead="Players whose birthday falls between the opening match and the final.",
+            ),
         ]
     )
 
     geography = "\n".join(
         [
-            _render_figure_section("Proportional area", proportional_fig, include_plotlyjs="cdn"),
-            _render_figure_section("Geography", geography_fig),
+            _render_figure_section(
+                "Club host countries",
+                treemap_fig,
+                lead="Where squad members play club football, sized by player count and coloured by club confederation.",
+                include_plotlyjs="cdn",
+            ),
+            _render_chart_row(
+                _render_chart_column(
+                    "Playing abroad",
+                    abroad_confed_fig,
+                    lead="Domestic vs abroad split within each national confederation.",
+                ),
+                _render_chart_column(
+                    "Flight distances",
+                    geography_fig,
+                    lead="Great-circle distance from national capital to club city.",
+                ),
+            ),
             _render_table_section(
-                "Abroad by nation (full ranking)",
+                "Playing abroad by nation",
                 abroad_nations_table_html(rows),
+                lead="All 48 nations ranked by share of the squad playing outside their home federation.",
             ),
         ]
     )
