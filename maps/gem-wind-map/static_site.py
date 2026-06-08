@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from html import escape
 from pathlib import Path
 
@@ -28,13 +29,13 @@ TABLE_ROW_LIMIT = 100
 
 
 def _plotly_cdn_script() -> str:
+    """Plotly.js tag matching the installed Python package (not plotly-latest)."""
     snippet = pio.to_html(go.Figure(), include_plotlyjs="cdn", full_html=False)
-    start = snippet.find("<script")
-    end = snippet.find("</script>") + len("</script>")
-    if start < 0 or end <= start:
-        msg = "Could not extract Plotly CDN script tag"
+    match = re.search(r'<script[^>]*src="https://cdn\.plot\.ly/plotly[^"]+"[^>]*></script>', snippet)
+    if not match:
+        msg = "Could not extract Plotly CDN script tag from plotly.io.to_html"
         raise RuntimeError(msg)
-    return snippet[start:end]
+    return match.group(0)
 
 
 def _figure_div(fig: go.Figure) -> str:
