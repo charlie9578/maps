@@ -39,7 +39,8 @@ jobs:
             maps/osm-solar-map/requirements.txt \
             maps/academic-citations-map/requirements.txt \
             maps/basic-world-map/requirements.txt \
-            maps/gem-wind-map/requirements.txt
+            maps/gem-wind-map/requirements.txt \
+            maps/gem-wind-bokeh-map/requirements.txt
           do
             pip install -r "$req"
           done

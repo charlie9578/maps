@@ -25,6 +25,7 @@ PAGES_REQUIREMENTS: tuple[str, ...] = (
     "maps/academic-citations-map/requirements.txt",
     "maps/basic-world-map/requirements.txt",
     "maps/gem-wind-map/requirements.txt",
+    "maps/gem-wind-bokeh-map/requirements.txt",
 )
 
 
@@ -233,6 +234,29 @@ def publish_gem_wind(site_dir: Path, _site_url: str) -> None:
     shutil.rmtree(staging)
 
 
+def publish_gem_wind_bokeh(site_dir: Path, _site_url: str) -> None:
+    map_dir = MAPS_DIR / "gem-wind-bokeh-map"
+    staging = _staging_dir("gem-wind-bokeh-map")
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True, exist_ok=True)
+    output_path = staging / "gem_wind_bokeh_map.html"
+    subprocess.run(
+        [
+            sys.executable,
+            str(map_dir / "main.py"),
+            "-o",
+            str(output_path),
+        ],
+        check=True,
+        cwd=REPO_ROOT,
+    )
+    dest = site_dir / "gem-wind-bokeh"
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(output_path, dest / "index.html")
+    shutil.rmtree(staging)
+
+
 PUBLISHED_MAPS: tuple[PublishedMap, ...] = (
     PublishedMap(
         slug="world-cup-2026",
@@ -273,6 +297,16 @@ PUBLISHED_MAPS: tuple[PublishedMap, ...] = (
         ),
         tags=("Plotly", "Wind", "GEM"),
         publish=publish_gem_wind,
+    ),
+    PublishedMap(
+        slug="gem-wind-bokeh",
+        title="GEM global wind farms (Bokeh)",
+        summary=(
+            "February 2026 Global Wind Power Tracker — Bokeh bubble map by capacity and status, "
+            "with client-side cross-filtering on breakdown charts."
+        ),
+        tags=("Bokeh", "Wind", "GEM"),
+        publish=publish_gem_wind_bokeh,
     ),
     PublishedMap(
         slug="citation-network",
