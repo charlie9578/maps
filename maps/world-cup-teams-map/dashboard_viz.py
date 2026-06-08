@@ -76,7 +76,10 @@ def build_dashboard(
         vertical_spacing=0.10,
     )
 
-    top_clubs = club_counts.most_common(20)
+    top_clubs = club_counts.most_common(18)
+    top_club_countries = [
+        clubs.get(club, {}).get("country", "Unknown") for club, _count in reversed(top_clubs)
+    ]
     club_vals = [n for _, n in reversed(top_clubs)]
     max_club = max(club_vals) if club_vals else 1
     fig.add_trace(
@@ -94,7 +97,12 @@ def build_dashboard(
             text=club_vals,
             textposition="outside",
             cliponaxis=False,
-            hovertemplate="%{y}<br>%{x} players<extra></extra>",
+            customdata=[
+                [country, 100 * value / max(1, len(rows))]
+                for country, value in zip(top_club_countries, club_vals, strict=True)
+            ],
+            hovertemplate="%{y}<br>%{x} players · %{customdata[1]:.1f}% of all squads"
+            "<br>%{customdata[0]}<extra></extra>",
         ),
         row=1,
         col=1,
@@ -108,8 +116,9 @@ def build_dashboard(
             values=pos_values,
             marker={"colors": [POS_COLORS[p] for p in pos_labels]},
             hole=0.48,
-            textinfo="label+percent",
-            textfont={"size": 11},
+            sort=False,
+            textinfo="label+value",
+            textfont={"size": 12},
             hovertemplate="%{label}: %{value} players (%{percent})<extra></extra>",
         ),
         row=1,
@@ -150,7 +159,9 @@ def build_dashboard(
                 "target": targets,
                 "value": values,
                 "color": link_colors,
+                "hovertemplate": "%{source.label} → %{target.label}<br>%{value} players<extra></extra>",
             },
+            textfont={"color": TEXT, "size": 12},
         ),
         row=2,
         col=1,
@@ -159,7 +170,12 @@ def build_dashboard(
     _ = source_accessed  # cited in page footer
     abroad_n = sum(1 for r in rows if not r.domestic)
     abroad_pct = round(100 * abroad_n / max(1, len(rows)))
-    dark_layout(fig, f"{tournament} — squad overview", height=900, showlegend=False)
+    dark_layout(
+        fig,
+        f"{tournament} — squad overview · {abroad_pct}% play outside their home federation",
+        height=860,
+        showlegend=False,
+    )
     fig.update_xaxes(title_text="Players", row=1, col=1, gridcolor=GRID, zeroline=False)
     fig.update_yaxes(row=1, col=1, gridcolor=GRID, automargin=True)
 
@@ -175,6 +191,26 @@ def build_dashboard(
             showarrow=False,
             font={"size": 14, "color": TEXT},
             xanchor="center",
+        )
+
+    if top_clubs:
+        club, count = top_clubs[0]
+        country = clubs.get(club, {}).get("country", "Unknown")
+        fig.add_annotation(
+            text=f"<b>{club}</b><br><span style='font-size:11px;color:#94a3b8'>"
+            f"{count} players · {country}</span>",
+            x=0.02,
+            y=0.94,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font={"size": 13, "color": TEXT},
+            xanchor="left",
+            yanchor="top",
+            bgcolor="rgba(30,41,59,0.86)",
+            bordercolor="#334155",
+            borderwidth=1,
+            borderpad=6,
         )
 
     fig.add_annotation(
@@ -307,41 +343,55 @@ def build_club_countries_treemap(tournament: str, rows: list[PlayerRow]) -> go.F
             values=values,
             marker={"colors": colors, "line": {"width": 1, "color": PLOT_BG}},
             branchvalues="total",
-            textinfo="label+value",
+            texttemplate="<b>%{label}</b><br>%{value} players<br>%{percentRoot:.1%}",
+            textfont={"size": 13},
             hovertemplate="%{label}<br>%{value} players (%{percentRoot:.1%} of total)<extra></extra>",
         )
     )
-    dark_layout(fig, f"{tournament} — players by club host country", height=520)
+    dark_layout(fig, f"{tournament} — club host countries (top 25 plus other)", height=540)
     return fig
 
 
 def build_abroad_by_confed_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
     """Domestic vs abroad players within each national confederation."""
     confeds = active_confeds(rows)
-    domestic = []
-    abroad = []
+    domestic_counts = []
+    abroad_counts = []
+    domestic_pct = []
+    abroad_pct = []
     for confed in confeds:
         group = [r for r in rows if r.nation_confed == confed]
-        domestic.append(sum(1 for r in group if r.domestic))
-        abroad.append(sum(1 for r in group if not r.domestic))
+        domestic = sum(1 for r in group if r.domestic)
+        abroad = sum(1 for r in group if not r.domestic)
+        total = max(1, domestic + abroad)
+        domestic_counts.append(domestic)
+        abroad_counts.append(abroad)
+        domestic_pct.append(100 * domestic / total)
+        abroad_pct.append(100 * abroad / total)
 
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
             x=confeds,
-            y=domestic,
+            y=domestic_pct,
             name="Domestic",
             marker={"color": "#34d399"},
-            hovertemplate="%{x}<br>Domestic: %{y} players<extra></extra>",
+            text=[f"{v:.0f}%" if v >= 12 else "" for v in domestic_pct],
+            textposition="inside",
+            customdata=domestic_counts,
+            hovertemplate="%{x}<br>Domestic: %{customdata} players (%{y:.0f}%)<extra></extra>",
         ),
     )
     fig.add_trace(
         go.Bar(
             x=confeds,
-            y=abroad,
+            y=abroad_pct,
             name="Abroad",
             marker={"color": "#38bdf8"},
-            hovertemplate="%{x}<br>Abroad: %{y} players<extra></extra>",
+            text=[f"{v:.0f}%" if v >= 12 else "" for v in abroad_pct],
+            textposition="inside",
+            customdata=abroad_counts,
+            hovertemplate="%{x}<br>Abroad: %{customdata} players (%{y:.0f}%)<extra></extra>",
         ),
     )
     dark_layout(
@@ -352,7 +402,7 @@ def build_abroad_by_confed_panel(tournament: str, rows: list[PlayerRow]) -> go.F
         legend_below=True,
     )
     fig.update_layout(barmode="stack")
-    fig.update_yaxes(title_text="Players")
+    fig.update_yaxes(title_text="Share of players", ticksuffix="%", range=[0, 100])
     fig.update_xaxes(title_text="National confederation")
     return fig
 
@@ -379,6 +429,7 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
     distances = sorted(r.distance_km for r in rows if r.distance_km is not None)
     if distances:
         median_dist = statistics.median(distances)
+        p75_dist = distances[int(0.75 * (len(distances) - 1))]
         fig.add_trace(
             go.Scatter(
                 x=distances,
@@ -400,12 +451,20 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
             row=1,
             col=2,
         )
+        fig.add_vline(
+            x=p75_dist,
+            line={"color": "#38bdf8", "width": 1.5, "dash": "dash"},
+            annotation_text=f"75th pct {p75_dist:,.0f} km",
+            annotation_position="bottom",
+            row=1,
+            col=2,
+        )
 
     dark_layout(fig, f"{tournament} — flight distances", height=460, showlegend=False)
     style_subplot_titles(fig)
     fig.update_yaxes(title_text="Distance (km)", row=1, col=1)
     fig.update_xaxes(title_text="Distance (km)", row=1, col=2)
-    fig.update_yaxes(title_text="Players (cumulative)", row=1, col=2)
+    fig.update_yaxes(title_text="Players at or below distance", row=1, col=2)
     return fig
 
 

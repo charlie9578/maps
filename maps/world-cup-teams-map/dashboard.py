@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import statistics
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -95,10 +97,11 @@ def _page_styles() -> str:
       flex-wrap: wrap;
       gap: 8px 12px;
       align-items: center;
-      padding: 10px 16px;
-      background: rgba(15, 23, 42, 0.92);
+      padding: 12px 18px;
+      background: rgba(15, 23, 42, 0.94);
       border-bottom: 1px solid #334155;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(2, 6, 23, 0.22);
     }}
     .top-nav .nav-brand {{
       color: #94a3b8;
@@ -140,13 +143,13 @@ def _page_styles() -> str:
       line-height: 1.55;
       max-width: 72ch;
     }}
-    .chart-block {{ margin: 0 auto 12px; max-width: 1400px; padding: 0 8px; }}
+    .chart-block {{ margin: 0 auto 16px; max-width: 1400px; padding: 0 12px; }}
     .chart-row {{
       display: grid;
-      gap: 12px;
+      gap: 16px;
       max-width: 1400px;
-      margin: 0 auto 12px;
-      padding: 0 8px;
+      margin: 0 auto 16px;
+      padding: 0 12px;
     }}
     @media (min-width: 1024px) {{
       .chart-row {{ grid-template-columns: 1fr 1fr; }}
@@ -161,7 +164,7 @@ def _page_styles() -> str:
       padding: 0;
     }}
     .chart-block .plotly-graph-div {{ margin: 0 auto; }}
-    .table-section {{ max-width: 1400px; margin: 0 auto 24px; padding: 0 8px; }}
+    .table-section {{ max-width: 1400px; margin: 0 auto 24px; padding: 0 12px; }}
     .table-note {{ color: #94a3b8; font-size: 13px; margin: 0 0 10px; }}
     .table-grid {{
       display: grid;
@@ -176,8 +179,9 @@ def _page_styles() -> str:
       max-height: 420px;
       overflow: auto;
       border: 1px solid #334155;
-      border-radius: 8px;
+      border-radius: 12px;
       background: #1e293b;
+      box-shadow: 0 18px 45px rgba(2, 6, 23, 0.22);
     }}
     .data-table {{
       width: 100%;
@@ -210,24 +214,28 @@ def _page_styles() -> str:
     .data-table tr.row-opening td {{ background: rgba(56, 189, 248, 0.12); }}
     .page-intro {{
       max-width: 1400px;
-      margin: 20px auto 8px;
-      padding: 16px 20px;
+      margin: 22px auto 12px;
+      padding: 22px 24px;
       border: 1px solid #334155;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.85));
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 30%),
+        linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.88));
+      box-shadow: 0 22px 55px rgba(2, 6, 23, 0.28);
     }}
     .page-intro h1 {{
       margin: 0 0 8px;
-      font-size: 1.35rem;
-      font-weight: 600;
+      font-size: clamp(1.6rem, 2.6vw, 2.35rem);
+      font-weight: 700;
       color: #f1f5f9;
+      letter-spacing: -0.035em;
     }}
     .page-intro p {{
       margin: 0 0 12px;
       color: #94a3b8;
-      font-size: 14px;
-      line-height: 1.5;
-      max-width: 72ch;
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 82ch;
     }}
     .stat-pills {{
       display: flex;
@@ -243,6 +251,42 @@ def _page_styles() -> str:
       color: #cbd5e1;
     }}
     .stat-pill strong {{ color: #f8fafc; }}
+    .insight-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      max-width: 1400px;
+      margin: 0 auto 22px;
+      padding: 0 12px;
+    }}
+    .insight-card {{
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.78));
+      box-shadow: 0 14px 36px rgba(2, 6, 23, 0.20);
+    }}
+    .insight-kicker {{
+      margin: 0 0 7px;
+      color: #38bdf8;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }}
+    .insight-main {{
+      margin: 0;
+      color: #f8fafc;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.15;
+    }}
+    .insight-detail {{
+      margin: 7px 0 0;
+      color: #94a3b8;
+      font-size: 13px;
+      line-height: 1.45;
+    }}
     .chart-block.chart-overview {{
       max-width: none;
       margin-bottom: 0;
@@ -252,8 +296,9 @@ def _page_styles() -> str:
     }}
     .chart-card .plotly-graph-div {{
       border: 1px solid #334155;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
+      box-shadow: 0 18px 45px rgba(2, 6, 23, 0.22);
     }}
     .js-plotly-plot .modebar {{ display: none !important; }}
     .page-footer {{
@@ -317,8 +362,8 @@ def _page_intro(slug: str, tournament: str, rows: list) -> str:
     intros: dict[str, tuple[str, str, list[str]]] = {
         "overview": (
             "Overview",
-            f"All {n_players:,} squad players across 48 nations — where they play club football, "
-            "how they line up by position, and how national federations connect to club confederations. "
+            f"A guided read of all {n_players:,} squad players across 48 nations: where they play "
+            "club football, how squads are balanced by position, and how national federations connect to club confederations. "
             f"{abroad_pct}% play outside their home federation.",
             [
                 f"<strong>{n_players:,}</strong> players",
@@ -329,8 +374,8 @@ def _page_intro(slug: str, tournament: str, rows: list) -> str:
         ),
         "records": (
             "Records & leaderboards",
-            "International goals and caps before the opening match — scatter plot, position "
-            "breakdowns, squad experience by nation, and sortable leaderboards.",
+            "Pre-tournament international goals and caps, with the headline record holders pulled forward "
+            "and the long tail left to the scrollable leaderboards.",
             [
                 f"top scorer <strong>{ts.name}</strong> ({ts.goals} goals)" if ts else "",
                 f"most caps <strong>{tc.name}</strong> ({tc.caps})" if tc else "",
@@ -340,8 +385,8 @@ def _page_intro(slug: str, tournament: str, rows: list) -> str:
         ),
         "captains": (
             "Captains",
-            "Each nation's armband holder compared with the rest of the squad — age, caps, "
-            "goals, and how often they play abroad.",
+            "Each nation's armband holder compared with the rest of the squad: seniority, scoring burden, "
+            "age gap, and how often leadership comes from outside the domestic game.",
             [
                 f"<strong>{len(caps)}</strong> captains",
                 f"<strong>{most_capped_caps}</strong> are squad's most-capped",
@@ -350,8 +395,8 @@ def _page_intro(slug: str, tournament: str, rows: list) -> str:
         ),
         "age": (
             "Age & birthdays",
-            f"Squad ages as of 11 June 2026. {len(bdays)} players celebrate a birthday during "
-            "the tournament (11 Jun – 19 Jul).",
+            f"Squad ages as of 11 June 2026, from teenage selections to late-career veterans. "
+            f"{len(bdays)} players celebrate a birthday during the tournament window.",
             [
                 f"<strong>{len(bdays)}</strong> tournament birthdays",
                 f"youngest <strong>{yng.name}</strong> ({yng.age})" if yng else "",
@@ -361,8 +406,8 @@ def _page_intro(slug: str, tournament: str, rows: list) -> str:
         ),
         "geography": (
             "Geography & clubs",
-            f"Club host countries, flight distances from capital to stadium, and which nations "
-            f"export the most players. England alone hosts {top_cc_n} squad members.",
+            "Club host countries, capital-to-stadium distances, and which national squads depend most "
+            f"on overseas club football. {top_cc_name} alone hosts {top_cc_n} squad members.",
             [
                 f"<strong>{abroad_pct}%</strong> play abroad",
                 f"top host <strong>{top_cc_name}</strong> ({top_cc_n})",
@@ -383,6 +428,134 @@ def _page_intro(slug: str, tournament: str, rows: list) -> str:
   </header>"""
 
 
+def _insight_card(kicker: str, main: str, detail: str) -> str:
+    return f"""    <article class="insight-card">
+      <p class="insight-kicker">{kicker}</p>
+      <p class="insight-main">{main}</p>
+      <p class="insight-detail">{detail}</p>
+    </article>"""
+
+
+def _page_insights(slug: str, rows: list) -> str:
+    """Small narrative cards that make each page readable before interacting."""
+    n_players = len(rows)
+    abroad_n = sum(1 for r in rows if not r.domestic)
+    abroad_pct = round(100 * abroad_n / max(1, n_players))
+    top_goals = top_players(rows, "goals", limit=1)
+    top_caps = top_players(rows, "caps", limit=1)
+    top_club = Counter(r.club for r in rows).most_common(1)
+    top_host = club_country_counts(rows).most_common(1)
+    ages = [r.age for r in rows if r.age is not None]
+    distances = [r.distance_km for r in rows if r.distance_km is not None]
+    youngest, oldest = age_extremes(rows)
+    bdays = tournament_birthdays(rows)
+    caps = captain_profiles(rows)
+
+    cards_by_slug: dict[str, list[tuple[str, str, str]]] = {
+        "overview": [
+            (
+                "Club hub",
+                f"{top_club[0][0]}" if top_club else "No club data",
+                f"Supplies {top_club[0][1]} players, the largest single-club contribution." if top_club else "",
+            ),
+            (
+                "Abroad",
+                f"{abroad_pct}% of players",
+                f"{abroad_n:,} of {n_players:,} squad members play outside their home federation.",
+            ),
+            (
+                "Top scorer",
+                f"{top_goals[0].name}" if top_goals else "No goals data",
+                f"{top_goals[0].nation} · {top_goals[0].goals} international goals." if top_goals else "",
+            ),
+            (
+                "Most capped",
+                f"{top_caps[0].name}" if top_caps else "No caps data",
+                f"{top_caps[0].nation} · {top_caps[0].caps} international appearances." if top_caps else "",
+            ),
+        ],
+        "records": [
+            (
+                "Top scorer",
+                f"{top_goals[0].goals} goals" if top_goals else "No goals data",
+                f"{top_goals[0].name} ({top_goals[0].nation}) leads the field." if top_goals else "",
+            ),
+            (
+                "Most capped",
+                f"{top_caps[0].caps} caps" if top_caps else "No caps data",
+                f"{top_caps[0].name} ({top_caps[0].nation}) anchors the experience chart." if top_caps else "",
+            ),
+            ("Centurions", f"{len(veterans(rows))}", "Players with 100+ pre-tournament caps."),
+            ("Uncapped", f"{len(debutants(rows))}", "Players entering with zero senior international caps."),
+        ],
+        "captains": [
+            ("Captains tracked", f"{len(caps)}", "One armband holder per nation where marked in the source data."),
+            (
+                "Most-capped leaders",
+                f"{sum(1 for p in caps if p.most_capped_on_team)}",
+                "Captains who are also their squad's appearance leader.",
+            ),
+            (
+                "Captains abroad",
+                f"{sum(1 for p in caps if p.plays_abroad)}",
+                "Armband holders playing outside their national federation.",
+            ),
+            (
+                "Top-scorer captains",
+                f"{sum(1 for p in caps if p.top_scorer_on_team)}",
+                "Captains who share or hold the squad scoring lead.",
+            ),
+        ],
+        "age": [
+            (
+                "Median age",
+                f"{statistics.median(ages):.1f}" if ages else "No age data",
+                "Age in years on opening day, 11 June 2026.",
+            ),
+            (
+                "Youngest",
+                f"{youngest[0].age}" if youngest else "No age data",
+                f"{youngest[0].name} ({youngest[0].nation})." if youngest else "",
+            ),
+            (
+                "Oldest",
+                f"{oldest[0].age}" if oldest else "No age data",
+                f"{oldest[0].name} ({oldest[0].nation})." if oldest else "",
+            ),
+            ("Birthdays", f"{len(bdays)}", "Players turning a year older during the tournament."),
+        ],
+        "geography": [
+            (
+                "Top host",
+                f"{top_host[0][0]}" if top_host else "No club data",
+                f"{top_host[0][1]} squad members play club football there." if top_host else "",
+            ),
+            (
+                "Club countries",
+                f"{len({r.club_country for r in rows if r.club_country != 'Unknown'})}",
+                "Different countries represented by player club locations.",
+            ),
+            (
+                "Median route",
+                f"{statistics.median(distances):,.0f} km" if distances else "No distance data",
+                "Capital-to-club great-circle distance across all players.",
+            ),
+            (
+                "Playing abroad",
+                f"{abroad_pct}%",
+                f"{abroad_n:,} players are based outside their home federation.",
+            ),
+        ],
+    }
+
+    cards = cards_by_slug.get(slug, [])
+    if not cards:
+        return ""
+    return '  <section class="insight-grid">\n' + "\n".join(
+        _insight_card(kicker, main, detail) for kicker, main, detail in cards
+    ) + "\n  </section>"
+
+
 def _page_shell(
     tournament: str,
     *,
@@ -393,6 +566,7 @@ def _page_shell(
     rows: list,
 ) -> str:
     intro = _page_intro(active_slug, tournament, rows)
+    insights = _page_insights(active_slug, rows)
     footer = _footer_html(source_accessed)
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -407,6 +581,7 @@ def _page_shell(
 <body>
 {_nav_html(tournament, active_slug)}
 {intro}
+{insights}
   {body}
 {footer}
 </body>

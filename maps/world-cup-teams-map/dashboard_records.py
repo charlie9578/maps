@@ -161,6 +161,8 @@ def build_goals_caps_scatter(tournament: str, rows: list[PlayerRow]) -> go.Figur
         )
 
     if caps_vals:
+        top_scorer = max(scatter, key=lambda r: (r.goals or 0, r.caps or 0, r.name))
+        most_capped = max(scatter, key=lambda r: (r.caps or 0, r.goals or 0, r.name))
         fig.add_vline(
             x=median_caps,
             line={"color": "#475569", "width": 1, "dash": "dot"},
@@ -173,10 +175,39 @@ def build_goals_caps_scatter(tournament: str, rows: list[PlayerRow]) -> go.Figur
             annotation_text=f"Median goals ({median_goals:.0f})",
             annotation_position="bottom right",
         )
+        fig.add_annotation(
+            x=top_scorer.caps,
+            y=top_scorer.goals,
+            text=f"Top scorer<br><b>{top_scorer.name}</b>",
+            showarrow=True,
+            arrowhead=2,
+            ax=40,
+            ay=-44,
+            bgcolor="rgba(30,41,59,0.88)",
+            bordercolor="#334155",
+            borderwidth=1,
+            borderpad=5,
+            font={"color": TEXT, "size": 11},
+        )
+        if most_capped != top_scorer:
+            fig.add_annotation(
+                x=most_capped.caps,
+                y=most_capped.goals,
+                text=f"Most capped<br><b>{most_capped.name}</b>",
+                showarrow=True,
+                arrowhead=2,
+                ax=-55,
+                ay=36,
+                bgcolor="rgba(30,41,59,0.88)",
+                bordercolor="#334155",
+                borderwidth=1,
+                borderpad=5,
+                font={"color": TEXT, "size": 11},
+            )
 
     dark_layout(
         fig,
-        f"{tournament} — goals vs caps",
+        f"{tournament} — goals vs caps · {len(scatter):,} players",
         height=480,
         showlegend=True,
         legend_below=True,
