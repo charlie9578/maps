@@ -137,6 +137,12 @@ and never committed to `main`.
 |------|---------|
 | `/` | Landing page listing published maps |
 | `/world-cup-2026/` | 2026 World Cup squad dashboard |
+| `/co2-per-capita/` | OWID CO₂ per capita choropleth (year slider) |
+| `/osm-solar-malta/` | Malta solar plants (OpenStreetMap / Folium) |
+| `/citation-network/` | OpenAlex citation network demo |
+| `/world-map/` | Cartopy political world map (PNG) |
+
+**Not on Pages:** `gem-wind-map` and `tfl-live-map` are live Dash apps (need a running server).
 
 ### Why “Deploy from a branch” does not work
 

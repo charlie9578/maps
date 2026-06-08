@@ -33,10 +33,20 @@ def draw_world_map(output_path: Path) -> None:
 
 
 def main() -> None:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    output_path = OUTPUT_DIR / "world_map.png"
-    draw_world_map(output_path)
-    print(f"Wrote {output_path}")
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Render a political world map PNG.")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=OUTPUT_DIR / "world_map.png",
+        help="Output PNG path (default: output/world_map.png).",
+    )
+    args = parser.parse_args()
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    draw_world_map(args.output)
+    print(f"Wrote {args.output}")
 
 
 if __name__ == "__main__":
