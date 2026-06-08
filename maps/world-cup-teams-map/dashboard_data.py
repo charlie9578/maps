@@ -621,32 +621,68 @@ def squad_shortfall_nations(rows: list[PlayerRow]) -> list[tuple[str, int]]:
     )
 
 
-def squad_roster_note_html(rows: list[PlayerRow]) -> str:
-    """Explain why total players may be below 48 × 26 (injury withdrawals on Wikipedia)."""
+def overview_intro_html(
+    rows: list[PlayerRow],
+    *,
+    tournament: str = "2026 FIFA World Cup",
+    source_accessed: str = "2026-06-05",
+) -> str:
+    """Overview page introduction: competition context, dataset scope, sources, roster caveats."""
     n_players = len(rows)
+    n_nations = len({r.nation for r in rows})
+    n_clubs = len({r.club for r in rows})
     expected = NUM_FINALISTS * OFFICIAL_SQUAD_SIZE
-    if n_players >= expected:
-        return ""
+    opening = WC_OPENING_DAY.strftime("%d %B %Y")
+    final = WC_FINAL_DAY.strftime("%d %B %Y")
 
-    shortfalls = squad_shortfall_nations(rows)
-    missing = expected - n_players
-    items = "\n".join(
-        f"      <li><strong>{_esc(nation)}</strong> ({count} listed) — "
-        f"{_esc(SQUAD_WITHDRAWAL_NOTES.get(nation, 'Fewer than 26 players in the source table.'))}</li>"
-        for nation, count in shortfalls
-    )
-    return f"""  <aside class="roster-note site-width">
-    <p class="roster-note-title">Why {n_players:,} players, not {expected:,}?</p>
-    <p>FIFA squads are capped at {OFFICIAL_SQUAD_SIZE} players per nation ({NUM_FINALISTS} × {OFFICIAL_SQUAD_SIZE} = {expected:,}).
-    This dataset lists <strong>{n_players:,}</strong> because <strong>{missing}</strong> squad {("slot is" if missing == 1 else "slots are")}
-    currently unfilled after injury withdrawals documented on
-    <a href="https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads">Wikipedia</a>:</p>
+    shortfall_block = ""
+    if n_players < expected:
+        shortfalls = squad_shortfall_nations(rows)
+        missing = expected - n_players
+        items = "\n".join(
+            f"      <li><strong>{_esc(nation)}</strong> ({count} listed) — "
+            f"{_esc(SQUAD_WITHDRAWAL_NOTES.get(nation, 'Fewer than 26 players in the source table.'))}</li>"
+            for nation, count in shortfalls
+        )
+        shortfall_block = f"""
+    <p class="roster-note-subtitle">Why {n_players:,} players, not {expected:,}?</p>
+    <p>FIFA allows {OFFICIAL_SQUAD_SIZE} players per nation ({NUM_FINALISTS} × {OFFICIAL_SQUAD_SIZE} = {expected:,}).
+    This snapshot lists <strong>{n_players:,}</strong> because <strong>{missing}</strong> squad
+    {("slot is" if missing == 1 else "slots are")} currently unfilled after injury withdrawals
+    documented on Wikipedia:</p>
     <ul class="roster-note-list">
 {items}
     </ul>
     <p class="roster-note-foot">Injured players may be replaced up to 24 hours before a team's opening match.
-    Austria's coach has already confirmed he will not add a replacement for Baumgartner.</p>
+    Austria's coach has already confirmed he will not add a replacement for Baumgartner.</p>"""
+
+    return f"""  <aside class="roster-note site-width">
+    <p class="roster-note-title">About this dataset</p>
+    <p>The <strong>{_esc(tournament)}</strong> is the first finals with <strong>48 teams</strong>
+    (up from 32) and <strong>{OFFICIAL_SQUAD_SIZE}-player squads</strong> (up from 23).
+    The tournament runs from {opening} to {final}, jointly hosted by
+    <strong>Canada, Mexico, and the United States</strong>.</p>
+    <p>This dashboard covers every named player in the official pre-tournament squads of all
+    <strong>{n_nations} qualified nations</strong> — <strong>{n_players:,} players</strong> linked to
+    <strong>{n_clubs:,} clubs</strong> worldwide. For each player you will find shirt position
+    (GK / DF / MF / FW), date of birth, <strong>age on {opening}</strong>, pre-tournament
+    international <strong>caps and goals</strong>, and club employer. National teams are plotted at
+    their capital cities; clubs at stadium coordinates, connected by great-circle flight paths on the
+    map pages.</p>
+    <p class="roster-note-subtitle">Sources &amp; caveats</p>
+    <p>Squad lists mirror
+    <a href="https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads">Wikipedia — 2026 FIFA World Cup squads</a>
+    (accessed {source_accessed}), which follows FIFA's published selections.
+    Caps and goals are senior-international totals <em>before</em> the opening match; they do not include
+    2026 World Cup appearances. Club locations come from curated <code>clubs.json</code>
+    (Wikipedia stadium coordinates, city-level precision). Flag emojis may not render on all platforms.</p>
+{shortfall_block}
   </aside>"""
+
+
+def squad_roster_note_html(rows: list[PlayerRow]) -> str:
+    """Legacy alias — use :func:`overview_intro_html` for the full overview introduction."""
+    return overview_intro_html(rows)
 
 
 @dataclass(frozen=True)

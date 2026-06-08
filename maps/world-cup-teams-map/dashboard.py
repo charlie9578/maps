@@ -27,7 +27,7 @@ from dashboard_data import (
     leaderboard_table_html,
     nation_caps_summaries,
     position_summaries,
-    squad_roster_note_html,
+    overview_intro_html,
     top_players,
     tournament_birthdays,
     veterans,
@@ -360,9 +360,16 @@ def _page_styles() -> str:
       line-height: 1.55;
     }}
     .roster-note-title {{
-      margin: 0 0 8px;
+      margin: 0 0 10px;
+      color: #f1f5f9;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }}
+    .roster-note-subtitle {{
+      margin: 16px 0 8px;
       color: #cbd5e1;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
     }}
     .roster-note p {{ margin: 0 0 10px; }}
@@ -606,8 +613,7 @@ def _page_intro(
     intros: dict[str, tuple[str, str]] = {
         "overview": (
             "Overview",
-            f"All {n_players:,} squad players from {n_nations} nations at the expanded World Cup. "
-            "Pick a topic below — each card highlights something worth exploring on that page.",
+            "Pick a topic below — each card links to charts and tables for that theme.",
         ),
         "squads": (
             "Squads",
@@ -869,7 +875,11 @@ def _page_shell(
     insights = "" if active_slug == "overview" else _page_insights(
         active_slug, rows, map_bundle=map_bundle
     )
-    roster_note = squad_roster_note_html(rows) if active_slug == "overview" else ""
+    roster_note = (
+        overview_intro_html(rows, tournament=tournament, source_accessed=source_accessed)
+        if active_slug == "overview"
+        else ""
+    )
     footer = _footer_html(source_accessed)
     return f"""<!DOCTYPE html>
 <html lang="en">
