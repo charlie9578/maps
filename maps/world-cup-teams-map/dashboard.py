@@ -64,17 +64,15 @@ class DashboardPage:
 
 DASHBOARD_PAGES: tuple[DashboardPage, ...] = (
     DashboardPage("overview", "world_cup_dashboard.html", "Overview", "Overview"),
-    DashboardPage("map", "world_cup_dashboard_map.html", "Flight paths", "Flight paths"),
-    DashboardPage("squads", "world_cup_dashboard_squads.html", "Squad stats", "Squad stats"),
+    DashboardPage(
+        "where",
+        "world_cup_dashboard_where.html",
+        "Where they play",
+        "Where they play",
+    ),
+    DashboardPage("squads", "world_cup_dashboard_squads.html", "Squads", "Squads"),
     DashboardPage("records", "world_cup_dashboard_records.html", "Records", "Records"),
     DashboardPage("captains", "world_cup_dashboard_captains.html", "Captains", "Captains"),
-    DashboardPage("age", "world_cup_dashboard_age.html", "Age & birthdays", "Age & birthdays"),
-    DashboardPage(
-        "geography",
-        "world_cup_dashboard_geography.html",
-        "Geography",
-        "Geography & clubs",
-    ),
 )
 
 PLOTLY_CONFIG = {"displayModeBar": False, "responsive": True}
@@ -479,32 +477,22 @@ def _page_intro(
             f"each links to a deeper page. {abroad_pct}% play outside their home federation.",
         ),
         "squads": (
-            "Squad stats",
-            f"How all {n_players:,} players break down by position and nation — age and caps distributions "
-            "by GK/DF/MF/FW, plus which squads arrive with the most international experience.",
+            "Squads",
+            f"Composition across all {n_nations} nations — position mix, caps experience, age profile, "
+            f"tournament birthdays, and which squads rely most on overseas club football.",
         ),
         "records": (
             "Records & leaderboards",
-            "Pre-tournament international goals and caps: every player on the scatter plot, "
-            "with scrollable leaderboards for top scorers, cap holders, and uncapped debutants.",
+            "Pre-tournament international goals and caps — every player on the scatter plot, "
+            "distance and abroad context, plus scrollable leaderboards.",
         ),
         "captains": (
             "Captains",
             "Each nation's armband holder compared with the rest of the squad: seniority, scoring burden, "
             "age gap, and how often leadership comes from outside the domestic game.",
         ),
-        "age": (
-            "Age & birthdays",
-            f"Squad ages as of 11 June 2026, from teenage selections to late-career veterans. "
-            f"{len(bdays)} players celebrate a birthday during the tournament window.",
-        ),
-        "geography": (
-            "Geography & clubs",
-            "Club host countries, capital-to-stadium distances, and which national squads depend most "
-            f"on overseas club football. {top_cc_name} alone hosts {top_cc_n} squad members.",
-        ),
     }
-    if slug == "map" and map_bundle:
+    if slug == "where" and map_bundle:
         top_club = Counter(r.club for r in rows).most_common(1)
         top_club_line = (
             f" Start with the top clubs chart — {top_club[0][0]} supplies {top_club[0][1]} players — "
@@ -512,11 +500,12 @@ def _page_intro(
             if top_club
             else ""
         )
-        intros["map"] = (
-            "Flight paths",
-            f"Where squads play club football: top supplying clubs and confederation flows, "
-            f"then an interactive map of {map_bundle.route_count:,} capital-to-club routes across "
-            f"{map_bundle.stadium_count} locations.{top_club_line}",
+        intros["where"] = (
+            "Where they play",
+            f"Explore where all {n_players:,} squad players play club football — top supplying clubs, "
+            f"confederation flows, an interactive map of {map_bundle.route_count:,} capital-to-club routes, "
+            f"and a treemap of host countries. "
+            f"{top_cc_name} hosts {top_cc_n} squad members.{top_club_line}",
         )
     title, blurb = intros.get(slug, (slug.title(), ""))
     return f"""  <header class="page-intro">
@@ -548,35 +537,29 @@ def _render_overview_guide(rows: list) -> str:
     abroad_n = sum(1 for r in rows if not r.domestic)
     abroad_pct = round(100 * abroad_n / max(1, n_players))
     top_club = Counter(r.club for r in rows).most_common(1)
-    top_host = club_country_counts(rows).most_common(1)
     top_goals = top_players(rows, "goals", limit=1)
     top_caps = top_players(rows, "caps", limit=1)
     ages = [r.age for r in rows if r.age is not None]
     bdays = tournament_birthdays(rows)
     caps = captain_profiles(rows)
-    distances = [r.distance_km for r in rows if r.distance_km is not None]
-    median_dist = f"{statistics.median(distances):,.0f} km" if distances else "—"
     pos_stats = position_summaries(rows)
     top_pos = max(pos_stats, key=lambda p: p.count) if pos_stats else None
 
     top_club_stat = f"{top_club[0][0]} · {top_club[0][1]} players" if top_club else "—"
-    top_club_blurb = (
-        "Named club employers and confederation flows — then click those cities on the interactive map."
-        if top_club
-        else "Club hotspots and confederation flows on the interactive map."
-    )
 
     cards = [
         (
-            "Flight paths",
+            "Where they play",
             top_club_stat,
-            f"{abroad_pct}% play abroad. {top_club_blurb}",
-            _page_href("map"),
+            f"{abroad_pct}% play abroad. Clubs, confederation flows, interactive map, and host-country treemap.",
+            _page_href("where"),
         ),
         (
-            "Squad stats",
-            f"{top_pos.count} {top_pos.pos}" if top_pos else f"{n_players:,} players",
-            "Position breakdown and average international caps by nation.",
+            "Squads",
+            f"{statistics.median(ages):.1f} yr median · {top_pos.count} {top_pos.pos}"
+            if ages and top_pos
+            else f"{n_players:,} players",
+            "Position mix, nation experience, age profile, and overseas-club share by nation.",
             _page_href("squads"),
         ),
         (
@@ -584,7 +567,7 @@ def _render_overview_guide(rows: list) -> str:
             f"{top_goals[0].goals} goals · {top_caps[0].caps} caps"
             if top_goals and top_caps
             else "Goals & caps",
-            "Goals vs caps scatter and scrollable leaderboards.",
+            "Goals vs caps scatter, route and abroad context, and scrollable leaderboards.",
             _page_href("records"),
         ),
         (
@@ -593,18 +576,6 @@ def _render_overview_guide(rows: list) -> str:
             f"{sum(1 for p in caps if p.plays_abroad)} captains play abroad; "
             f"compare position mix and per-nation age/caps gaps.",
             _page_href("captains"),
-        ),
-        (
-            "Age & birthdays",
-            f"{statistics.median(ages):.1f} yr median" if ages else "Squad ages",
-            f"Age profile from teenage picks to veterans; {len(bdays)} players have a birthday during the tournament.",
-            _page_href("age"),
-        ),
-        (
-            "Geography & clubs",
-            f"{top_host[0][0]} · {top_host[0][1]} players" if top_host else "Club countries",
-            f"Host countries, distance from capital to club ({median_dist} median), and abroad share by nation.",
-            _page_href("geography"),
         ),
     ]
     return '  <section class="guide-grid">\n' + "\n".join(
@@ -630,15 +601,12 @@ def _page_insights(
     n_clubs = len({r.club for r in rows})
     n_club_countries = len({r.club_country for r in rows if r.club_country != "Unknown"})
     ages = [r.age for r in rows if r.age is not None]
-    distances = [r.distance_km for r in rows if r.distance_km is not None]
-    youngest, oldest = age_extremes(rows)
     bdays = tournament_birthdays(rows)
     caps = captain_profiles(rows)
     pos_stats = position_summaries(rows)
     nation_stats = nation_caps_summaries(rows)
     top_pos = max(pos_stats, key=lambda p: p.count) if pos_stats else None
     most_exp_nation = nation_stats[0] if nation_stats else None
-    least_exp_nation = nation_stats[-1] if nation_stats else None
 
     cards_by_slug: dict[str, list[tuple[str, str, str]]] = {
         "overview": [
@@ -669,7 +637,12 @@ def _page_insights(
             (
                 "Largest line",
                 f"{top_pos.pos} · {top_pos.count}" if top_pos else "—",
-                "Share of all squad players in each outfield/GK position.",
+                "Share of all squad players in each GK / DF / MF / FW position.",
+            ),
+            (
+                "Median age",
+                f"{statistics.median(ages):.1f} years" if ages else "No age data",
+                "Squad age on opening day, 11 June 2026.",
             ),
             (
                 "Most experienced",
@@ -679,18 +652,9 @@ def _page_insights(
                 "Nation with the highest average caps per squad member.",
             ),
             (
-                "Least experienced",
-                f"{least_exp_nation.nation} · {least_exp_nation.avg_caps:.0f} avg caps"
-                if least_exp_nation
-                else "—",
-                "Nation with the lowest average caps per squad member.",
-            ),
-            (
-                "Median caps",
-                f"{statistics.median([r.caps for r in rows if r.caps is not None]):.0f}"
-                if any(r.caps is not None for r in rows)
-                else "—",
-                "Typical pre-tournament international caps across all players.",
+                "Tournament birthdays",
+                f"{len(bdays)} players",
+                "Turn a year older between the opening match and the final.",
             ),
         ],
         "records": [
@@ -725,61 +689,12 @@ def _page_insights(
                 "Captains who share or hold the squad scoring lead.",
             ),
         ],
-        "age": [
-            (
-                "Median age",
-                f"{statistics.median(ages):.1f} years" if ages else "No age data",
-                "Squad age on opening day, 11 June 2026.",
-            ),
-            (
-                "Youngest",
-                f"{youngest[0].age} years" if youngest else "No age data",
-                f"{youngest[0].name} ({youngest[0].nation})." if youngest else "",
-            ),
-            (
-                "Oldest",
-                f"{oldest[0].age} years" if oldest else "No age data",
-                f"{oldest[0].name} ({oldest[0].nation})." if oldest else "",
-            ),
-            (
-                "Tournament birthdays",
-                f"{len(bdays)} players",
-                "Turn a year older between the opening match and the final.",
-            ),
-        ],
-        "geography": [
-            (
-                "Playing abroad",
-                f"{abroad_pct}%",
-                f"{abroad_n:,} players are based outside their home federation.",
-            ),
-            (
-                "Top host country",
-                f"{top_host[0][0]}" if top_host else "No club data",
-                f"{top_host[0][1]} squad members play club football there." if top_host else "",
-            ),
-            (
-                "Club countries",
-                f"{n_club_countries}",
-                "Different countries represented by player club locations.",
-            ),
-            (
-                "Median route",
-                f"{statistics.median(distances):,.0f} km" if distances else "No distance data",
-                "Capital-to-club great-circle distance across all players.",
-            ),
-        ],
     }
 
-    if slug == "map":
+    if slug == "where":
         if not map_bundle:
             return ""
         cards = [
-            (
-                "Nations",
-                f"{map_bundle.nation_count}",
-                "Capitals plotted for each qualified team.",
-            ),
             (
                 "Flight paths",
                 f"{map_bundle.route_count:,}",
@@ -789,6 +704,11 @@ def _page_insights(
                 "Club locations",
                 f"{map_bundle.stadium_count}",
                 "Stadium cities with squad members in the dataset.",
+            ),
+            (
+                "Top host country",
+                f"{top_host[0][0]} · {top_host[0][1]}" if top_host else "No club data",
+                "Country hosting the most squad members' club football.",
             ),
             (
                 "Playing abroad",
@@ -956,6 +876,15 @@ def _build_page_bodies(
 
     overview = _render_overview_guide(rows)
 
+    youngest, oldest = youngest_oldest(rows, n=6)
+    age_highlights_html = (
+        f'<div class="table-grid">'
+        f"{age_extreme_table_html(youngest, title='Six youngest', note='Ages on 11 Jun 2026.')}"
+        f"{age_extreme_table_html(oldest, title='Six oldest', note='Ages on 11 Jun 2026.')}"
+        f"{birthday_table_html(tournament_birthdays(rows))}"
+        f"</div>"
+    )
+
     squads = "\n".join(
         [
             _render_figure_section(
@@ -969,6 +898,28 @@ def _build_page_bodies(
                 records_fig,
                 lead="Age and caps distributions by GK/DF/MF/FW, plus total goals and position leaders.",
             ),
+            _render_chart_row(
+                _render_chart_column(
+                    "Squad age profile",
+                    age_milestones_fig,
+                    lead="One bar per squad age on 11 Jun 2026, with median and min/max markers.",
+                ),
+                _render_chart_column(
+                    "Age bands by confederation",
+                    age_bands_fig,
+                    lead="Share of each squad in five-year age bands (100% stacked).",
+                ),
+            ),
+            _render_table_section(
+                "Age highlights",
+                age_highlights_html,
+                lead="Youngest and oldest picks, plus players with a birthday during the tournament.",
+            ),
+            _render_table_section(
+                "Playing abroad by nation",
+                abroad_nations_table_html(rows),
+                lead="All 48 nations ranked by share of the squad playing outside their home federation.",
+            ),
         ]
     )
 
@@ -979,6 +930,18 @@ def _build_page_bodies(
                 scatter_fig,
                 lead="Every player plotted by pre-tournament international record. Marker size reflects age; colour is position.",
                 include_plotlyjs="cdn",
+            ),
+            _render_chart_row(
+                _render_chart_column(
+                    "Playing abroad",
+                    abroad_confed_fig,
+                    lead="Domestic vs abroad split within each national confederation.",
+                ),
+                _render_chart_column(
+                    "Flight distances",
+                    geography_fig,
+                    lead="Great-circle distance from national capital to club city.",
+                ),
             ),
             _render_table_section(
                 "Leaderboards",
@@ -1009,69 +972,7 @@ def _build_page_bodies(
         ]
     )
 
-    youngest, oldest = youngest_oldest(rows, n=6)
-    age_extremes_html = (
-        f'<div class="table-grid">'
-        f"{age_extreme_table_html(youngest, title='Six youngest', note='Ages on 11 Jun 2026.')}"
-        f"{age_extreme_table_html(oldest, title='Six oldest', note='Ages on 11 Jun 2026.')}"
-        f"</div>"
-    )
-
-    age = "\n".join(
-        [
-            _render_figure_section(
-                "Squad age profile",
-                age_milestones_fig,
-                lead="One bar per squad age on 11 Jun 2026, with median and min/max markers.",
-                include_plotlyjs="cdn",
-            ),
-            _render_table_section(
-                "Youngest & oldest",
-                age_extremes_html,
-                lead="Six youngest and six oldest squad selections, including ties at the cutoff.",
-            ),
-            _render_figure_section(
-                "Age bands by confederation",
-                age_bands_fig,
-                lead="Share of each squad in five-year age bands (100% stacked).",
-            ),
-            _render_table_section(
-                "Tournament birthdays",
-                birthday_table_html(tournament_birthdays(rows)),
-                lead="Players whose birthday falls between the opening match and the final.",
-            ),
-        ]
-    )
-
-    geography = "\n".join(
-        [
-            _render_figure_section(
-                "Club host countries",
-                treemap_fig,
-                lead="Where squad members play club football, sized by player count and coloured by club confederation.",
-                include_plotlyjs="cdn",
-            ),
-            _render_chart_row(
-                _render_chart_column(
-                    "Playing abroad",
-                    abroad_confed_fig,
-                    lead="Domestic vs abroad split within each national confederation.",
-                ),
-                _render_chart_column(
-                    "Flight distances",
-                    geography_fig,
-                    lead="Great-circle distance from national capital to club city.",
-                ),
-            ),
-            _render_table_section(
-                "Playing abroad by nation",
-                abroad_nations_table_html(rows),
-                lead="All 48 nations ranked by share of the squad playing outside their home federation.",
-            ),
-        ]
-    )
-
-    map_page = "\n".join(
+    where_page = "\n".join(
         [
             _render_figure_section(
                 "Clubs supplying the most players",
@@ -1085,17 +986,20 @@ def _build_page_bodies(
                 lead="How each national federation connects to club confederations worldwide.",
             ),
             _render_map_section(map_bundle) if map_bundle else "",
+            _render_figure_section(
+                "Club host countries",
+                treemap_fig,
+                lead="Where squad members play club football, sized by player count and coloured by club confederation.",
+            ),
         ]
     )
 
     return {
         "overview": overview,
-        "map": map_page,
+        "where": where_page,
         "squads": squads,
         "records": records,
         "captains": captains,
-        "age": age,
-        "geography": geography,
     }
 
 
@@ -1129,7 +1033,7 @@ def write_dashboard_site(output_dir: Path | None = None) -> list[Path]:
             body=bodies[page.slug],
             source_accessed=accessed,
             rows=rows,
-            map_bundle=map_bundle if page.slug == "map" else None,
+            map_bundle=map_bundle if page.slug == "where" else None,
         )
         path.write_text(html, encoding="utf-8")
         written.append(path)

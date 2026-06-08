@@ -245,7 +245,7 @@ STANDALONE_TOOLBAR_SCRIPT = """
     bar.appendChild(makeBtn("Show all", showAll));
     bar.appendChild(makeBtn("Hide all", hideAll));
     var dashLink = document.createElement("a");
-    dashLink.href = "world_cup_dashboard_map.html";
+    dashLink.href = "world_cup_dashboard_where.html";
     dashLink.textContent = "Dashboard";
     dashLink.style.cssText =
         "padding:8px 14px;border:1px solid #475569;border-radius:6px;" +

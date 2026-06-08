@@ -75,7 +75,7 @@ def main() -> None:
     tournament = squads.get("tournament", "World Cup")
     n_teams = len(squads.get("teams", []))
     print(f"{tournament}: dashboard for {n_teams} nations ({len(paths)} pages).")
-    print("Open output/world_cup_dashboard.html — Flight paths is in the nav.")
+    print("Open output/world_cup_dashboard.html — five pages linked from the nav.")
 
 
 if __name__ == "__main__":
