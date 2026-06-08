@@ -226,6 +226,24 @@ def age_extremes(rows: list[PlayerRow]) -> tuple[list[AgeExtreme], list[AgeExtre
     return youngest, oldest
 
 
+def youngest_oldest(
+    rows: list[PlayerRow], *, n: int = 6
+) -> tuple[list[AgeExtreme], list[AgeExtreme]]:
+    """Return the ``n`` youngest and ``n`` oldest players (ranked age, then DOB)."""
+    ranked = [r for r in rows if r.age is not None]
+    if not ranked:
+        return [], []
+
+    def dob_ord(r: PlayerRow) -> int:
+        dob = parse_dob(r.dob)
+        return dob.toordinal() if dob else 0
+
+    youngest = sorted(ranked, key=lambda r: (r.age, -dob_ord(r), r.name))[:n]
+    oldest = sorted(ranked, key=lambda r: (-r.age, dob_ord(r), r.name))[:n]
+    to_extreme = lambda r: AgeExtreme(r.name, r.nation, r.pos, r.age, r.dob, r.club)
+    return [to_extreme(r) for r in youngest], [to_extreme(r) for r in oldest]
+
+
 def format_dob(iso: str | None) -> str:
     dob = parse_dob(iso)
     if dob is None:
@@ -259,8 +277,100 @@ def band_color(index: int, *, alpha: float = 1.0) -> str:
 
 VETERAN_CAPS = 100
 
+# Shared layout width for all dashboard pages (matches CSS --page-max-width).
+PAGE_MAX_WIDTH = 1400
+
+TABLE_HEADER_BG = "#0f172a"
+TABLE_ROW_BG = PLOT_BG
+TABLE_ROW_ALT_BG = "#172033"
+TABLE_ROW_HIGHLIGHT_BG = "rgba(251, 191, 36, 0.12)"
+TABLE_ROW_OPENING_BG = "rgba(56, 189, 248, 0.12)"
+
+PLOTLY_TABLE_HEADER = {
+    "fill_color": TABLE_HEADER_BG,
+    "font": {"color": "#cbd5e1", "size": 13},
+    "align": "left",
+    "line": {"color": GRID, "width": 1},
+}
+
 # Horizontal legend below the plot area (avoids clashing with subplot titles).
 LEGEND_BELOW = {"orientation": "h", "yanchor": "top", "y": -0.12, "x": 0, "xanchor": "left"}
+
+
+def plotly_table_row_colors(
+    n_rows: int,
+    *,
+    highlight_rows: set[int] | None = None,
+    opening_rows: set[int] | None = None,
+) -> list[str]:
+    """Zebra striping aligned with HTML ``.data-table`` rows."""
+    colors: list[str] = []
+    for i in range(n_rows):
+        if opening_rows and i in opening_rows:
+            colors.append(TABLE_ROW_OPENING_BG)
+        elif highlight_rows and i in highlight_rows:
+            colors.append(TABLE_ROW_HIGHLIGHT_BG)
+        elif i % 2:
+            colors.append(TABLE_ROW_ALT_BG)
+        else:
+            colors.append(TABLE_ROW_BG)
+    return colors
+
+
+def plotly_table_cells(
+    values: list[list],
+    *,
+    highlight_rows: set[int] | None = None,
+    opening_rows: set[int] | None = None,
+    column_font_colors: list[list[str]] | None = None,
+    height: int = 32,
+) -> dict:
+    """Build Plotly table ``cells`` kwargs matching HTML ``.data-table`` styling."""
+    n_rows = len(values[0]) if values and values[0] else 0
+    row_colors = plotly_table_row_colors(
+        n_rows,
+        highlight_rows=highlight_rows,
+        opening_rows=opening_rows,
+    )
+    cells: dict = {
+        "values": values,
+        "fill_color": [row_colors] * len(values),
+        "font": {"color": TEXT, "size": 13},
+        "align": "left",
+        "height": height,
+        "line": {"color": GRID, "width": 1},
+    }
+    if column_font_colors:
+        cells["font"] = {"color": column_font_colors, "size": 13}
+    return cells
+
+
+def make_plotly_table(
+    header_values: list[str],
+    row_values: list[tuple[str, ...] | list[str]],
+    *,
+    columnwidth: list[float] | None = None,
+    highlight_rows: set[int] | None = None,
+    opening_rows: set[int] | None = None,
+    column_font_colors: list[list[str]] | None = None,
+    height: int = 32,
+) -> go.Table:
+    """Plotly table trace styled like dashboard HTML tables."""
+    columns = list(zip(*row_values, strict=True)) if row_values else []
+    cells = plotly_table_cells(
+        [list(col) for col in columns],
+        highlight_rows=highlight_rows,
+        opening_rows=opening_rows,
+        column_font_colors=column_font_colors,
+        height=height,
+    )
+    table = go.Table(
+        header={"values": header_values, **PLOTLY_TABLE_HEADER},
+        cells=cells,
+    )
+    if columnwidth:
+        table.columnwidth = columnwidth
+    return table
 
 
 def dark_layout(
@@ -282,6 +392,7 @@ def dark_layout(
         "height": height,
         "margin": {"l": 48, "r": 24, "t": top, "b": bottom},
         "showlegend": showlegend,
+        "autosize": True,
     }
     if legend_below and showlegend:
         layout["legend"] = LEGEND_BELOW

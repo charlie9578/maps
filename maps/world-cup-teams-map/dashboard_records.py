@@ -8,11 +8,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from dashboard_data import (
-    DASH_BG,
     GRID,
     MUTED,
     NationCapsSummary,
-    PLOT_BG,
     POS_COLORS,
     POS_ORDER,
     TEXT,
@@ -20,6 +18,7 @@ from dashboard_data import (
     add_violin_box,
     confed_color,
     dark_layout,
+    make_plotly_table,
     nation_caps_summaries,
     player_chart_label,
     position_summaries,
@@ -91,20 +90,9 @@ def build_records_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         for p in pos_stats
     ]
     fig.add_trace(
-        go.Table(
-            header={
-                "values": ["Pos", "Players", "Avg age", "Avg caps", "Total goals", "Top scorer", "Most caps"],
-                "fill_color": PLOT_BG,
-                "font": {"color": TEXT, "size": 11},
-                "align": "left",
-            },
-            cells={
-                "values": list(zip(*summary_rows, strict=True)) if summary_rows else [["—"] * 7],
-                "fill_color": DASH_BG,
-                "font": {"color": TEXT, "size": 11},
-                "align": "left",
-                "height": 28,
-            },
+        make_plotly_table(
+            ["Pos", "Players", "Avg age", "Avg caps", "Total goals", "Top scorer", "Most caps"],
+            summary_rows,
         ),
         row=2,
         col=2,
@@ -181,8 +169,8 @@ def build_goals_caps_scatter(tournament: str, rows: list[PlayerRow]) -> go.Figur
             text=f"Top scorer<br><b>{top_scorer.name}</b>",
             showarrow=True,
             arrowhead=2,
-            ax=40,
-            ay=-44,
+            ax=-52,
+            ay=-40,
             bgcolor="rgba(30,41,59,0.88)",
             bordercolor="#334155",
             borderwidth=1,
@@ -212,6 +200,11 @@ def build_goals_caps_scatter(tournament: str, rows: list[PlayerRow]) -> go.Figur
         showlegend=True,
         legend_below=True,
     )
+    if caps_vals:
+        max_caps = max(caps_vals)
+        max_goals = max(goals_vals)
+        fig.update_xaxes(range=[-6, max_caps * 1.08])
+        fig.update_yaxes(range=[-6, max_goals * 1.28])
     fig.update_xaxes(title_text="International caps")
     fig.update_yaxes(title_text="International goals")
     return fig

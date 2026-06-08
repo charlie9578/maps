@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 
 from dashboard_data import (
     DASH_BG,
+    PAGE_MAX_WIDTH,
     abroad_nations_table_html,
     age_extremes,
     birthday_table_html,
@@ -83,25 +84,40 @@ def _figure_to_div(fig: go.Figure, *, include_plotlyjs: bool | str = False) -> s
 
 def _page_styles() -> str:
     return f"""
+    :root {{
+      --page-max-width: {PAGE_MAX_WIDTH}px;
+      --page-gutter: 16px;
+    }}
     html, body {{
       margin: 0;
       background: {DASH_BG};
       color: #e2e8f0;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     }}
+    .site-width {{
+      max-width: var(--page-max-width);
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: var(--page-gutter);
+      padding-right: var(--page-gutter);
+      box-sizing: border-box;
+    }}
     .top-nav {{
       position: sticky;
       top: 0;
       z-index: 1000;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 12px;
-      align-items: center;
-      padding: 12px 18px;
       background: rgba(15, 23, 42, 0.94);
       border-bottom: 1px solid #334155;
       backdrop-filter: blur(10px);
       box-shadow: 0 12px 30px rgba(2, 6, 23, 0.22);
+    }}
+    .top-nav-inner {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+      padding-top: 12px;
+      padding-bottom: 12px;
     }}
     .top-nav .nav-brand {{
       color: #94a3b8;
@@ -124,9 +140,9 @@ def _page_styles() -> str:
       user-select: none;
     }}
     .section-head {{
-      max-width: 1400px;
+      max-width: var(--page-max-width);
       margin: 28px auto 6px;
-      padding: 0 16px;
+      padding: 0 var(--page-gutter);
     }}
     .section-title {{
       margin: 0;
@@ -143,13 +159,13 @@ def _page_styles() -> str:
       line-height: 1.55;
       max-width: 72ch;
     }}
-    .chart-block {{ margin: 0 auto 16px; max-width: 1400px; padding: 0 12px; }}
+    .chart-block {{ margin: 0 auto 16px; max-width: var(--page-max-width); padding: 0 var(--page-gutter); }}
     .chart-row {{
       display: grid;
       gap: 16px;
-      max-width: 1400px;
+      max-width: var(--page-max-width);
       margin: 0 auto 16px;
-      padding: 0 12px;
+      padding: 0 var(--page-gutter);
     }}
     @media (min-width: 1024px) {{
       .chart-row {{ grid-template-columns: 1fr 1fr; }}
@@ -163,8 +179,8 @@ def _page_styles() -> str:
       max-width: none;
       padding: 0;
     }}
-    .chart-block .plotly-graph-div {{ margin: 0 auto; }}
-    .table-section {{ max-width: 1400px; margin: 0 auto 24px; padding: 0 12px; }}
+    .chart-block .plotly-graph-div {{ margin: 0 auto; width: 100% !important; }}
+    .table-section {{ max-width: var(--page-max-width); margin: 0 auto 24px; padding: 0 var(--page-gutter); }}
     .table-note {{ color: #94a3b8; font-size: 13px; margin: 0 0 10px; }}
     .table-grid {{
       display: grid;
@@ -192,6 +208,7 @@ def _page_styles() -> str:
       padding: 8px 12px;
       text-align: left;
       border-bottom: 1px solid #334155;
+      font-variant-numeric: tabular-nums;
     }}
     .data-table th {{
       position: sticky;
@@ -213,9 +230,9 @@ def _page_styles() -> str:
     .data-table tr.row-highlight td {{ background: rgba(251, 191, 36, 0.12); }}
     .data-table tr.row-opening td {{ background: rgba(56, 189, 248, 0.12); }}
     .page-intro {{
-      max-width: 1400px;
+      max-width: var(--page-max-width);
       margin: 22px auto 12px;
-      padding: 22px 24px;
+      padding: 22px var(--page-gutter);
       border: 1px solid #334155;
       border-radius: 16px;
       background:
@@ -255,9 +272,9 @@ def _page_styles() -> str:
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 12px;
-      max-width: 1400px;
+      max-width: var(--page-max-width);
       margin: 0 auto 22px;
-      padding: 0 12px;
+      padding: 0 var(--page-gutter);
     }}
     .insight-card {{
       border: 1px solid #334155;
@@ -288,7 +305,6 @@ def _page_styles() -> str:
       line-height: 1.45;
     }}
     .chart-block.chart-overview {{
-      max-width: none;
       margin-bottom: 0;
     }}
     .chart-block.chart-overview .plotly-graph-div {{
@@ -302,9 +318,9 @@ def _page_styles() -> str:
     }}
     .js-plotly-plot .modebar {{ display: none !important; }}
     .page-footer {{
-      max-width: 1400px;
+      max-width: var(--page-max-width);
       margin: 32px auto 24px;
-      padding: 12px 16px;
+      padding: 12px var(--page-gutter);
       border-top: 1px solid #334155;
       color: #64748b;
       font-size: 12px;
@@ -321,11 +337,13 @@ def _nav_html(tournament: str, active_slug: str) -> str:
         links.append(f'<a href="{page.filename}"{cls}>{page.label}</a>')
     dash_links = "\n    <span class=\"nav-sep\">|</span>\n    ".join(links)
     return f"""  <nav class="top-nav">
+    <div class="site-width top-nav-inner">
     <span class="nav-brand">{tournament} squad dashboard</span>
     <span class="nav-sep">|</span>
     {dash_links}
     <span class="nav-sep">|</span>
     <a href="{MAP_HTML}">Flight-path map</a>
+    </div>
   </nav>"""
 
 

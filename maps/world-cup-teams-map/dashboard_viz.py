@@ -24,15 +24,15 @@ from dashboard_data import (
     active_confeds,
     add_violin_box,
     age_band,
-    age_extremes,
     band_color,
     build_player_rows,
     club_country_counts,
     confed_color,
     dark_layout,
     format_dob,
+    make_plotly_table,
     style_subplot_titles,
-    tournament_birthdays,
+    youngest_oldest,
 )
 from dashboard_captains import build_captains_panel
 from dashboard_records import (
@@ -196,18 +196,20 @@ def build_dashboard(
     if top_clubs:
         club, count = top_clubs[0]
         country = clubs.get(club, {}).get("country", "Unknown")
+        # Sits in the open lower-right of the horizontal bar panel (clear of the bars).
         fig.add_annotation(
-            text=f"<b>{club}</b><br><span style='font-size:11px;color:#94a3b8'>"
-            f"{count} players · {country}</span>",
-            x=0.02,
-            y=0.94,
+            text=f"Top supplier<br><b>{club}</b><br>"
+            f"<span style='font-size:11px;color:#94a3b8'>{count} players · {country}</span>",
+            x=0.30,
+            y=0.80,
             xref="paper",
             yref="paper",
             showarrow=False,
             font={"size": 13, "color": TEXT},
             xanchor="left",
             yanchor="top",
-            bgcolor="rgba(30,41,59,0.86)",
+            align="left",
+            bgcolor="rgba(15,23,42,0.86)",
             bordercolor="#334155",
             borderwidth=1,
             borderpad=6,
@@ -216,15 +218,16 @@ def build_dashboard(
     fig.add_annotation(
         text=f"<b>{abroad_pct}%</b> play abroad<br><span style='font-size:11px;color:#94a3b8'>"
         f"{abroad_n:,} of {len(rows):,} players</span>",
-        x=0.02,
-        y=0.48,
+        x=0.005,
+        y=0.46,
         xref="paper",
         yref="paper",
         showarrow=False,
         font={"size": 13, "color": TEXT},
         xanchor="left",
         yanchor="middle",
-        bgcolor="rgba(30,41,59,0.85)",
+        align="left",
+        bgcolor="rgba(15,23,42,0.9)",
         bordercolor="#334155",
         borderwidth=1,
         borderpad=6,
@@ -414,7 +417,7 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         cols=2,
         subplot_titles=(
             "Capital-to-club distance by confederation",
-            "Cumulative players by flight distance",
+            "Cumulative share by flight distance",
         ),
         horizontal_spacing=0.12,
     )
@@ -430,15 +433,18 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
     if distances:
         median_dist = statistics.median(distances)
         p75_dist = distances[int(0.75 * (len(distances) - 1))]
+        max_dist = distances[-1]
+        n = len(distances)
         fig.add_trace(
             go.Scatter(
                 x=distances,
-                y=list(range(1, len(distances) + 1)),
+                y=[100 * i / n for i in range(1, n + 1)],
                 mode="lines",
                 fill="tozeroy",
                 line={"color": "#64748b", "width": 2},
                 fillcolor="rgba(100, 116, 139, 0.35)",
-                hovertemplate="≤ %{x:,.0f} km<br>%{y} players<extra></extra>",
+                customdata=list(range(1, n + 1)),
+                hovertemplate="≤ %{x:,.0f} km<br>%{customdata} players (%{y:.0f}%)<extra></extra>",
             ),
             row=1,
             col=2,
@@ -447,7 +453,8 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
             x=median_dist,
             line={"color": "#a78bfa", "width": 2, "dash": "dot"},
             annotation_text=f"Median {median_dist:,.0f} km",
-            annotation_position="top",
+            annotation_position="top left",
+            annotation_font={"color": "#c4b5fd", "size": 11},
             row=1,
             col=2,
         )
@@ -455,16 +462,19 @@ def build_geography_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
             x=p75_dist,
             line={"color": "#38bdf8", "width": 1.5, "dash": "dash"},
             annotation_text=f"75th pct {p75_dist:,.0f} km",
-            annotation_position="bottom",
+            annotation_position="top right",
+            annotation_font={"color": "#7dd3fc", "size": 11},
             row=1,
             col=2,
         )
+        # Distances cannot be negative — clamp the violin/box axis to start at 0.
+        fig.update_yaxes(range=[0, max_dist * 1.05], row=1, col=1)
 
     dark_layout(fig, f"{tournament} — flight distances", height=460, showlegend=False)
     style_subplot_titles(fig)
     fig.update_yaxes(title_text="Distance (km)", row=1, col=1)
     fig.update_xaxes(title_text="Distance (km)", row=1, col=2)
-    fig.update_yaxes(title_text="Players at or below distance", row=1, col=2)
+    fig.update_yaxes(title_text="Share of players (%)", range=[0, 100], row=1, col=2)
     return fig
 
 
@@ -488,20 +498,19 @@ def build_extra_figures(
 
 def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
     """Squad age histogram and youngest/oldest player table."""
-    youngest, oldest = age_extremes(rows)
-    birthdays = tournament_birthdays(rows)
+    youngest, oldest = youngest_oldest(rows, n=6)
     ages = [r.age for r in rows if r.age is not None]
 
     fig = make_subplots(
         rows=1,
         cols=2,
-        column_widths=[0.55, 0.45],
+        column_widths=[0.46, 0.54],
         specs=[[{"type": "xy"}, {"type": "table"}]],
         subplot_titles=(
             "Squad age distribution",
-            "Youngest & oldest (as of 11 Jun 2026)",
+            "Six youngest (▼) & six oldest (▲), ages on 11 Jun 2026",
         ),
-        horizontal_spacing=0.12,
+        horizontal_spacing=0.10,
     )
 
     if ages:
@@ -520,8 +529,9 @@ def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Fig
         fig.add_vline(
             x=median_age,
             line={"color": "#a78bfa", "width": 2, "dash": "dot"},
-            annotation_text=f"Median ({median_age:.1f})",
-            annotation_position="top",
+            annotation_text=f"Median {median_age:.1f}",
+            annotation_position="top right",
+            annotation_font={"color": "#c4b5fd", "size": 11},
             row=1,
             col=1,
         )
@@ -529,6 +539,9 @@ def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Fig
             fig.add_vline(
                 x=youngest[0].age,
                 line={"color": "#38bdf8", "width": 1.5, "dash": "dash"},
+                annotation_text=f"Min {youngest[0].age}",
+                annotation_position="top left",
+                annotation_font={"color": "#7dd3fc", "size": 11},
                 row=1,
                 col=1,
             )
@@ -536,58 +549,47 @@ def build_age_milestones_panel(tournament: str, rows: list[PlayerRow]) -> go.Fig
             fig.add_vline(
                 x=oldest[0].age,
                 line={"color": "#fb7185", "width": 1.5, "dash": "dash"},
+                annotation_text=f"Max {oldest[0].age}",
+                annotation_position="bottom right",
+                annotation_font={"color": "#fda4af", "size": 11},
                 row=1,
                 col=1,
             )
 
-    extreme_rows = [
-        (
-            "Youngest",
-            p.name,
+    def table_row(tag: str, p) -> tuple[str, ...]:
+        return (
+            tag,
+            f"{p.name}",
             p.nation,
             str(p.age) if p.age is not None else "—",
             format_dob(p.dob),
             p.pos,
             p.club,
         )
-        for p in youngest
-    ] + [
-        (
-            "Oldest",
-            p.name,
-            p.nation,
-            str(p.age) if p.age is not None else "—",
-            format_dob(p.dob),
-            p.pos,
-            p.club,
-        )
-        for p in oldest
+
+    extreme_rows = [table_row("▼", p) for p in youngest] + [
+        table_row("▲", p) for p in oldest
     ]
+    n_rows = len(extreme_rows)
+    tag_colors = ["#7dd3fc"] * len(youngest) + ["#fda4af"] * len(oldest)
+    column_font_colors = (
+        [tag_colors] + [[TEXT] * n_rows] * 6 if extreme_rows else None
+    )
     fig.add_trace(
-        go.Table(
-            header={
-                "values": ["", "Player", "Nation", "Age", "Born", "Pos", "Club"],
-                "fill_color": PLOT_BG,
-                "font": {"color": TEXT, "size": 12},
-                "align": "left",
-            },
-            cells={
-                "values": list(zip(*extreme_rows, strict=True)) if extreme_rows else [["—"] * 7],
-                "fill_color": DASH_BG,
-                "font": {"color": TEXT, "size": 11},
-                "align": "left",
-                "height": 28,
-            },
+        make_plotly_table(
+            ["", "Player", "Nation", "Age", "Born", "Pos", "Club"],
+            extreme_rows or [("—", "—", "—", "—", "—", "—", "—")],
+            columnwidth=[0.4, 2.4, 1.6, 0.7, 1.6, 0.7, 2.2],
+            column_font_colors=column_font_colors,
         ),
         row=1,
         col=2,
     )
 
-    _ = birthdays
     dark_layout(
         fig,
         f"{tournament} — squad age profile",
-        height=420,
+        height=460,
         showlegend=False,
     )
     fig.update_xaxes(title_text="Age (years)", row=1, col=1)

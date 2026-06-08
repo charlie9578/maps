@@ -9,16 +9,14 @@ from plotly.subplots import make_subplots
 
 from dashboard_data import (
     CAPTAIN_LABEL,
-    DASH_BG,
     GRID,
     MATE_LABEL,
-    PLOT_BG,
-    TEXT,
     PlayerRow,
     add_violin_box,
     captain_group,
     captain_profiles,
     dark_layout,
+    make_plotly_table,
     style_subplot_titles,
 )
 
@@ -36,7 +34,7 @@ def _delta_bars(
     label: str,
     row: int,
     col: int,
-    limit_each_side: int = 8,
+    limit_each_side: int = 6,
 ) -> None:
     sorted_profiles = sorted(
         [p for p in profiles if getattr(p, value_attr) is not None],
@@ -51,24 +49,39 @@ def _delta_bars(
         selected = sorted_profiles
     ordered = list(reversed(selected))
     values = [getattr(p, value_attr) or 0 for p in ordered]
+    fmt = "{:+.0f}" if value_attr == "caps_vs_squad" else "{:+.1f}"
+    # Place the value just past the bar tip; keep the long player name in hover.
     fig.add_trace(
         go.Bar(
             y=[p.nation for p in ordered],
             x=values,
             orientation="h",
             marker={"color": ["#34d399" if v >= 0 else "#fb7185" for v in values]},
-            text=[f"{p.name} ({v:+.0f})" if value_attr == "caps_vs_squad" else f"{p.name} ({v:+.1f})"
-                  for p, v in zip(ordered, values, strict=True)],
+            text=[fmt.format(v) for v in values],
             textposition="outside",
+            textfont={"size": 11},
             cliponaxis=False,
-            hovertemplate="%{y}<br>%{text}<extra></extra>",
+            customdata=[p.name for p in ordered],
+            hovertemplate="%{y} — %{customdata}<br>" + label + ": %{x}<extra></extra>",
             showlegend=False,
         ),
         row=row,
         col=col,
     )
-    fig.update_xaxes(title_text=label, row=row, col=col, gridcolor=GRID)
-    fig.update_yaxes(automargin=True, row=row, col=col)
+    # Headroom so the outside value labels are not clipped at the plot edge.
+    lo = min(values + [0])
+    hi = max(values + [0])
+    span = (hi - lo) or 1
+    fig.update_xaxes(
+        title_text=label,
+        row=row,
+        col=col,
+        gridcolor=GRID,
+        range=[lo - 0.14 * span, hi + 0.14 * span],
+        zeroline=True,
+        zerolinecolor="#475569",
+    )
+    fig.update_yaxes(automargin=True, tickfont={"size": 11}, row=row, col=col)
 
 
 def build_captains_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
@@ -127,20 +140,9 @@ def build_captains_panel(tournament: str, rows: list[PlayerRow]) -> go.Figure:
         ),
     ]
     fig.add_trace(
-        go.Table(
-            header={
-                "values": ["Metric", CAPTAIN_LABEL, MATE_LABEL],
-                "fill_color": PLOT_BG,
-                "font": {"color": TEXT, "size": 12},
-                "align": "left",
-            },
-            cells={
-                "values": list(zip(*summary_rows, strict=True)),
-                "fill_color": DASH_BG,
-                "font": {"color": TEXT, "size": 12},
-                "align": "left",
-                "height": 32,
-            },
+        make_plotly_table(
+            ["Metric", CAPTAIN_LABEL, MATE_LABEL],
+            summary_rows,
         ),
         row=1,
         col=1,
