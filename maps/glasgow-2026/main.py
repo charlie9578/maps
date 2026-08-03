@@ -11,6 +11,7 @@ from data_processing import MAP_DIR, Team, flag_url, load_data
 from viz import MEDAL_COLOURS, REGION_COLOURS, build_figure
 
 OUTPUT = MAP_DIR / "output" / "glasgow_2026_dashboard.html"
+PREVIEW = MAP_DIR / "output" / "glasgow_2026_preview.png"
 
 def _table_rows(teams: list[Team]) -> str:
     ranked = sorted(teams, key=lambda team: (-team.gold, -team.silver, -team.bronze, team.name))
@@ -64,26 +65,32 @@ def build_html() -> str:
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Every Glasgow 2026 team and medal woven into one interactive Commonwealth tartan.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Commonwealth Tartan · Glasgow 2026">
+<meta property="og:description" content="Every Glasgow 2026 team and medal woven into one interactive Commonwealth tartan.">
+<meta property="og:image" content="glasgow_2026_preview.png">
+<meta property="og:image:alt" content="The Glasgow 2026 Commonwealth Tartan medal map">
+<meta name="twitter:card" content="summary_large_image">
 <title>The Commonwealth Tartan · Glasgow 2026</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
-:root{{--ink:#07151d;--panel:#0c202a;--panel2:#102a36;--line:#254552;--text:#eef6f8;--muted:#8eabb6;--pink:#ff4f9a;--lime:#b8ef5a;--gold:#f6c453;--silver:#d9e1e8;--bronze:#c77d4a}}
+:root{{--ink:#16082e;--panel:#21103d;--panel2:#2b1450;--line:rgba(0,196,201,.28);--text:#fff7fc;--muted:#cbb9d4;--pink:#f259b0;--purple:#51129b;--indigo:#263cc8;--teal:#00c4c9;--gold:#f6c453;--silver:#d9e1e8;--bronze:#c77d4a}}
 *{{box-sizing:border-box}} body{{margin:0;background:var(--ink);color:var(--text);font-family:'DM Sans',system-ui,sans-serif}}
-body:before{{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 0%,rgba(255,79,154,.14),transparent 30%),radial-gradient(circle at 82% 5%,rgba(184,239,90,.09),transparent 28%)}}
+body:before{{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 0%,rgba(242,89,176,.22),transparent 32%),radial-gradient(circle at 88% 4%,rgba(0,196,201,.17),transparent 30%),linear-gradient(145deg,transparent 52%,rgba(38,60,200,.11))}}
 .shell{{position:relative;max-width:1600px;margin:auto;padding:26px 28px 34px}} header{{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:end;margin-bottom:22px}}
-.eyebrow{{font:700 12px 'Space Grotesk';letter-spacing:.18em;text-transform:uppercase;color:var(--lime);margin-bottom:8px}}
+.eyebrow{{font:700 12px 'Space Grotesk';letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}}
 h1{{font:700 clamp(34px,5vw,68px)/.96 'Space Grotesk';letter-spacing:-.055em;margin:0;max-width:920px}} h1 span{{color:var(--pink)}}
-.dek{{max-width:760px;color:#b6cbd3;font-size:15px;line-height:1.55;margin:16px 0 0}}
-.stamp{{border:1px solid var(--line);border-radius:999px;padding:9px 14px;color:var(--muted);font-size:12px;white-space:nowrap}}
-.stats{{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-bottom:12px}} .stat{{background:linear-gradient(135deg,rgba(16,42,54,.96),rgba(12,32,42,.9));border:1px solid var(--line);border-radius:13px;padding:14px 16px}}
+.dek{{max-width:760px;color:var(--muted);font-size:15px;line-height:1.55;margin:16px 0 0}}
+.stamp{{border:1px solid var(--pink);border-radius:999px;padding:9px 14px;color:var(--text);background:rgba(242,89,176,.12);font-size:12px;white-space:nowrap}}
+.stats{{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-bottom:12px}} .stat{{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(43,20,80,.96),rgba(33,16,61,.92));border:1px solid var(--line);border-radius:13px;padding:14px 16px}} .stat:before{{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--pink)}} .stat:nth-child(2):before{{background:var(--purple)}} .stat:nth-child(3):before{{background:var(--teal)}} .stat:nth-child(4):before{{background:var(--indigo)}}
 .stat b{{font:700 24px 'Space Grotesk';display:block}} .stat span{{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}}
-.workspace{{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:12px;min-height:1250px}} .map-card,.side{{background:rgba(12,32,42,.9);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.22)}}
-.map-card{{position:relative}} #glasgow-map{{height:1120px}} .controls{{min-height:56px;padding:11px 14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--line);background:#0c202a}}
-.chart-legends{{min-height:74px;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;border-top:1px solid var(--line);background:#0c202a}} .legend-group{{display:flex;align-items:center;gap:10px;flex-wrap:wrap}} .legend-group strong{{font:700 10px 'Space Grotesk';letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:2px}} .legend-item{{display:inline-flex;align-items:center;gap:5px;color:#dbe7ec;font-size:11px;white-space:nowrap}} .legend-item i{{display:inline-block;width:22px;height:5px;border-radius:99px}}
-button{{font:600 12px 'DM Sans';color:#cbdde3;background:rgba(7,21,29,.92);border:1px solid #355766;border-radius:999px;padding:8px 12px;cursor:pointer}} button:hover,button.active{{background:var(--text);color:var(--ink);border-color:var(--text)}}
-.side{{height:1250px;display:flex;flex-direction:column}} .side-head{{padding:16px;border-bottom:1px solid var(--line)}} .side-head h2{{font:700 18px 'Space Grotesk';margin:0 0 6px}} .side-head p{{font-size:11px;color:var(--muted);line-height:1.45;margin:0 0 12px}} input{{width:100%;border:1px solid var(--line);border-radius:9px;background:var(--ink);color:var(--text);padding:10px 12px;outline:none}} input:focus{{border-color:#5a899a}}
-.table-wrap{{overflow:auto;flex:1}} table{{width:100%;border-collapse:collapse;font-size:12px}} thead{{position:sticky;top:0;z-index:2;background:#0c202a}} th{{padding:10px 8px;text-align:right;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line)}} th:nth-child(2){{text-align:left}} td{{padding:9px 8px;border-bottom:1px solid rgba(37,69,82,.65);text-align:right}} tr{{cursor:pointer}} tbody tr:hover,tbody tr.selected{{background:#153642}} td:nth-child(2){{text-align:left;max-width:190px}} td small{{display:block;color:var(--muted);margin:2px 0 0 29px}} .flag{{display:inline-block;width:20px;height:20px;margin-right:9px;vertical-align:-5px}} .imagelayer image{{pointer-events:none}} .rank{{color:#6f919d;width:28px}} .medal{{font-weight:700}} .gold{{color:var(--gold)}} .silver{{color:var(--silver)}} .bronze{{color:var(--bronze)}} .total{{font-weight:700}} tr.hidden{{display:none}}
-.note{{color:var(--muted);font-size:11px;line-height:1.5;margin:14px 2px 0}} .note a{{color:#b9d9e4}}
+.workspace{{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:12px;min-height:1250px}} .map-card,.side{{background:rgba(33,16,61,.92);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 18px 60px rgba(7,0,24,.42)}}
+.map-card{{position:relative}} #glasgow-map{{height:1120px}} .controls{{min-height:56px;padding:11px 14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--line);background:var(--panel)}}
+.chart-legends{{min-height:74px;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;border-top:1px solid var(--line);background:var(--panel)}} .legend-group{{display:flex;align-items:center;gap:10px;flex-wrap:wrap}} .legend-group strong{{font:700 10px 'Space Grotesk';letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:2px}} .legend-item{{display:inline-flex;align-items:center;gap:5px;color:var(--text);font-size:11px;white-space:nowrap}} .legend-item i{{display:inline-block;width:22px;height:5px;border-radius:99px}}
+button{{font:600 12px 'DM Sans';color:var(--text);background:rgba(22,8,46,.9);border:1px solid rgba(0,196,201,.4);border-radius:999px;padding:8px 12px;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}} button:hover{{border-color:var(--teal);background:rgba(0,196,201,.12)}} button.active{{background:linear-gradient(110deg,var(--pink),#dd43a5);color:var(--ink);border-color:var(--pink)}} button:active{{transform:translateY(1px)}} button:focus-visible,input:focus-visible{{outline:2px solid var(--teal);outline-offset:2px}}
+.side{{height:1250px;display:flex;flex-direction:column}} .side-head{{padding:16px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(81,18,155,.2),transparent 70%)}} .side-head h2{{font:700 18px 'Space Grotesk';margin:0 0 6px}} .side-head p{{font-size:11px;color:var(--muted);line-height:1.45;margin:0 0 12px}} input{{width:100%;border:1px solid var(--line);border-radius:9px;background:var(--ink);color:var(--text);padding:10px 12px;outline:none}} input::placeholder{{color:#9f8bae}} input:focus{{border-color:var(--teal)}}
+.table-wrap{{overflow:auto;flex:1}} table{{width:100%;border-collapse:collapse;font-size:12px}} thead{{position:sticky;top:0;z-index:2;background:var(--panel)}} th{{padding:10px 8px;text-align:right;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line)}} th:nth-child(2){{text-align:left}} td{{padding:9px 8px;border-bottom:1px solid rgba(0,196,201,.12);text-align:right}} tr{{cursor:pointer}} tbody tr:hover{{background:rgba(0,196,201,.09)}} tbody tr.selected{{background:rgba(242,89,176,.18);box-shadow:inset 3px 0 var(--pink)}} td:nth-child(2){{text-align:left;max-width:190px}} td small{{display:block;color:var(--muted);margin:2px 0 0 29px}} .flag{{display:inline-block;width:20px;height:20px;margin-right:9px;vertical-align:-5px}} .imagelayer image{{pointer-events:none}} .rank{{color:#ad97ba;width:28px}} .medal{{font-weight:700}} .gold{{color:var(--gold)}} .silver{{color:var(--silver)}} .bronze{{color:var(--bronze)}} .total{{font-weight:700}} tr.hidden{{display:none}}
+.note{{color:var(--muted);font-size:11px;line-height:1.5;margin:14px 2px 0}} .note a{{color:var(--teal)}}
 @media(max-width:1000px){{header{{grid-template-columns:1fr}}.stamp{{justify-self:start}}.workspace{{grid-template-columns:1fr}}.side{{height:620px}}}}
 @media(max-width:620px){{.shell{{padding:18px 12px}}.stats{{grid-template-columns:repeat(2,1fr)}}#glasgow-map{{height:1060px}}.workspace{{min-height:0}}.map-card{{min-height:1060px}}}}
 </style></head><body><main class="shell">
@@ -110,12 +117,12 @@ function refresh(){{
   document.querySelectorAll('tbody tr').forEach(r=>r.classList.toggle('selected',r.dataset.code===selected));
   return Promise.all(updates);
 }}
-document.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{{mode=btn.dataset.filter;selected=null;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===btn));filterRows();refresh();}});
+document.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{{mode=btn.dataset.filter;selected=null;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===btn));refresh();}});
 function choose(code){{selected=selected===code?null:code;refresh();}}
 document.querySelectorAll('tbody tr').forEach(row=>row.onclick=()=>choose(row.dataset.code));
 gd.on('plotly_click',ev=>{{const p=ev.points[0];if(p.customdata&&(p.curveNumber===MARKERS||(p.data.meta&&p.data.meta.kind==='stitches')))choose(p.customdata[0]);}});
 document.getElementById('clear').onclick=()=>{{selected=null;refresh();}};
-function filterRows(){{const q=document.getElementById('search').value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>{{const status=mode==='all'||(mode==='medallists'&&r.dataset.medallist==='1')||(mode==='none'&&r.dataset.medallist==='0');r.classList.toggle('hidden',!status||!r.dataset.search.includes(q));}})}}
+function filterRows(){{const q=document.getElementById('search').value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>{{r.classList.toggle('hidden',!r.dataset.search.includes(q));}})}}
 document.getElementById('search').addEventListener('input',filterRows);
 filterRows();refresh();
 </script></body></html>"""
@@ -128,7 +135,12 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(build_html(), encoding="utf-8")
     raw, teams = load_data()
+    figure, _, _ = build_figure(raw, teams)
+    # LinkedIn's large-image card is a wide 1200x630 canvas; keep the full
+    # tartan visible inside that share-friendly frame.
+    PREVIEW.write_bytes(figure.to_image(format="png", width=1200, height=630, scale=1))
     print(f"Wrote {args.output}")
+    print(f"Wrote {PREVIEW}")
     print(f"{raw['event']}: {len(teams)} teams, {sum(team.total for team in teams)} medals")
 
 

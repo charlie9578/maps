@@ -26,8 +26,10 @@ python maps/glasgow-2026/main.py
 ```
 
 Open `maps/glasgow-2026/output/glasgow_2026_dashboard.html`. The generated file
-loads Plotly, dashboard fonts, and MIT-licensed [Circle Flags](https://github.com/HatScripts/circle-flags)
-SVGs from CDNs; the data and interaction code are embedded in the HTML.
+loads Plotly, dashboard fonts, [Circle Flags](https://github.com/HatScripts/circle-flags)
+for the medal table, and rectangular [FlagCDN](https://flagcdn.com/) SVGs for
+the tartan; the data and interaction code are embedded in the HTML. The build
+also writes `glasgow_2026_preview.png`, the Open Graph/LinkedIn share image.
 
 ## Data
 

@@ -9,14 +9,18 @@ import math
 import plotly.graph_objects as go
 from PIL import Image
 
-from data_processing import MAP_DIR, Team, flag_url, load_sport_medals
+from data_processing import MAP_DIR, Team, load_sport_medals, rectangular_flag_url
 
 MEDAL_COLOURS = {"gold": "#f6c453", "silver": "#d9e1e8", "bronze": "#c77d4a"}
 REGION_COLOURS = {
-    "Africa": "#ffb0a4", "Americas & Caribbean": "#ffdb57", "Asia": "#caff74",
-    "Europe": "#70e2ff", "Oceania": "#d8b4ff",
+    "Africa": "#ff9bca", "Americas & Caribbean": "#ffda66", "Asia": "#5ee6d0",
+    "Europe": "#70ddff", "Oceania": "#c5a7ff",
 }
-TARTAN_BG = "#d92b78"
+BRAND_PINK = "#F259B0"
+BRAND_TEAL = "#00C4C9"
+BRAND_PURPLE = "#51129B"
+BRAND_INK = "#16082E"
+TARTAN_BG = BRAND_PINK
 REGIONS = {
     "Africa": set("BOT CMR SWZ GAB GHA KEN LES MAW MRI MOZ NAM NGR RWA SEY SLE RSA SHN TZA GAM TOG UGA ZAM".split()),
     "Americas & Caribbean": set("AIA ANT BAR BIZ BER CAN CAY DMA FLK GRN GUY IVB JAM LCA MNT SKN VIN BAH TTO TCA".split()),
@@ -206,8 +210,8 @@ def build_figure(raw: dict, teams: list[Team]) -> tuple[go.Figure, dict[str, lis
         if sport_id not in sport_assets:
             annotations.append({
                 "x": index, "y": 76.3, "text": f"<b>{sport_name.upper()}</b>", "showarrow": False,
-                "font": {"size": 10, "color": "#e9f3f6"}, "bgcolor": "#102a36",
-                "bordercolor": "#4e7482", "borderwidth": 1, "borderpad": 7,
+                "font": {"size": 10, "color": "#fff7fc"}, "bgcolor": BRAND_PURPLE,
+                "bordercolor": BRAND_TEAL, "borderwidth": 1, "borderpad": 7,
             })
 
     fig.add_trace(go.Scatter(
@@ -219,8 +223,10 @@ def build_figure(raw: dict, teams: list[Team]) -> tuple[go.Figure, dict[str, lis
     ))
 
     flag_images = [{
-        "source": flag_url(team.code), "xref": "x", "yref": "y", "x": -0.98, "y": y_by_code[team.code],
-        "sizex": 0.30, "sizey": 0.64, "xanchor": "center", "yanchor": "middle",
+        "source": rectangular_flag_url(team.code), "xref": "x", "yref": "y", "x": -0.77, "y": y_by_code[team.code],
+        # Plotly's x/y data units have different pixel scales here. This box
+        # maps to a consistent 4:3 flag on screen rather than a stretched rail.
+        "sizex": 0.22, "sizey": 0.98, "xanchor": "right", "yanchor": "middle",
         "sizing": "contain", "opacity": 1, "layer": "above",
     } for team in ordered]
     sport_images = [{
@@ -230,19 +236,19 @@ def build_figure(raw: dict, teams: list[Team]) -> tuple[go.Figure, dict[str, lis
     } for index, (sport_id, _, _) in enumerate(sports) if sport_id in sport_assets]
 
     fig.update_layout(
-        paper_bgcolor="#07151d", plot_bgcolor="#07151d",
-        font={"family": "Inter, system-ui, sans-serif", "color": "#dbe7ec"},
+        paper_bgcolor=BRAND_INK, plot_bgcolor=BRAND_INK,
+        font={"family": "Inter, system-ui, sans-serif", "color": "#f7ebf6"},
         margin={"l": 8, "r": 8, "t": 18, "b": 48}, height=1120,
         xaxis={"range": [-1.22, 11.18], "visible": False, "fixedrange": True},
         yaxis={"range": [-4.2, 79.2], "visible": False, "fixedrange": True},
         shapes=[{
             "type": "rect", "x0": -0.74, "x1": 10.60, "y0": -0.48, "y1": len(ordered) - 0.52,
-            "fillcolor": TARTAN_BG, "line": {"color": "#ef5a9b", "width": 1}, "layer": "below",
+            "fillcolor": TARTAN_BG, "line": {"color": "#ff8fca", "width": 1}, "layer": "below",
         }],
         annotations=annotations, images=flag_images + sport_images,
         showlegend=False,
         hovermode="closest",
-        hoverlabel={"bgcolor": "#102a36", "bordercolor": "#4e7482", "font": {"color": "white", "size": 13}},
+        hoverlabel={"bgcolor": BRAND_PURPLE, "bordercolor": BRAND_TEAL, "font": {"color": "white", "size": 13}},
         uirevision="glasgow-2026-tartan", dragmode=False,
     )
     return fig, thread_indices, marker_index

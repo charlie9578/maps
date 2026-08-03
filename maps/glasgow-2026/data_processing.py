@@ -55,6 +55,11 @@ def flag_url(code: str) -> str:
     return f"https://hatscripts.github.io/circle-flags/flags/{flag_slug(code)}.svg"
 
 
+def rectangular_flag_url(code: str) -> str:
+    """Rectangular SVG used where the compact circular crop loses detail."""
+    return f"https://flagcdn.com/{flag_slug(code)}.svg"
+
+
 @dataclass(frozen=True)
 class Team:
     name: str
