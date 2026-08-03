@@ -47,4 +47,9 @@ Thumbs.db
 # Large downloads (document sources in map README; override per-map if needed)
 # *.tif
 # *.mbtiles
-/maps/glasgow-2026/data
+# Glasgow's generated dashboard needs the curated JSON and sport icons in CI.
+/maps/glasgow-2026/data/*
+!/maps/glasgow-2026/data/teams.json
+!/maps/glasgow-2026/data/sport_medals.json
+!/maps/glasgow-2026/data/FINNIE-POSES-9-16_*.png
+/maps/glasgow-2026/data/FINNIE-POSES-9-16_TANDEM-CYCLING.png

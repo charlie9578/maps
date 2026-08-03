@@ -26,6 +26,7 @@ PAGES_REQUIREMENTS: tuple[str, ...] = (
     "maps/basic-world-map/requirements.txt",
     "maps/gem-wind-map/requirements.txt",
     "maps/gem-wind-bokeh-map/requirements.txt",
+    "maps/glasgow-2026/requirements.txt",
 )
 
 
@@ -257,7 +258,30 @@ def publish_gem_wind_bokeh(site_dir: Path, _site_url: str) -> None:
     shutil.rmtree(staging)
 
 
+def publish_glasgow(site_dir: Path, _site_url: str) -> None:
+    preview = "glasgow_2026_preview.png"
+    spec = ScriptMapSpec(
+        map_name="glasgow-2026",
+        script="main.py",
+        built_output="glasgow_2026_dashboard.html",
+        script_args=("--preview", str(_staging_dir("glasgow-2026") / preview)),
+        extra_outputs=(preview,),
+    )
+    staging = _run_script_map(spec)
+    _copy_script_output(site_dir, "glasgow-2026", staging, spec)
+
+
 PUBLISHED_MAPS: tuple[PublishedMap, ...] = (
+    PublishedMap(
+        slug="glasgow-2026",
+        title="The Commonwealth Tartan · Glasgow 2026",
+        summary=(
+            "All 74 Commonwealth teams woven into an interactive tartan, with "
+            "sport-level gold, silver, and bronze results."
+        ),
+        tags=("Plotly", "Commonwealth Games", "2026"),
+        publish=publish_glasgow,
+    ),
     PublishedMap(
         slug="world-cup-2026",
         title="2026 FIFA World Cup squads",

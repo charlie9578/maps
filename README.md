@@ -141,6 +141,7 @@ and never committed to `main`.
 | `/osm-solar-malta/` | Malta solar plants (OpenStreetMap / Folium) |
 | `/citation-network/` | OpenAlex citation network demo |
 | `/gem-wind/` | GEM wind farms static snapshot (map + breakdown charts) |
+| `/glasgow-2026/` | Glasgow 2026 Commonwealth Games medal tartan |
 | `/world-map/` | Cartopy political world map (PNG) |
 
 **Not on Pages:** `tfl-live-map` is a live Dash app (needs a running server and TfL API key).

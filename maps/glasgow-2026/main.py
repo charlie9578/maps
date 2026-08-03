@@ -131,6 +131,12 @@ filterRows();refresh();
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-o", "--output", type=Path, default=OUTPUT)
+    parser.add_argument(
+        "--preview",
+        type=Path,
+        default=PREVIEW,
+        help="Path for the Open Graph preview image.",
+    )
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(build_html(), encoding="utf-8")
@@ -138,9 +144,10 @@ def main() -> None:
     figure, _, _ = build_figure(raw, teams)
     # LinkedIn's large-image card is a wide 1200x630 canvas; keep the full
     # tartan visible inside that share-friendly frame.
-    PREVIEW.write_bytes(figure.to_image(format="png", width=1200, height=630, scale=1))
+    args.preview.parent.mkdir(parents=True, exist_ok=True)
+    args.preview.write_bytes(figure.to_image(format="png", width=1200, height=630, scale=1))
     print(f"Wrote {args.output}")
-    print(f"Wrote {PREVIEW}")
+    print(f"Wrote {args.preview}")
     print(f"{raw['event']}: {len(teams)} teams, {sum(team.total for team in teams)} medals")
 
 

@@ -1,0 +1,40 @@
+{
+  "sports": [
+    ["powerlifting", "Para Powerlifting", "24 Jul"],
+    ["artistic_gymnastics", "Gymnastics", "24–28 Jul"],
+    ["swimming", "Swimming", "24–29 Jul"],
+    ["weightlifting", "Weightlifting", "26–30 Jul"],
+    ["athletics", "Athletics", "27 Jul–1 Aug"],
+    ["bowls", "Bowls", "28 Jul–2 Aug"],
+    ["3x3_basketball", "3×3 Basketball", "29 Jul"],
+    ["cycling", "Cycling", "30 Jul–2 Aug"],
+    ["judo", "Judo", "31 Jul–2 Aug"],
+    ["boxing", "Boxing", "1 Aug"],
+    ["netball", "Netball", "2 Aug"]
+  ],
+  "rows": [
+    ["AUS","3x3_basketball",2,1,1],["AUS","artistic_gymnastics",4,1,4],["AUS","athletics",12,11,11],["AUS","bowls",2,0,0],["AUS","boxing",2,1,3],["AUS","cycling",10,10,8],["AUS","judo",0,5,2],["AUS","netball",0,0,1],["AUS","powerlifting",0,0,1],["AUS","swimming",37,16,23],["AUS","weightlifting",1,0,2],
+    ["BAH","athletics",1,0,0],["BAH","judo",0,0,1],["BAR","athletics",0,1,0],["BER","athletics",0,0,1],
+    ["CAN","3x3_basketball",0,0,1],["CAN","artistic_gymnastics",7,5,4],["CAN","athletics",4,7,5],["CAN","boxing",0,2,2],["CAN","cycling",0,0,1],["CAN","judo",4,2,1],["CAN","swimming",2,2,5],["CAN","weightlifting",2,2,4],
+    ["CMR","athletics",1,0,1],["CMR","judo",0,1,2],["CYP","artistic_gymnastics",0,2,1],["CYP","athletics",0,1,1],["CYP","judo",1,2,4],["DMA","athletics",1,0,0],
+    ["ENG","3x3_basketball",2,1,0],["ENG","artistic_gymnastics",1,4,2],["ENG","athletics",6,9,6],["ENG","bowls",3,2,1],["ENG","boxing",4,3,3],["ENG","cycling",3,7,5],["ENG","judo",4,2,6],["ENG","powerlifting",1,1,1],["ENG","swimming",4,12,10],["ENG","weightlifting",1,4,2],
+    ["FIJ","boxing",0,0,1],["FIJ","weightlifting",1,0,0],["GAB","judo",0,0,1],["GAM","judo",0,0,1],["GGY","bowls",0,1,0],["GHA","athletics",0,1,0],["GHA","boxing",0,0,1],["GRN","athletics",1,0,0],
+    ["IND","athletics",3,7,6],["IND","boxing",7,3,0],["IND","judo",2,1,1],["IND","powerlifting",0,0,1],["IND","weightlifting",1,6,1],
+    ["IOM","athletics",0,0,1],["IOM","cycling",1,0,0],["IVB","athletics",1,0,0],["JAM","athletics",10,3,5],["JAM","netball",0,1,0],["JEY","swimming",1,1,0],
+    ["KEN","athletics",3,4,4],["KEN","weightlifting",0,0,1],["LES","boxing",0,0,2],
+    ["MAS","athletics",1,0,1],["MAS","bowls",0,2,2],["MAS","cycling",1,0,0],["MAS","judo",1,0,0],["MAS","powerlifting",0,0,1],["MAS","weightlifting",5,1,1],
+    ["MLT","judo",0,0,1],["MRI","athletics",0,2,0],["MRI","boxing",0,0,1],["MRI","judo",1,0,0],["NAM","boxing",0,1,2],["NFK","bowls",0,0,1],
+    ["NGR","athletics",4,3,6],["NGR","judo",0,0,1],["NGR","powerlifting",3,3,0],["NGR","weightlifting",3,1,0],
+    ["NIR","athletics",1,0,0],["NIR","bowls",1,0,2],["NIR","boxing",1,2,3],["NIR","judo",0,0,2],["NIR","swimming",0,2,2],
+    ["NRU","weightlifting",0,0,2],
+    ["NZL","3x3_basketball",0,0,1],["NZL","athletics",2,3,2],["NZL","bowls",0,2,0],["NZL","cycling",3,3,5],["NZL","judo",1,0,1],["NZL","netball",1,0,0],["NZL","swimming",2,5,3],["NZL","weightlifting",1,1,0],
+    ["PAK","boxing",0,0,1],["PNG","weightlifting",0,0,1],
+    ["RSA","athletics",1,2,1],["RSA","judo",0,1,1],["RSA","swimming",6,8,8],["RWA","athletics",0,0,1],["SAM","weightlifting",1,1,0],
+    ["SCO","3x3_basketball",0,1,1],["SCO","artistic_gymnastics",1,1,1],["SCO","athletics",4,0,3],["SCO","bowls",1,0,0],["SCO","boxing",0,0,3],["SCO","cycling",2,2,4],["SCO","judo",0,0,2],["SCO","swimming",5,5,2],["SCO","weightlifting",0,0,1],
+    ["SGP","artistic_gymnastics",0,1,0],["SGP","swimming",0,1,0],["SRI","athletics",1,1,0],["TGA","judo",0,0,1],
+    ["TTO","athletics",0,2,2],["TTO","boxing",0,0,1],["TTO","cycling",0,1,1],["TUV","boxing",0,0,1],
+    ["UGA","3x3_basketball",0,1,0],["UGA","athletics",0,0,1],["UGA","swimming",0,1,0],
+    ["WAL","artistic_gymnastics",1,0,2],["WAL","athletics",2,2,1],["WAL","bowls",0,0,1],["WAL","boxing",0,2,2],["WAL","cycling",6,3,2],["WAL","swimming",0,3,3],["WAL","weightlifting",0,0,1],
+    ["ZAM","boxing",0,0,2]
+  ]
+}
