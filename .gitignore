@@ -47,3 +47,4 @@ Thumbs.db
 # Large downloads (document sources in map README; override per-map if needed)
 # *.tif
 # *.mbtiles
+/maps/glasgow-2026/data
