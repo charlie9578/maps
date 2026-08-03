@@ -11,6 +11,7 @@ from PIL import Image
 
 from data_processing import MAP_DIR, Team, load_sport_medals, rectangular_flag_url
 
+ICON_MAX_PX = 256
 MEDAL_COLOURS = {"gold": "#f6c453", "silver": "#d9e1e8", "bronze": "#c77d4a"}
 REGION_COLOURS = {
     "Africa": "#ff9bca", "Americas & Caribbean": "#ffda66", "Asia": "#5ee6d0",
@@ -59,6 +60,9 @@ def _asset_uri(filename: str) -> str:
         bounds = image.getchannel("A").getbbox()
         if bounds:
             image = image.crop(bounds)
+        # The source poses are 1440x2560, but the chart displays them at icon
+        # scale. Downsample once during build to keep the generated HTML light.
+        image.thumbnail((ICON_MAX_PX, ICON_MAX_PX), Image.Resampling.LANCZOS)
         buffer = io.BytesIO()
         image.save(buffer, format="PNG", optimize=True)
     encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
